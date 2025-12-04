@@ -18,6 +18,88 @@
 ## バックエンド／API連携（該当する場合）
 - APIモックや外部APIクライアントは疎結合を優先し、将来的な入れ替え・ローカル実装も容易に
 
+## src 配下の構成（現状）
+
+```
+src/
+├── angular.json          # Angular CLI設定
+├── eslint.config.js      # ESLint設定
+├── package.json          # 依存関係
+├── public/
+│   └── favicon.ico
+├── src/
+│   ├── app/              # アプリケーション本体
+│   │   ├── app.component.ts/html/scss  # ルートコンポーネント
+│   │   ├── app.config.ts               # アプリ設定
+│   │   ├── app.routes.ts               # ルーティング定義
+│   │   ├── app.routes.server.ts        # SSR用ルーティング
+│   │   ├── core/                       # シングルトン（ガード、インターセプター、サービス）
+│   │   ├── shared/                     # 共通部品（コンポーネント、パイプ、ディレクティブ、モデル、ユーティリティ）
+│   │   └── features/                   # 機能単位のモジュール
+│   ├── environments/     # 環境変数
+│   │   ├── environment.ts              # 開発環境
+│   │   └── environment.prod.ts         # 本番環境
+│   ├── stories/          # Storybookサンプル（実装時はshared/componentsに移行）
+│   ├── index.html        # エントリーHTML
+│   ├── main.ts           # クライアントエントリー
+│   ├── main.server.ts    # SSRエントリー
+│   └── styles.scss       # グローバルスタイル
+└── tsconfig.json         # TypeScript設定
+```
+
+### 今後の拡張方針
+
+#### コンポーネント方針
+- **Standalone Components を採用**（Angular 17+ 推奨）
+- NgModule は使用せず、各コンポーネントを独立して管理
+
+#### ディレクトリ構成
+
+```
+src/app/
+├── core/                 # アプリ全体で1回だけ読み込むもの（シングルトン）
+│   ├── guards/           # 認証ガード等
+│   │   └── auth.guard.ts
+│   ├── interceptors/     # HTTPインターセプター
+│   │   └── auth.interceptor.ts
+│   └── services/         # シングルトンサービス
+│       └── api.service.ts
+│
+├── shared/               # 複数機能で共有するもの（再利用可能）
+│   ├── components/       # 共通UIコンポーネント（Storybook登録対象）
+│   ├── pipes/            # 共通パイプ
+│   ├── directives/       # 共通ディレクティブ
+│   ├── models/           # 共通型定義・インターフェース
+│   └── utils/            # ユーティリティ関数
+│
+└── features/             # 機能単位のモジュール
+    ├── auth/             # 認証機能
+    ├── daily-report/     # 日報機能
+    └── ...
+```
+
+#### features/ 配下の詳細構成（例：auth）
+
+```
+src/app/features/auth/
+├── components/           # 機能固有のUIコンポーネント
+│   ├── login-form/
+│   └── signup-form/
+├── pages/                # ルーティング対象のページコンポーネント
+│   ├── login-page/
+│   └── signup-page/
+├── services/             # 機能固有のサービス
+│   └── auth.service.ts
+├── models/               # 機能固有の型定義
+│   └── user.model.ts
+└── auth.routes.ts        # 機能のルーティング定義
+```
+
+#### Storybook との連携
+- `shared/components/` の共通コンポーネントは Storybook に登録必須
+- `features/*/components/` の機能固有コンポーネントは任意で登録
+- 現在の `stories/` 配下はサンプルとして残し、実装時は上記構成に移行
+
 ## 変更履歴・技術的な意思決定
 - 重要な設計判断・変更点は必ずdocs/general/以下のmdに追記してください
 
