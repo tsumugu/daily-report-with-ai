@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# node
+node_modules/
+dist/
+build/
+coverage/
+
+# log
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 本番運用・依存の自動成果物
+.env
+.env.*
+
+# その他
+*.local.js
