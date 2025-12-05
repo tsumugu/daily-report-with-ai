@@ -15,36 +15,42 @@
 - **グローバル変数・副作用の最小化**
   -状態・副作用の扱い（context/fook/store）は最小範囲で限定的に、安易なグローバル展開は避ける
 
-## バックエンド／API連携（該当する場合）
+## バックエンド／API連携
+- Express + TypeScript でAPIサーバーを構築
 - APIモックや外部APIクライアントは疎結合を優先し、将来的な入れ替え・ローカル実装も容易に
 
-## src 配下の構成（現状）
+## モノレポ構成（現状）
 
 ```
-src/
-├── angular.json          # Angular CLI設定
-├── eslint.config.js      # ESLint設定
-├── package.json          # 依存関係
-├── public/
-│   └── favicon.ico
-├── src/
-│   ├── app/              # アプリケーション本体
-│   │   ├── app.component.ts/html/scss  # ルートコンポーネント
-│   │   ├── app.config.ts               # アプリ設定
-│   │   ├── app.routes.ts               # ルーティング定義
-│   │   ├── app.routes.server.ts        # SSR用ルーティング
-│   │   ├── core/                       # シングルトン（ガード、インターセプター、サービス）
-│   │   ├── shared/                     # 共通部品（コンポーネント、パイプ、ディレクティブ、モデル、ユーティリティ）
-│   │   └── features/                   # 機能単位のモジュール
-│   ├── environments/     # 環境変数
-│   │   ├── environment.ts              # 開発環境
-│   │   └── environment.prod.ts         # 本番環境
-│   ├── stories/          # Storybookサンプル（実装時はshared/componentsに移行）
-│   ├── index.html        # エントリーHTML
-│   ├── main.ts           # クライアントエントリー
-│   ├── main.server.ts    # SSRエントリー
-│   └── styles.scss       # グローバルスタイル
-└── tsconfig.json         # TypeScript設定
+daily-report/
+├── apps/
+│   ├── web/              # @daily-report/web（Angular フロントエンド）
+│   │   ├── src/
+│   │   │   ├── app/
+│   │   │   │   ├── core/       # シングルトン（ガード、インターセプター）
+│   │   │   │   ├── shared/     # 共通部品
+│   │   │   │   └── features/   # 機能単位のモジュール
+│   │   │   └── environments/   # 環境変数
+│   │   ├── angular.json
+│   │   └── package.json
+│   │
+│   └── api/              # @daily-report/api（Express バックエンド）
+│       ├── src/
+│       │   ├── routes/         # APIルート
+│       │   ├── middleware/     # ミドルウェア
+│       │   ├── models/         # データモデル
+│       │   └── db/             # データベース
+│       └── package.json
+│
+├── packages/
+│   └── shared/           # @daily-report/shared（FE/BE共通型定義）
+│       └── src/
+│           └── models/         # 共通型定義
+│
+├── docs/                 # ドキュメント
+├── daily_report/         # 日報記録
+├── rules/                # AIロール定義
+└── package.json          # ルート（npm workspaces）
 ```
 
 ### 今後の拡張方針
@@ -53,10 +59,10 @@ src/
 - **Standalone Components を採用**（Angular 17+ 推奨）
 - NgModule は使用せず、各コンポーネントを独立して管理
 
-#### ディレクトリ構成
+#### フロントエンド（apps/web）ディレクトリ構成
 
 ```
-src/app/
+apps/web/src/app/
 ├── core/                 # アプリ全体で1回だけ読み込むもの（シングルトン）
 │   ├── guards/           # 認証ガード等
 │   │   └── auth.guard.ts
@@ -81,7 +87,7 @@ src/app/
 #### features/ 配下の詳細構成（例：auth）
 
 ```
-src/app/features/auth/
+apps/web/src/app/features/auth/
 ├── components/           # 機能固有のUIコンポーネント
 │   ├── login-form/
 │   └── signup-form/

@@ -1,0 +1,15 @@
+{
+  "name": "@daily-report/shared",
+  "version": "1.0.0",
+  "description": "Daily Report - 共通型定義・ユーティリティ",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.2"
+  }
+}
+

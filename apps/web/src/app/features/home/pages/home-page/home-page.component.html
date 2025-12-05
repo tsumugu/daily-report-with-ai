@@ -1,0 +1,41 @@
+<div class="home-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <h1 class="logo">📝 Daily Report</h1>
+      <div class="user-menu">
+        @if (currentUser()) {
+          <span class="user-email">{{ currentUser()?.email }}</span>
+        }
+        <button class="logout-button" (click)="logout()">ログアウト</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="welcome-section">
+      <h2>ようこそ！</h2>
+      <p>日報管理システムへログインしました。</p>
+    </div>
+
+    <div class="coming-soon">
+      <div class="coming-soon-card">
+        <span class="icon">📋</span>
+        <h3>日報入力</h3>
+        <p>Coming Soon...</p>
+      </div>
+      <div class="coming-soon-card">
+        <span class="icon">📊</span>
+        <h3>日報一覧</h3>
+        <p>Coming Soon...</p>
+      </div>
+      <div class="coming-soon-card">
+        <span class="icon">🎯</span>
+        <h3>目標管理</h3>
+        <p>Coming Soon...</p>
+      </div>
+    </div>
+  </main>
+</div>
+

@@ -1,0 +1,25 @@
+{
+  "name": "daily-report",
+  "version": "1.0.0",
+  "description": "日報管理システム - モノレポ",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:web": "npm run dev -w @daily-report/web",
+    "dev:api": "npm run dev -w @daily-report/api",
+    "build": "npm run build --workspaces --if-present",
+    "build:web": "npm run build -w @daily-report/web",
+    "build:api": "npm run build -w @daily-report/api",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "storybook": "npm run storybook -w @daily-report/web"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+

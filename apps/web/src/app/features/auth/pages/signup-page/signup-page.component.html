@@ -1,0 +1,111 @@
+<div class="signup-container">
+  <div class="signup-card">
+    <!-- Logo -->
+    <div class="logo">
+      <h1>Daily Report</h1>
+      <p class="subtitle">アカウントを作成</p>
+    </div>
+
+    <!-- Error Message -->
+    @if (errorMessage()) {
+      <div class="error-banner">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <!-- Signup Form -->
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="signup-form">
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email" class="form-label">メールアドレス</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          class="form-input"
+          [class.error]="getFieldError('email')"
+          placeholder="your@email.com"
+          autocomplete="email"
+        />
+        @if (getFieldError('email')) {
+          <span class="field-error">{{ getFieldError('email') }}</span>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password" class="form-label">パスワード</label>
+        <div class="password-wrapper">
+          <input
+            [type]="showPassword() ? 'text' : 'password'"
+            id="password"
+            formControlName="password"
+            class="form-input"
+            [class.error]="getFieldError('password')"
+            placeholder="8文字以上"
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePassword()"
+            [attr.aria-label]="showPassword() ? 'パスワードを隠す' : 'パスワードを表示'"
+          >
+            {{ showPassword() ? '👁' : '👁‍🗨' }}
+          </button>
+        </div>
+        @if (getFieldError('password')) {
+          <span class="field-error">{{ getFieldError('password') }}</span>
+        }
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group">
+        <label for="confirmPassword" class="form-label">パスワード（確認）</label>
+        <div class="password-wrapper">
+          <input
+            [type]="showConfirmPassword() ? 'text' : 'password'"
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            class="form-input"
+            [class.error]="getFieldError('confirmPassword')"
+            placeholder="パスワードを再入力"
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="toggleConfirmPassword()"
+            [attr.aria-label]="showConfirmPassword() ? 'パスワードを隠す' : 'パスワードを表示'"
+          >
+            {{ showConfirmPassword() ? '👁' : '👁‍🗨' }}
+          </button>
+        </div>
+        @if (getFieldError('confirmPassword')) {
+          <span class="field-error">{{ getFieldError('confirmPassword') }}</span>
+        }
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="isLoading()"
+      >
+        @if (isLoading()) {
+          <span class="spinner"></span>
+          作成中...
+        } @else {
+          アカウントを作成
+        }
+      </button>
+    </form>
+
+    <!-- Login Link -->
+    <div class="login-link">
+      <span>すでにアカウントをお持ちの方は</span>
+      <a routerLink="/login">ログイン</a>
+    </div>
+  </div>
+</div>
+

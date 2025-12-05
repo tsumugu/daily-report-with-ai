@@ -1,0 +1,110 @@
+/**
+ * カラートークン定義
+ * デザインシステムの色を一元管理
+ */
+
+:root {
+  /* ========================================
+   * Primary Colors（メインカラー）
+   * ======================================== */
+  --color-primary-50: #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
+  --color-primary-500: #667eea;
+  --color-primary-600: #5b5bd6;
+  --color-primary-700: #4f46e5;
+  --color-primary-800: #4338ca;
+  --color-primary-900: #3730a3;
+
+  /* ========================================
+   * Secondary Colors（アクセントカラー）
+   * ======================================== */
+  --color-secondary-50: #faf5ff;
+  --color-secondary-100: #f3e8ff;
+  --color-secondary-200: #e9d5ff;
+  --color-secondary-300: #d8b4fe;
+  --color-secondary-400: #c084fc;
+  --color-secondary-500: #a855f7;
+  --color-secondary-600: #9333ea;
+  --color-secondary-700: #764ba2;
+  --color-secondary-800: #6b21a8;
+  --color-secondary-900: #581c87;
+
+  /* ========================================
+   * Gray Colors（グレースケール）
+   * ======================================== */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* ========================================
+   * Semantic Colors（意味を持つ色）
+   * ======================================== */
+  /* Success（成功） */
+  --color-success-50: #ecfdf5;
+  --color-success-100: #d1fae5;
+  --color-success-500: #10b981;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
+
+  /* Warning（警告） */
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
+
+  /* Error（エラー） */
+  --color-error-50: #fef2f2;
+  --color-error-100: #fee2e2;
+  --color-error-500: #ef4444;
+  --color-error-600: #dc2626;
+  --color-error-700: #b91c1c;
+
+  /* Info（情報） */
+  --color-info-50: #eff6ff;
+  --color-info-100: #dbeafe;
+  --color-info-500: #3b82f6;
+  --color-info-600: #2563eb;
+  --color-info-700: #1d4ed8;
+
+  /* ========================================
+   * Background Colors（背景色）
+   * ======================================== */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: var(--color-gray-50);
+  --color-bg-tertiary: var(--color-gray-100);
+
+  /* ========================================
+   * Text Colors（テキスト色）
+   * ======================================== */
+  --color-text-primary: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-600);
+  --color-text-tertiary: var(--color-gray-500);
+  --color-text-disabled: var(--color-gray-400);
+  --color-text-inverse: #ffffff;
+
+  /* ========================================
+   * Border Colors（ボーダー色）
+   * ======================================== */
+  --color-border-default: var(--color-gray-200);
+  --color-border-hover: var(--color-gray-300);
+  --color-border-focus: var(--color-primary-500);
+  --color-border-error: var(--color-error-500);
+
+  /* ========================================
+   * Gradients（グラデーション）
+   * ======================================== */
+  --gradient-primary: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-secondary-700) 100%);
+  --gradient-primary-hover: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-secondary-800) 100%);
+}
+
