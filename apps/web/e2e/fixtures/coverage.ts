@@ -1,7 +1,12 @@
 import { test as base, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { fileURLToPath } from 'url';
+import * as crypto from 'crypto';
+
+// ESモジュールで__dirnameを取得
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // カバレッジ出力ディレクトリ
 const coverageDir = path.join(__dirname, '../../coverage/e2e');
@@ -31,7 +36,7 @@ export const test = base.extend({
     });
 
     if (relevantCoverage.length > 0) {
-      const coverageFile = path.join(coverageDir, `coverage-${uuidv4()}.json`);
+      const coverageFile = path.join(coverageDir, `coverage-${crypto.randomUUID()}.json`);
       fs.writeFileSync(coverageFile, JSON.stringify(relevantCoverage, null, 2));
     }
   },

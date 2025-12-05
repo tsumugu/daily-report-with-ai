@@ -64,8 +64,6 @@
     "storybook": "^10.1.4",
     "typescript": "~5.7.2",
     "typescript-eslint": "8.46.4",
-    "@playwright/test": "^1.49.0",
-    "uuid": "^9.0.0",
-    "@types/uuid": "^9.0.0"
+    "@playwright/test": "^1.49.0"
   }
 }
