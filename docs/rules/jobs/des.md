@@ -52,12 +52,6 @@
 ### 4.2. 既存コンポーネントの活用
 実装前に `shared/components/` を確認し、既存のコンポーネントを活用する：
 
-| コンポーネント | 用途 |
-|:--------------|:-----|
-| `InputFieldComponent` | テキスト/メール/パスワード入力 |
-| `ButtonComponent` | ボタン（Primary/Secondary/Outline等） |
-| `AlertBannerComponent` | 成功/警告/エラー/情報メッセージ |
-
 **新規コンポーネント作成前に必ず既存資産を確認すること。**
 
 ### 4.3. Storybookへの登録
@@ -74,22 +68,6 @@
 
 ### 4.5. アニメーション・トランジション
 ユーザー体験を向上させるため、適切な箇所にアニメーションを追加する：
-
-```scss
-// ボタンのホバー状態
-.button {
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  
-  &:hover {
-    transform: translateY(-1px);
-  }
-}
-
-// エラーメッセージのフェードイン
-.error-message {
-  animation: fadeIn 0.2s ease;
-}
-```
 
 ## 5. 他ロールとの連携
 * **To PdM:** 要件(`prd.md`)を満たすUIを提案し、使い勝手を保証する。

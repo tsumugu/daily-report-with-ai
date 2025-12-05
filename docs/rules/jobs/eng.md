@@ -67,29 +67,5 @@ PdMの要件とDesのデザインを、堅牢なシステムとして具現化�
 * **テストを後回しにしない**: テストは実装の一部であり、後付けではない。
 * **設計ドキュメントを信頼する**: tech_spec.md があれば、実装時の迷いが減る。
 
-## 7. よく使うテスト設定（参考）
-
-### Angular コンポーネントテスト
-```typescript
-// RouterLinkを含むコンポーネント
-import { RouterTestingModule } from '@angular/router/testing';
-
-TestBed.configureTestingModule({
-  imports: [ComponentUnderTest, RouterTestingModule.withRoutes([])],
-  providers: [{ provide: SomeService, useValue: mockService }],
-});
-```
-
-### HTTP テスト
-```typescript
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-
-TestBed.configureTestingModule({
-  providers: [
-    provideHttpClient(withInterceptors([authInterceptor])),
-    provideHttpClientTesting(),
-  ],
-});
-```
+## 7. 参考資料
+- テスト設定のスニペット・パターン: `docs/general/test_rules.md` を参照
