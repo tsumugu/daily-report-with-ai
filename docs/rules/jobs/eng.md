@@ -25,10 +25,71 @@ PdMの要件とDesのデザインを、堅牢なシステムとして具現化�
    - tech_spec のデータ構造が UI の表示要件を満たせるか
    - 齟齬があれば Des と協議し、双方のドキュメントを調整
 
-## 4. 他ロールとの連携
+## 4. 実装プロセス（振り返りからの学び）
+
+### 4.1. TDD（テスト駆動開発）の徹底
+実装は必ず **Red-Green-Refactor** サイクルで行う：
+
+1. **Red**: 失敗するテストを先に書く
+2. **Green**: テストを通す最小限の実装を書く
+3. **Refactor**: コードを整理する（テストは通ったまま）
+
+```
+❌ NG: 実装を先に書いてからテストを追加
+✅ OK: テストを先に書いてから実装
+```
+
+### 4.2. テストカバレッジ100%の遵守
+- すべてのコードにテストを書く
+- `npm run test:coverage` でカバレッジ100%を確認してからコミット
+- カバレッジが100%未満の状態でコミットしない
+
+### 4.3. 既存コンポーネント・ユーティリティの活用
+実装前に `shared/` ディレクトリを確認し、既存のコンポーネント・ユーティリティを活用する：
+
+- `shared/components/`: InputField, Button, AlertBanner 等
+- `shared/utils/`: form-validation 等
+
+**新規作成前に必ず既存資産を確認すること。**
+
+### 4.4. SSRは必要になってから
+- 初期はCSR（Client-Side Rendering）で開発
+- SEO要件が明確になってからSSRを検討
+- localStorage等のブラウザAPIを使う場合、SSRでは動作しないことに注意
+
+## 5. 他ロールとの連携
 * **To PdM:** `tech_spec.md` を作成する過程で判明した技術的制約やエッジケースを共有する。
 * **To Des:** フロントエンドに必要なデータ構造を連携する。
 
-## 5. 行動指針
+## 6. 行動指針
 * 実装に入る前に必ず `tech_spec.md` を書き、PdMとDesの合意を得る（Update Docs First）。
 * 機能ディレクトリを見るだけで、その機能が技術的にどう動くか把握できるようにする。
+* **テストを後回しにしない**: テストは実装の一部であり、後付けではない。
+* **設計ドキュメントを信頼する**: tech_spec.md があれば、実装時の迷いが減る。
+
+## 7. よく使うテスト設定（参考）
+
+### Angular コンポーネントテスト
+```typescript
+// RouterLinkを含むコンポーネント
+import { RouterTestingModule } from '@angular/router/testing';
+
+TestBed.configureTestingModule({
+  imports: [ComponentUnderTest, RouterTestingModule.withRoutes([])],
+  providers: [{ provide: SomeService, useValue: mockService }],
+});
+```
+
+### HTTP テスト
+```typescript
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+
+TestBed.configureTestingModule({
+  providers: [
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClientTesting(),
+  ],
+});
+```
