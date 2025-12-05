@@ -5,83 +5,83 @@ import { Component } from '@angular/core';
   selector: 'app-colors-showcase',
   standalone: true,
   template: `
-    <div style="padding: 2rem; font-family: system-ui, sans-serif;">
-      <h1 style="font-size: 2rem; margin-bottom: 1rem;">🎨 カラートークン</h1>
-      <p style="color: #6b7280; margin-bottom: 2rem;">
+    <div class="colors-showcase">
+      <h1 class="colors-showcase__title">🎨 カラートークン</h1>
+      <p class="colors-showcase__description">
         Daily Report で使用するカラーパレットです。<br>
         すべての色は CSS 変数として定義されており、一貫したデザインを実現します。
       </p>
       
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 2rem 0;">
+      <hr class="colors-showcase__divider">
       
-      <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Primary Colors（メインカラー）</h2>
-      <p style="color: #6b7280; margin-bottom: 1rem;">ブランドカラーとして使用する紫〜青系のカラーです。</p>
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-          <div style="aspect-ratio: 1; background: var(--color-primary-50); border-radius: 8px; border: 1px solid #e5e7eb;"></div>
-          <span style="font-size: 10px; color: #6b7280;">primary-50</span>
-          <span style="font-size: 10px; color: #9ca3af; font-family: monospace;">#eef2ff</span>
+      <h2 class="colors-showcase__section-title">Primary Colors（メインカラー）</h2>
+      <p class="colors-showcase__section-description">ブランドカラーとして使用する紫〜青系のカラーです。</p>
+      <div class="colors-showcase__grid">
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-primary-50);"></div>
+          <span class="color-swatch__name">primary-50</span>
+          <span class="color-swatch__value">#eef2ff</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-          <div style="aspect-ratio: 1; background: var(--color-primary-100); border-radius: 8px; border: 1px solid #e5e7eb;"></div>
-          <span style="font-size: 10px; color: #6b7280;">primary-100</span>
-          <span style="font-size: 10px; color: #9ca3af; font-family: monospace;">#e0e7ff</span>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-primary-100);"></div>
+          <span class="color-swatch__name">primary-100</span>
+          <span class="color-swatch__value">#e0e7ff</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-          <div style="aspect-ratio: 1; background: var(--color-primary-200); border-radius: 8px; border: 1px solid #e5e7eb;"></div>
-          <span style="font-size: 10px; color: #6b7280;">primary-200</span>
-          <span style="font-size: 10px; color: #9ca3af; font-family: monospace;">#c7d2fe</span>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-primary-200);"></div>
+          <span class="color-swatch__name">primary-200</span>
+          <span class="color-swatch__value">#c7d2fe</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-          <div style="aspect-ratio: 1; background: var(--color-primary-300); border-radius: 8px; border: 1px solid #e5e7eb;"></div>
-          <span style="font-size: 10px; color: #6b7280;">primary-300</span>
-          <span style="font-size: 10px; color: #9ca3af; font-family: monospace;">#a5b4fc</span>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-primary-300);"></div>
+          <span class="color-swatch__name">primary-300</span>
+          <span class="color-swatch__value">#a5b4fc</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-          <div style="aspect-ratio: 1; background: var(--color-primary-400); border-radius: 8px; border: 1px solid #e5e7eb;"></div>
-          <span style="font-size: 10px; color: #6b7280;">primary-400</span>
-          <span style="font-size: 10px; color: #9ca3af; font-family: monospace;">#818cf8</span>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-primary-400);"></div>
+          <span class="color-swatch__name">primary-400</span>
+          <span class="color-swatch__value">#818cf8</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-          <div style="aspect-ratio: 1; background: var(--color-primary-500); border-radius: 8px; border: 1px solid #e5e7eb;"></div>
-          <span style="font-size: 10px; color: #6b7280;">primary-500</span>
-          <span style="font-size: 10px; color: #9ca3af; font-family: monospace;">#667eea</span>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-primary-500);"></div>
+          <span class="color-swatch__name">primary-500</span>
+          <span class="color-swatch__value">#667eea</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-          <div style="aspect-ratio: 1; background: var(--color-primary-600); border-radius: 8px; border: 1px solid #e5e7eb;"></div>
-          <span style="font-size: 10px; color: #6b7280;">primary-600</span>
-          <span style="font-size: 10px; color: #9ca3af; font-family: monospace;">#5b5bd6</span>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-primary-600);"></div>
+          <span class="color-swatch__name">primary-600</span>
+          <span class="color-swatch__value">#5b5bd6</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-          <div style="aspect-ratio: 1; background: var(--color-primary-700); border-radius: 8px; border: 1px solid #e5e7eb;"></div>
-          <span style="font-size: 10px; color: #6b7280;">primary-700</span>
-          <span style="font-size: 10px; color: #9ca3af; font-family: monospace;">#4f46e5</span>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-primary-700);"></div>
+          <span class="color-swatch__name">primary-700</span>
+          <span class="color-swatch__value">#4f46e5</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-          <div style="aspect-ratio: 1; background: var(--color-primary-800); border-radius: 8px; border: 1px solid #e5e7eb;"></div>
-          <span style="font-size: 10px; color: #6b7280;">primary-800</span>
-          <span style="font-size: 10px; color: #9ca3af; font-family: monospace;">#4338ca</span>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-primary-800);"></div>
+          <span class="color-swatch__name">primary-800</span>
+          <span class="color-swatch__value">#4338ca</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-          <div style="aspect-ratio: 1; background: var(--color-primary-900); border-radius: 8px; border: 1px solid #e5e7eb;"></div>
-          <span style="font-size: 10px; color: #6b7280;">primary-900</span>
-          <span style="font-size: 10px; color: #9ca3af; font-family: monospace;">#3730a3</span>
-        </div>
-      </div>
-
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 2rem 0;">
-
-      <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Gradients（グラデーション）</h2>
-      <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-        <div style="width: 200px; height: 100px; border-radius: 8px; background: var(--gradient-primary); display: flex; align-items: flex-end; padding: 0.5rem;">
-          <span style="color: white; font-size: 12px; font-weight: 500;">gradient-primary</span>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-primary-900);"></div>
+          <span class="color-swatch__name">primary-900</span>
+          <span class="color-swatch__value">#3730a3</span>
         </div>
       </div>
 
-      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 2rem 0;">
+      <hr class="colors-showcase__divider">
 
-      <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">使用方法</h2>
-      <pre style="background: #f3f4f6; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code>/* CSS変数として使用 */
+      <h2 class="colors-showcase__section-title">Gradients（グラデーション）</h2>
+      <div class="gradient-showcase">
+        <div class="gradient-showcase__box" style="background: var(--gradient-primary);">
+          <span class="gradient-showcase__label">gradient-primary</span>
+        </div>
+      </div>
+
+      <hr class="colors-showcase__divider">
+
+      <h2 class="colors-showcase__section-title">使用方法</h2>
+      <pre class="code-example"><code>/* CSS変数として使用 */
 .button {{ '{' }}
   background: var(--color-primary-500);
   color: var(--color-text-inverse);
@@ -98,7 +98,106 @@ import { Component } from '@angular/core';
 {{ '}' }}</code></pre>
     </div>
   `,
-  styles: [],
+  styles: [`
+    .colors-showcase {
+      padding: 2rem;
+      font-family: system-ui, sans-serif;
+
+      &__title {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: var(--color-text-primary);
+      }
+
+      &__description {
+        color: var(--color-text-secondary);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+      }
+
+      &__divider {
+        border: none;
+        border-top: 1px solid var(--color-border-default);
+        margin: 2rem 0;
+      }
+
+      &__section-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--color-text-primary);
+      }
+
+      &__section-description {
+        color: var(--color-text-secondary);
+        margin-bottom: 1rem;
+      }
+
+      &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+    }
+
+    .color-swatch {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      &__box {
+        aspect-ratio: 1;
+        border-radius: 8px;
+        border: 1px solid var(--color-border-default);
+      }
+
+      &__name {
+        font-size: 10px;
+        color: var(--color-text-secondary);
+      }
+
+      &__value {
+        font-size: 10px;
+        color: var(--color-text-tertiary);
+        font-family: monospace;
+      }
+    }
+
+    .gradient-showcase {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+
+      &__box {
+        width: 200px;
+        height: 100px;
+        border-radius: 8px;
+        display: flex;
+        align-items: flex-end;
+        padding: 0.5rem;
+      }
+
+      &__label {
+        color: var(--color-text-inverse);
+        font-size: 12px;
+        font-weight: 500;
+      }
+    }
+
+    .code-example {
+      background: var(--color-bg-secondary);
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      border: 1px solid var(--color-border-default);
+
+      code {
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+        color: var(--color-text-primary);
+      }
+    }
+  `],
 })
 class ColorsShowcaseComponent {}
 
@@ -114,4 +213,3 @@ export default meta;
 type Story = StoryObj<ColorsShowcaseComponent>;
 
 export const Default: Story = {};
-

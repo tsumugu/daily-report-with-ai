@@ -1,0 +1,94 @@
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { signal } from '@angular/core';
+import { of, throwError } from 'rxjs';
+import { HomePageComponent } from './home-page.component';
+import { AuthService } from '../../../auth/services/auth.service';
+
+describe('HomePageComponent', () => {
+  let component: HomePageComponent;
+  let fixture: ComponentFixture<HomePageComponent>;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
+  let routerSpy: jasmine.SpyObj<Router>;
+
+  const mockUser = {
+    id: '1',
+    email: 'test@example.com',
+    createdAt: new Date().toISOString(),
+  };
+
+  beforeEach(async () => {
+    authServiceSpy = jasmine.createSpyObj('AuthService', ['logout'], {
+      currentUser: signal(mockUser),
+    });
+    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+
+    await TestBed.configureTestingModule({
+      imports: [HomePageComponent],
+      providers: [
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: Router, useValue: routerSpy },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(HomePageComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  describe('初期状態', () => {
+    it('コンポーネントが作成されること', () => {
+      expect(component).toBeTruthy();
+    });
+
+    it('currentUserが設定されていること', () => {
+      expect(component.currentUser()).toEqual(mockUser);
+    });
+  });
+
+  describe('logout', () => {
+    it('ログアウトが成功した場合、ログインページに遷移すること', fakeAsync(() => {
+      authServiceSpy.logout.and.returnValue(of(void 0));
+
+      component.logout();
+      tick();
+
+      expect(authServiceSpy.logout).toHaveBeenCalled();
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
+    }));
+
+    it('ログアウトが失敗した場合でも、ログインページに遷移すること', fakeAsync(() => {
+      authServiceSpy.logout.and.returnValue(throwError(() => new Error('Logout failed')));
+
+      component.logout();
+      tick();
+
+      expect(authServiceSpy.logout).toHaveBeenCalled();
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
+    }));
+  });
+
+  describe('DOM', () => {
+    it('ユーザーのメールアドレスが表示されること', () => {
+      const emailElement = fixture.nativeElement.querySelector('.header');
+      expect(emailElement.textContent).toContain(mockUser.email);
+    });
+
+    it('ログアウトボタンが表示されること', () => {
+      const logoutButton = fixture.nativeElement.querySelector('.logout-button');
+      expect(logoutButton).toBeTruthy();
+      expect(logoutButton.textContent).toContain('ログアウト');
+    });
+
+    it('ログアウトボタンをクリックするとlogoutが呼ばれること', fakeAsync(() => {
+      authServiceSpy.logout.and.returnValue(of(void 0));
+      const logoutButton = fixture.nativeElement.querySelector('.logout-button');
+
+      logoutButton.click();
+      tick();
+
+      expect(authServiceSpy.logout).toHaveBeenCalled();
+    }));
+  });
+});
+
