@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { provideRouter } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { SignupPageComponent } from './signup-page.component';
 import { AuthService } from '../../services/auth.service';
@@ -22,11 +22,17 @@ describe('SignupPageComponent', () => {
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      imports: [SignupPageComponent, ReactiveFormsModule],
+      imports: [SignupPageComponent, ReactiveFormsModule, RouterTestingModule],
       providers: [
-        provideRouter([]),
         { provide: AuthService, useValue: authServiceSpy },
         { provide: Router, useValue: routerSpy },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { paramMap: { get: () => null } },
+            queryParams: of({}),
+          },
+        },
       ],
     }).compileComponents();
 
