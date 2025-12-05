@@ -1,6 +1,7 @@
 {
   "name": "@daily-report/api",
   "version": "1.0.0",
+  "type": "module",
   "description": "Daily Report API Server",
   "main": "dist/index.js",
   "scripts": {

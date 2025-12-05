@@ -10,6 +10,8 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { InputFieldComponent, ButtonComponent, AlertBannerComponent } from '../../../../shared/components';
+import { getFieldErrorMessage } from '../../../../shared/utils';
 
 /**
  * サインアップページコンポーネント
@@ -17,7 +19,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-signup-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, InputFieldComponent, ButtonComponent, AlertBannerComponent],
   templateUrl: './signup-page.component.html',
   styleUrl: './signup-page.component.scss',
 })
@@ -31,10 +33,6 @@ export class SignupPageComponent {
 
   /** エラーメッセージ */
   readonly errorMessage = signal<string | null>(null);
-
-  /** パスワード表示切替 */
-  readonly showPassword = signal(false);
-  readonly showConfirmPassword = signal(false);
 
   /** サインアップフォーム */
   readonly signupForm: FormGroup = this.fb.group(
@@ -91,43 +89,10 @@ export class SignupPageComponent {
   }
 
   /**
-   * パスワード表示切替
-   */
-  togglePassword(): void {
-    this.showPassword.update((v) => !v);
-  }
-
-  toggleConfirmPassword(): void {
-    this.showConfirmPassword.update((v) => !v);
-  }
-
-  /**
    * フィールドエラー取得
    */
   getFieldError(fieldName: string): string | null {
-    const control = this.signupForm.get(fieldName);
-    if (!control || !control.touched || !control.errors) {
-      return null;
-    }
-
-    if (control.errors['required']) {
-      const labels: Record<string, string> = {
-        email: 'メールアドレスを入力してください',
-        password: 'パスワードを入力してください',
-        confirmPassword: '確認用パスワードを入力してください',
-      };
-      return labels[fieldName] || '入力してください';
-    }
-    if (control.errors['email']) {
-      return '有効なメールアドレスを入力してください';
-    }
-    if (control.errors['minlength']) {
-      return 'パスワードは8文字以上で入力してください';
-    }
-    if (control.errors['passwordMismatch']) {
-      return 'パスワードが一致しません';
-    }
-    return null;
+    return getFieldErrorMessage(this.signupForm.get(fieldName), fieldName);
   }
 }
 

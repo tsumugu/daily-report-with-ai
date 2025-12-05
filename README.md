@@ -78,12 +78,43 @@ npm run storybook
 | `@daily-report/api` | Express バックエンド | 3000 |
 | `@daily-report/shared` | 共通型定義 | - |
 
+## コード品質
+
+このプロジェクトでは、**統合型ESLint設定**と**自動Lint実行（Git Hooks）**を採用しています。
+
+```
+daily-report/
+├── eslint.config.js           ← 共通ルール
+├── .husky/pre-commit          ← commit時に自動Lint
+├── apps/
+│   ├── api/eslint.config.js   ← API固有ルール
+│   └── web/eslint.config.js   ← Web固有ルール
+```
+
+### 自動Lint実行
+
+```bash
+# git commit時に自動的に実行される
+git commit -m "feat: 新機能追加"
+# → 変更されたファイルのみLint実行
+# → エラーがあればcommit中断
+```
+
+詳細は [Lint設定ガイド](./docs/general/lint-rules.md) を参照してください。
+
 ## ドキュメント
 
+### 全体仕様
 - [PRD（サービス要件）](./docs/general/prd.md)
 - [ロードマップ](./docs/general/roadmap.md)
 - [アーキテクチャ](./docs/general/arch.md)
 - [デザインシステム](./docs/general/design_system.md)
+- [Lint設定ガイド](./docs/general/lint-rules.md)
+
+### 機能別仕様
+- [認証機能](./docs/features/auth/)
+- [日報入力](./docs/features/daily-report-input/)
+- [日報一覧](./docs/features/daily-report-list/)
 
 ## ライセンス
 

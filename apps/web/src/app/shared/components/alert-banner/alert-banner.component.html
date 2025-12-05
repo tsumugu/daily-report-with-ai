@@ -1,0 +1,21 @@
+<div [class]="alertClasses" role="alert">
+  <div class="alert__icon">{{ icon }}</div>
+  <div class="alert__content">
+    @if (message) {
+      <span>{{ message }}</span>
+    } @else {
+      <ng-content></ng-content>
+    }
+  </div>
+  @if (dismissible) {
+    <button
+      type="button"
+      class="alert__dismiss"
+      (click)="onDismiss()"
+      aria-label="閉じる"
+    >
+      ✕
+    </button>
+  }
+</div>
+

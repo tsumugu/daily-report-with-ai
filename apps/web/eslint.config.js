@@ -1,44 +1,54 @@
-// @ts-check
-const eslint = require("@eslint/js");
-const { defineConfig } = require("eslint/config");
-const tseslint = require("typescript-eslint");
-const angular = require("angular-eslint");
+import baseConfig from '../../eslint.config.js';
+import angular from 'angular-eslint';
 
-module.exports = defineConfig([
+/**
+ * Web (Angular) 固有のESLint設定
+ * ベース設定を継承し、Angular環境に特化したルールを追加
+ */
+export default [
+  ...baseConfig,
+
+  // TypeScriptファイル用の設定
+  ...angular.configs.tsRecommended.map((config) => ({
+    ...config,
+    files: ['**/*.ts'],
+  })),
   {
-    files: ["**/*.ts"],
-    extends: [
-      eslint.configs.recommended,
-      tseslint.configs.recommended,
-      tseslint.configs.stylistic,
-      angular.configs.tsRecommended,
-    ],
+    files: ['**/*.ts'],
     processor: angular.processInlineTemplates,
     rules: {
-      "@angular-eslint/directive-selector": [
-        "error",
+      // Angularディレクティブのセレクター規則
+      '@angular-eslint/directive-selector': [
+        'error',
         {
-          type: "attribute",
-          prefix: "app",
-          style: "camelCase",
+          type: 'attribute',
+          prefix: 'app',
+          style: 'camelCase',
         },
       ],
-      "@angular-eslint/component-selector": [
-        "error",
+
+      // Angularコンポーネントのセレクター規則
+      '@angular-eslint/component-selector': [
+        'error',
         {
-          type: "element",
-          prefix: "app",
-          style: "kebab-case",
+          type: 'element',
+          prefix: 'app',
+          style: 'kebab-case',
         },
       ],
+
+      // ControlValueAccessorなどで空関数が必要な場合は無効化コメントを使用
+      '@typescript-eslint/no-empty-function': 'warn',
     },
   },
-  {
-    files: ["**/*.html"],
-    extends: [
-      angular.configs.templateRecommended,
-      angular.configs.templateAccessibility,
-    ],
-    rules: {},
-  }
-]);
+
+  // HTMLテンプレートファイル用の設定
+  ...angular.configs.templateRecommended.map((config) => ({
+    ...config,
+    files: ['**/*.html'],
+  })),
+  ...angular.configs.templateAccessibility.map((config) => ({
+    ...config,
+    files: ['**/*.html'],
+  })),
+];

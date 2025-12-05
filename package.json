@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "日報管理システム - モノレポ",
   "private": true,
+  "type": "module",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -14,9 +15,30 @@
     "build": "npm run build --workspaces --if-present",
     "build:web": "npm run build -w @daily-report/web",
     "build:api": "npm run build -w @daily-report/api",
-    "lint": "npm run lint --workspaces --if-present",
+    "lint": "eslint . && npm run lint --workspaces --if-present",
+    "lint:root": "eslint .",
+    "lint:staged": "lint-staged",
     "test": "npm run test --workspaces --if-present",
-    "storybook": "npm run storybook -w @daily-report/web"
+    "storybook": "npm run storybook -w @daily-report/web",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "typescript-eslint": "^8.46.4"
+  },
+  "lint-staged": {
+    "apps/api/src/**/*.{ts,js}": [
+      "eslint --fix"
+    ],
+    "apps/web/src/**/*.{ts,html}": [
+      "eslint --fix"
+    ],
+    "**/*.{json,md}": [
+      "prettier --write"
+    ]
   },
   "engines": {
     "node": ">=18.0.0"

@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { InputFieldComponent, ButtonComponent, AlertBannerComponent } from '../../../../shared/components';
+import { getFieldErrorMessage } from '../../../../shared/utils';
 
 /**
  * ログインページコンポーネント
@@ -10,7 +12,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, InputFieldComponent, ButtonComponent, AlertBannerComponent],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
 })
@@ -24,9 +26,6 @@ export class LoginPageComponent {
 
   /** エラーメッセージ */
   readonly errorMessage = signal<string | null>(null);
-
-  /** パスワード表示切替 */
-  readonly showPassword = signal(false);
 
   /** ログインフォーム */
   readonly loginForm: FormGroup = this.fb.group({
@@ -62,31 +61,10 @@ export class LoginPageComponent {
   }
 
   /**
-   * パスワード表示切替
-   */
-  togglePassword(): void {
-    this.showPassword.update((v) => !v);
-  }
-
-  /**
    * フィールドエラー取得
    */
   getFieldError(fieldName: string): string | null {
-    const control = this.loginForm.get(fieldName);
-    if (!control || !control.touched || !control.errors) {
-      return null;
-    }
-
-    if (control.errors['required']) {
-      return fieldName === 'email' ? 'メールアドレスを入力してください' : 'パスワードを入力してください';
-    }
-    if (control.errors['email']) {
-      return '有効なメールアドレスを入力してください';
-    }
-    if (control.errors['minlength']) {
-      return 'パスワードは8文字以上で入力してください';
-    }
-    return null;
+    return getFieldErrorMessage(this.loginForm.get(fieldName), fieldName);
   }
 }
 

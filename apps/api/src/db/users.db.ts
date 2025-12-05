@@ -5,7 +5,7 @@ import { User } from '../models/user.model.js';
  * 本番環境では PostgreSQL/Firestore 等に置き換え
  */
 class UsersDatabase {
-  private users: Map<string, User> = new Map();
+  private users = new Map<string, User>();
 
   /**
    * ユーザーを保存
