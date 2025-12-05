@@ -1,30 +1,34 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import {
   generateToken,
   verifyToken,
   authMiddleware,
-  JwtPayload,
   AuthenticatedRequest,
-} from './auth.middleware';
+} from './auth.middleware.js';
 
 describe('Auth Middleware', () => {
   describe('generateToken', () => {
     it('JWTトークンを生成すること', () => {
-      const payload: JwtPayload = { userId: '1', email: 'test@example.com' };
-      const token = generateToken(payload);
+      const token = generateToken('1', 'test@example.com');
 
       expect(token).toBeTruthy();
       expect(typeof token).toBe('string');
       // JWTは3つのパートからなる
       expect(token.split('.')).toHaveLength(3);
     });
+
+    it('emailがなくてもトークンを生成できること', () => {
+      const token = generateToken('1');
+
+      expect(token).toBeTruthy();
+      expect(typeof token).toBe('string');
+    });
   });
 
   describe('verifyToken', () => {
     it('有効なトークンの場合、ペイロードを返すこと', () => {
-      const payload: JwtPayload = { userId: '1', email: 'test@example.com' };
-      const token = generateToken(payload);
+      const token = generateToken('1', 'test@example.com');
 
       const result = verifyToken(token);
 
@@ -39,8 +43,7 @@ describe('Auth Middleware', () => {
     });
 
     it('改ざんされたトークンの場合、nullを返すこと', () => {
-      const payload: JwtPayload = { userId: '1', email: 'test@example.com' };
-      const token = generateToken(payload);
+      const token = generateToken('1', 'test@example.com');
       const tamperedToken = token + 'tampered';
 
       const result = verifyToken(tamperedToken);
@@ -107,8 +110,7 @@ describe('Auth Middleware', () => {
     });
 
     it('有効なトークンの場合、req.userを設定しnextを呼ぶこと', () => {
-      const payload: JwtPayload = { userId: '1', email: 'test@example.com' };
-      const token = generateToken(payload);
+      const token = generateToken('1', 'test@example.com');
       mockReq.headers = { authorization: `Bearer ${token}` };
 
       authMiddleware(
@@ -118,10 +120,9 @@ describe('Auth Middleware', () => {
       );
 
       expect(mockReq.user).toBeTruthy();
-      expect(mockReq.user?.userId).toBe('1');
+      expect(mockReq.user?.id).toBe('1');
       expect(mockReq.user?.email).toBe('test@example.com');
       expect(mockNext).toHaveBeenCalled();
     });
   });
 });
-

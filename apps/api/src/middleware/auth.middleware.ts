@@ -15,13 +15,17 @@ export interface JwtPayload {
  * 認証済みリクエスト型
  */
 export interface AuthenticatedRequest extends Request {
-  user?: JwtPayload;
+  user?: {
+    id: string;
+    email?: string;
+  };
 }
 
 /**
  * JWTトークンを生成
  */
-export function generateToken(payload: JwtPayload): string {
+export function generateToken(userId: string, email?: string): string {
+  const payload: JwtPayload = { userId, email: email || '' };
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
 }
 
@@ -59,7 +63,10 @@ export function authMiddleware(
     return;
   }
 
-  req.user = payload;
+  req.user = {
+    id: payload.userId,
+    email: payload.email,
+  };
   next();
 }
 

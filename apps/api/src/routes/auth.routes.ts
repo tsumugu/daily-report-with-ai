@@ -61,7 +61,7 @@ authRouter.post('/signup', async (req: Request, res: Response) => {
     usersDb.save(user);
 
     // トークン生成（自動ログイン）
-    const token = generateToken({ userId: user.id, email: user.email });
+    const token = generateToken(user.id, user.email);
 
     res.status(201).json({
       user: toUserResponse(user),
@@ -102,7 +102,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
     }
 
     // トークン生成
-    const token = generateToken({ userId: user.id, email: user.email });
+    const token = generateToken(user.id, user.email);
 
     res.status(200).json({
       user: toUserResponse(user),
@@ -135,7 +135,7 @@ authRouter.get('/me', authMiddleware, (req: AuthenticatedRequest, res: Response)
       return;
     }
 
-    const user = usersDb.findById(req.user.userId);
+    const user = usersDb.findById(req.user.id!);
     if (!user) {
       res.status(404).json({ message: 'ユーザーが見つかりません' });
       return;
