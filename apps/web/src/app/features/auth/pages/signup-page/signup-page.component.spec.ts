@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { SignupPageComponent } from './signup-page.component';
@@ -10,7 +10,7 @@ describe('SignupPageComponent', () => {
   let component: SignupPageComponent;
   let fixture: ComponentFixture<SignupPageComponent>;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let router: Router;
 
   const mockAuthResponse = {
     token: 'mock-token',
@@ -19,22 +19,14 @@ describe('SignupPageComponent', () => {
 
   beforeEach(async () => {
     authServiceSpy = jasmine.createSpyObj('AuthService', ['signup']);
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      imports: [SignupPageComponent, ReactiveFormsModule, RouterTestingModule],
-      providers: [
-        { provide: AuthService, useValue: authServiceSpy },
-        { provide: Router, useValue: routerSpy },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: { paramMap: { get: () => null } },
-            queryParams: of({}),
-          },
-        },
-      ],
+      imports: [SignupPageComponent, ReactiveFormsModule, RouterTestingModule.withRoutes([])],
+      providers: [{ provide: AuthService, useValue: authServiceSpy }],
     }).compileComponents();
+
+    router = TestBed.inject(Router);
+    spyOn(router, 'navigate');
 
     fixture = TestBed.createComponent(SignupPageComponent);
     component = fixture.componentInstance;
@@ -126,7 +118,7 @@ describe('SignupPageComponent', () => {
         email: 'test@example.com',
         password: 'password123',
       });
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/']);
+      expect(router.navigate).toHaveBeenCalledWith(['/']);
     }));
 
     it('サインアップ中はisLoadingがtrueになること', () => {
@@ -157,7 +149,7 @@ describe('SignupPageComponent', () => {
 
       expect(component.isLoading()).toBeFalse();
       expect(component.errorMessage()).toBe('Email already exists');
-      expect(routerSpy.navigate).not.toHaveBeenCalled();
+      expect(router.navigate).not.toHaveBeenCalled();
     }));
 
     it('エラーメッセージがない場合、デフォルトメッセージを設定すること', fakeAsync(() => {
