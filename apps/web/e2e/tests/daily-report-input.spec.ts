@@ -12,12 +12,12 @@ test.describe('日報入力画面', () => {
     await page.goto('/signup');
     
     // ページが読み込まれるまで待機
-    await page.waitForSelector('#email');
+    await page.waitForSelector('input#email');
     
-    // フォーム入力（id属性でセレクト）
-    await page.fill('#email', testUser.email);
-    await page.fill('#password', testUser.password);
-    await page.fill('#confirmPassword', testUser.password);
+    // フォーム入力（内部のinput要素を正確にセレクト）
+    await page.fill('input#email', testUser.email);
+    await page.fill('input#password', testUser.password);
+    await page.fill('input#confirmPassword', testUser.password);
     
     // サブミットボタンをクリック
     await page.click('button[type="submit"]');
