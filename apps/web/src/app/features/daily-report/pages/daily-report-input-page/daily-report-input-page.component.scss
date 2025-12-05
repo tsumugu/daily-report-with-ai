@@ -1,0 +1,250 @@
+.daily-report-input {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-secondary-50) 100%);
+  padding-bottom: 100px; // 固定ボタン分の余白
+}
+
+// ヘッダー
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-gray-200);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--color-gray-700);
+  transition: background-color 0.2s;
+
+  &:hover {
+    background: var(--color-gray-100);
+  }
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin: 0;
+}
+
+// フォーム
+.form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-gray-800);
+  margin-bottom: 8px;
+}
+
+.label-icon {
+  font-size: 1.1rem;
+}
+
+.required {
+  color: var(--color-error-500);
+  font-weight: 500;
+}
+
+// 日付入力
+.date-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  border: 1px solid var(--color-gray-300);
+  border-radius: 8px;
+  background: var(--color-white);
+  color: var(--color-gray-900);
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px var(--color-primary-100);
+  }
+
+  &.error {
+    border-color: var(--color-error-500);
+  }
+}
+
+// テキストエリア
+.textarea {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  line-height: 1.6;
+  border: 1px solid var(--color-gray-300);
+  border-radius: 8px;
+  background: var(--color-white);
+  color: var(--color-gray-900);
+  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &::placeholder {
+    color: var(--color-gray-400);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px var(--color-primary-100);
+  }
+
+  &.error {
+    border-color: var(--color-error-500);
+  }
+
+  &--small {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+}
+
+// 文字数カウント
+.char-count {
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--color-gray-500);
+  margin-top: 4px;
+
+  &.over {
+    color: var(--color-error-500);
+    font-weight: 500;
+  }
+}
+
+// エラーメッセージ
+.error-message {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-error-500);
+  margin-top: 4px;
+}
+
+// カード（よかったこと/改善点）
+.card {
+  position: relative;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.card-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-gray-400);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+
+  &:hover {
+    background: var(--color-error-50);
+    color: var(--color-error-500);
+  }
+}
+
+.card-field {
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.card-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-gray-600);
+  margin-bottom: 6px;
+}
+
+// 追加ボタン
+.add-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-primary-600);
+  background: var(--color-white);
+  border: 2px dashed var(--color-primary-300);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+
+  &:hover {
+    background: var(--color-primary-50);
+    border-color: var(--color-primary-500);
+  }
+}
+
+// 保存ボタンエリア
+.form-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 20px;
+  background: var(--color-white);
+  border-top: 1px solid var(--color-gray-200);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+
+  @media (min-width: 640px) {
+    position: static;
+    padding: 24px 0 0;
+    background: transparent;
+    border-top: none;
+    box-shadow: none;
+  }
+}
+
+// アラートバナー用余白
+app-alert-banner {
+  display: block;
+  margin: 16px 20px 0;
+  max-width: 600px;
+
+  @media (min-width: 640px) {
+    margin: 16px auto 0;
+  }
+}
+

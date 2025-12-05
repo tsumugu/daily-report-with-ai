@@ -1,0 +1,181 @@
+<div class="daily-report-input">
+  <!-- ヘッダー -->
+  <header class="header">
+    <a routerLink="/daily-reports" class="back-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
+    </a>
+    <h1 class="title">日報を書く</h1>
+  </header>
+
+  <!-- エラーメッセージ -->
+  @if (errorMessage()) {
+    <app-alert-banner
+      [message]="errorMessage()"
+      variant="error"
+      [dismissible]="true"
+      (dismissed)="errorMessage.set(null)"
+    />
+  }
+
+  <!-- フォーム -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+    <!-- 日付 -->
+    <div class="form-group">
+      <label class="label">日付 <span class="required">*</span></label>
+      <input
+        type="date"
+        formControlName="date"
+        class="date-input"
+        [class.error]="form.get('date')?.touched && form.get('date')?.invalid"
+      />
+      @if (getFieldError('date')) {
+        <span class="error-message">{{ getFieldError('date') }}</span>
+      }
+    </div>
+
+    <!-- できごと -->
+    <div class="form-group">
+      <label class="label">
+        <span class="label-icon">📝</span>
+        できごと <span class="required">*</span>
+      </label>
+      <textarea
+        formControlName="events"
+        class="textarea"
+        [class.error]="form.get('events')?.touched && form.get('events')?.invalid"
+        placeholder="今日の主な業務内容、出来事を記入してください"
+        rows="4"
+      ></textarea>
+      <div class="char-count" [class.over]="eventsCharCount() > MAX_LENGTH">
+        {{ eventsCharCount() }}/{{ MAX_LENGTH }}
+      </div>
+      @if (getFieldError('events')) {
+        <span class="error-message">{{ getFieldError('events') }}</span>
+      }
+    </div>
+
+    <!-- 学び -->
+    <div class="form-group">
+      <label class="label">
+        <span class="label-icon">💡</span>
+        学び
+      </label>
+      <textarea
+        formControlName="learnings"
+        class="textarea"
+        [class.error]="form.get('learnings')?.touched && form.get('learnings')?.invalid"
+        placeholder="業務を通じて得た気づき、学びを記入してください"
+        rows="3"
+      ></textarea>
+      <div class="char-count" [class.over]="learningsCharCount() > MAX_LENGTH">
+        {{ learningsCharCount() }}/{{ MAX_LENGTH }}
+      </div>
+    </div>
+
+    <!-- よかったこと -->
+    <div class="form-group">
+      <label class="label">
+        <span class="label-icon">✨</span>
+        よかったこと
+      </label>
+
+      @for (gp of goodPoints(); track $index) {
+        <div class="card">
+          <button type="button" class="card-remove" (click)="removeGoodPoint($index)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+            </svg>
+          </button>
+          <div class="card-field">
+            <label class="card-label">内容</label>
+            <textarea
+              class="textarea textarea--small"
+              [value]="gp.content"
+              (input)="updateGoodPoint($index, 'content', $any($event.target).value)"
+              placeholder="うまくいったこと、成功体験"
+              rows="2"
+            ></textarea>
+          </div>
+          <div class="card-field">
+            <label class="card-label">要因・背景</label>
+            <textarea
+              class="textarea textarea--small"
+              [value]="gp.factors"
+              (input)="updateGoodPoint($index, 'factors', $any($event.target).value)"
+              placeholder="なぜうまくいったか"
+              rows="2"
+            ></textarea>
+          </div>
+        </div>
+      }
+
+      <button type="button" class="add-button" (click)="addGoodPoint()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"/><path d="M12 5v14"/>
+        </svg>
+        追加
+      </button>
+    </div>
+
+    <!-- 改善点/アクション -->
+    <div class="form-group">
+      <label class="label">
+        <span class="label-icon">📈</span>
+        改善点/アクション
+      </label>
+
+      @for (imp of improvements(); track $index) {
+        <div class="card">
+          <button type="button" class="card-remove" (click)="removeImprovement($index)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+            </svg>
+          </button>
+          <div class="card-field">
+            <label class="card-label">改善したいこと</label>
+            <textarea
+              class="textarea textarea--small"
+              [value]="imp.content"
+              (input)="updateImprovement($index, 'content', $any($event.target).value)"
+              placeholder="改善したい点、課題"
+              rows="2"
+            ></textarea>
+          </div>
+          <div class="card-field">
+            <label class="card-label">アクション</label>
+            <textarea
+              class="textarea textarea--small"
+              [value]="imp.action"
+              (input)="updateImprovement($index, 'action', $any($event.target).value)"
+              placeholder="明日以降に試したいこと"
+              rows="2"
+            ></textarea>
+          </div>
+        </div>
+      }
+
+      <button type="button" class="add-button" (click)="addImprovement()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"/><path d="M12 5v14"/>
+        </svg>
+        追加
+      </button>
+    </div>
+
+    <!-- 保存ボタン -->
+    <div class="form-actions">
+      <app-button
+        type="submit"
+        variant="primary"
+        [fullWidth]="true"
+        [loading]="isLoading()"
+        [disabled]="isLoading()"
+      >
+        保存する
+      </app-button>
+    </div>
+  </form>
+</div>
+

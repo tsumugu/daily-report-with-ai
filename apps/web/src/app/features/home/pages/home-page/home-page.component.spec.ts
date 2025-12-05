@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { signal } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { HomePageComponent } from './home-page.component';
@@ -9,7 +10,7 @@ describe('HomePageComponent', () => {
   let component: HomePageComponent;
   let fixture: ComponentFixture<HomePageComponent>;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let router: Router;
 
   const mockUser = {
     id: '1',
@@ -21,15 +22,14 @@ describe('HomePageComponent', () => {
     authServiceSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       currentUser: signal(mockUser),
     });
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      imports: [HomePageComponent],
-      providers: [
-        { provide: AuthService, useValue: authServiceSpy },
-        { provide: Router, useValue: routerSpy },
-      ],
+      imports: [HomePageComponent, RouterTestingModule.withRoutes([])],
+      providers: [{ provide: AuthService, useValue: authServiceSpy }],
     }).compileComponents();
+
+    router = TestBed.inject(Router);
+    spyOn(router, 'navigate');
 
     fixture = TestBed.createComponent(HomePageComponent);
     component = fixture.componentInstance;
@@ -54,7 +54,7 @@ describe('HomePageComponent', () => {
       tick();
 
       expect(authServiceSpy.logout).toHaveBeenCalled();
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
+      expect(router.navigate).toHaveBeenCalledWith(['/login']);
     }));
 
     it('ログアウトが失敗した場合でも、ログインページに遷移すること', fakeAsync(() => {
@@ -64,7 +64,7 @@ describe('HomePageComponent', () => {
       tick();
 
       expect(authServiceSpy.logout).toHaveBeenCalled();
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
+      expect(router.navigate).toHaveBeenCalledWith(['/login']);
     }));
   });
 
@@ -89,6 +89,11 @@ describe('HomePageComponent', () => {
 
       expect(authServiceSpy.logout).toHaveBeenCalled();
     }));
+
+    it('日報入力へのリンクが表示されること', () => {
+      const dailyReportLink = fixture.nativeElement.querySelector('a[routerLink="/daily-reports/new"]');
+      expect(dailyReportLink).toBeTruthy();
+    });
   });
 });
 

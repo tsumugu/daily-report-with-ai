@@ -1,0 +1,89 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import {
+  DailyReport,
+  CreateDailyReportRequest,
+  GoodPoint,
+  Improvement,
+  GoodPointStatus,
+  ImprovementStatus,
+} from '../models/daily-report.model';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class DailyReportService {
+  private readonly baseUrl = '/api';
+
+  constructor(private http: HttpClient) {}
+
+  /**
+   * 日報を作成
+   */
+  create(request: CreateDailyReportRequest): Observable<DailyReport> {
+    return this.http.post<DailyReport>(`${this.baseUrl}/daily-reports`, request);
+  }
+
+  /**
+   * 日報一覧を取得
+   */
+  getAll(): Observable<DailyReport[]> {
+    return this.http.get<DailyReport[]>(`${this.baseUrl}/daily-reports`);
+  }
+
+  /**
+   * 日報詳細を取得
+   */
+  getById(id: string): Observable<DailyReport> {
+    return this.http.get<DailyReport>(`${this.baseUrl}/daily-reports/${id}`);
+  }
+
+  /**
+   * よかったことを作成
+   */
+  createGoodPoint(request: {
+    content: string;
+    factors?: string;
+    tags?: string[];
+  }): Observable<GoodPoint> {
+    return this.http.post<GoodPoint>(`${this.baseUrl}/good-points`, request);
+  }
+
+  /**
+   * よかったことを更新
+   */
+  updateGoodPoint(
+    id: string,
+    request: {
+      content?: string;
+      factors?: string;
+      tags?: string[];
+      status?: GoodPointStatus;
+    }
+  ): Observable<GoodPoint> {
+    return this.http.patch<GoodPoint>(`${this.baseUrl}/good-points/${id}`, request);
+  }
+
+  /**
+   * 改善点を作成
+   */
+  createImprovement(request: { content: string; action?: string }): Observable<Improvement> {
+    return this.http.post<Improvement>(`${this.baseUrl}/improvements`, request);
+  }
+
+  /**
+   * 改善点を更新
+   */
+  updateImprovement(
+    id: string,
+    request: {
+      content?: string;
+      action?: string;
+      status?: ImprovementStatus;
+    }
+  ): Observable<Improvement> {
+    return this.http.patch<Improvement>(`${this.baseUrl}/improvements/${id}`, request);
+  }
+}
+

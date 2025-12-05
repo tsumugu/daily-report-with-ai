@@ -16,7 +16,24 @@ export const routes: Routes = [
       ),
   },
 
-  // TODO: Add daily-report routes here
+  // Daily Report routes
+  {
+    path: 'daily-reports/new',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/daily-report/pages/daily-report-input-page/daily-report-input-page.component').then(
+        (m) => m.DailyReportInputPageComponent
+      ),
+  },
+  {
+    path: 'daily-reports',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/home/pages/home-page/home-page.component').then(
+        (m) => m.HomePageComponent
+      ),
+    // TODO: Replace with DailyReportListPageComponent
+  },
 
   // Fallback
   {
