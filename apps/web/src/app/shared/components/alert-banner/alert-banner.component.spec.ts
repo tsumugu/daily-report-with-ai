@@ -36,9 +36,9 @@ describe('AlertBannerComponent', () => {
   describe('onDismiss', () => {
     it('dismissedイベントが発火すること', () => {
       const spy = spyOn(component.dismissed, 'emit');
-      
+
       component.onDismiss();
-      
+
       expect(spy).toHaveBeenCalled();
     });
   });
@@ -118,7 +118,8 @@ describe('AlertBannerComponent', () => {
       component.dismissible = false;
       fixture.detectChanges();
 
-      const dismissButton = fixture.nativeElement.querySelector('.alert__dismiss-button');
+      // 実際のクラス名は alert__dismiss
+      const dismissButton = fixture.nativeElement.querySelector('.alert__dismiss');
       expect(dismissButton).toBeFalsy();
     });
 
@@ -126,7 +127,8 @@ describe('AlertBannerComponent', () => {
       component.dismissible = true;
       fixture.detectChanges();
 
-      const dismissButton = fixture.nativeElement.querySelector('.alert__dismiss-button');
+      // 実際のクラス名は alert__dismiss
+      const dismissButton = fixture.nativeElement.querySelector('.alert__dismiss');
       expect(dismissButton).toBeTruthy();
     });
 
@@ -135,11 +137,10 @@ describe('AlertBannerComponent', () => {
       fixture.detectChanges();
 
       const spy = spyOn(component.dismissed, 'emit');
-      const dismissButton = fixture.nativeElement.querySelector('.alert__dismiss-button');
+      const dismissButton = fixture.nativeElement.querySelector('.alert__dismiss');
       dismissButton.click();
 
       expect(spy).toHaveBeenCalled();
     });
   });
 });
-

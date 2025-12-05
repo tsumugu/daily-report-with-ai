@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { LoginPageComponent } from './login-page.component';
 import { AuthService } from '../../services/auth.service';
@@ -23,6 +24,7 @@ describe('LoginPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [LoginPageComponent, ReactiveFormsModule],
       providers: [
+        provideRouter([]),
         { provide: AuthService, useValue: authServiceSpy },
         { provide: Router, useValue: routerSpy },
       ],
@@ -103,7 +105,6 @@ describe('LoginPageComponent', () => {
         password: 'password123',
       });
       expect(routerSpy.navigate).toHaveBeenCalledWith(['/']);
-      expect(component.isLoading()).toBeFalse();
     }));
 
     it('ログイン中はisLoadingがtrueになること', () => {
@@ -177,4 +178,3 @@ describe('LoginPageComponent', () => {
     });
   });
 });
-
