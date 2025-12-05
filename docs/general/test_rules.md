@@ -89,3 +89,66 @@ serviceSpy.methodA.and.returnValue(of(mockData));
 // プロパティスパイ
 const serviceSpy = jasmine.createSpyObj('ServiceName', [], { propertyA: 'value' });
 ```
+
+---
+
+## E2Eテスト（Playwright）
+
+本プロジェクトでは、E2EテストにPlaywrightを使用しています。
+
+### セットアップ
+
+```bash
+# 依存関係インストール
+cd apps/web && npm install
+
+# ブラウザインストール
+npx playwright install chromium
+```
+
+### テスト実行
+
+```bash
+# テスト実行
+npm run e2e
+
+# UIモードで実行（デバッグに便利）
+npm run e2e:ui
+
+# カバレッジ付きで実行
+npm run e2e:coverage
+```
+
+### テストファイル構成
+
+```
+apps/web/e2e/
+├── playwright.config.ts   # 設定ファイル
+└── tests/
+    └── daily-report-input.spec.ts  # 日報入力のE2Eテスト
+```
+
+### テストの書き方
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('日報を保存できること', async ({ page }) => {
+  // ページ遷移
+  await page.goto('/daily-reports/new');
+
+  // フォーム入力
+  await page.fill('textarea[formControlName="events"]', '今日のできごと');
+
+  // ボタンクリック
+  await page.click('button[type="submit"]');
+
+  // アサーション
+  await expect(page).toHaveURL('/daily-reports');
+});
+```
+
+### カバレッジについて
+
+E2Eテストのカバレッジは `coverage/e2e/` に出力されます。
+ユニットテストとE2Eテストの両方のカバレッジを合算して100%を目指します。

@@ -124,7 +124,7 @@ cd apps/api && npm run lint
 
 詳細は [Lint設定ガイド](./lint-rules.md) を参照。
 
-### テスト
+### ユニットテスト
 
 ```bash
 # 全ワークスペースのテスト実行
@@ -133,7 +133,28 @@ npm run test
 # 個別実行
 cd apps/web && npm run test
 cd apps/api && npm run test
+
+# カバレッジ付き
+cd apps/web && npm run test:coverage
 ```
+
+### E2Eテスト
+
+```bash
+# 初回のみ: Playwrightのブラウザをインストール
+cd apps/web && npx playwright install chromium
+
+# E2Eテスト実行（API + FE が自動起動）
+npm run e2e
+
+# UIモードで実行（デバッグに便利）
+npm run e2e:ui
+
+# カバレッジ付きで実行
+npm run e2e:coverage
+```
+
+詳細は [テストルール](./test_rules.md) を参照。
 
 ### Storybook
 

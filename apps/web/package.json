@@ -17,7 +17,8 @@
     "lint": "ng lint --format stylish",
     "format": "prettier --write \"src/**/*.{ts,js,scss,html,css,md}\"",
     "e2e": "playwright test --config=e2e/playwright.config.ts",
-    "e2e:ui": "playwright test --config=e2e/playwright.config.ts --ui"
+    "e2e:ui": "playwright test --config=e2e/playwright.config.ts --ui",
+    "e2e:coverage": "playwright test --config=e2e/playwright.config.ts && echo 'Coverage saved to coverage/e2e/'"
   },
   "private": true,
   "dependencies": {
@@ -63,6 +64,8 @@
     "storybook": "^10.1.4",
     "typescript": "~5.7.2",
     "typescript-eslint": "8.46.4",
-    "@playwright/test": "^1.49.0"
+    "@playwright/test": "^1.49.0",
+    "uuid": "^9.0.0",
+    "@types/uuid": "^9.0.0"
   }
 }

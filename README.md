@@ -91,6 +91,10 @@ npm run build:api    # バックエンドのみ
 npm run lint         # Lint実行
 npm run test         # テスト実行
 
+# E2Eテスト
+npm run e2e          # E2Eテスト実行
+npm run e2e:ui       # E2Eテスト（UIモード）
+
 # Storybook
 npm run storybook    # Storybook起動
 ```

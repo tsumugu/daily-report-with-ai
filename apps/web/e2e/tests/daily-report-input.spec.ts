@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures/coverage';
 
 test.describe('日報入力画面', () => {
   // テスト用のユーザー情報
