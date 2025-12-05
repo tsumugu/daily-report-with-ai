@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { DailyReportService } from '../../services/daily-report.service';
 import { GoodPointForm, ImprovementForm, CreateDailyReportRequest } from '../../models/daily-report.model';
-import { InputFieldComponent, ButtonComponent, AlertBannerComponent } from '../../../../shared/components';
+import { ButtonComponent, AlertBannerComponent } from '../../../../shared/components';
 
 @Component({
   selector: 'app-daily-report-input-page',
@@ -13,7 +13,6 @@ import { InputFieldComponent, ButtonComponent, AlertBannerComponent } from '../.
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
-    InputFieldComponent,
     ButtonComponent,
     AlertBannerComponent,
   ],

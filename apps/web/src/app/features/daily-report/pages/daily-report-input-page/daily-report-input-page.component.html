@@ -12,7 +12,7 @@
   <!-- エラーメッセージ -->
   @if (errorMessage()) {
     <app-alert-banner
-      [message]="errorMessage()"
+      [message]="errorMessage()!"
       variant="error"
       [dismissible]="true"
       (dismissed)="errorMessage.set(null)"
