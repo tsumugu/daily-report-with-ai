@@ -19,7 +19,19 @@
 - Express + TypeScript でAPIサーバーを構築
 - APIモックや外部APIクライアントは疎結合を優先し、将来的な入れ替え・ローカル実装も容易に
 
-## モノレポ構成（現状）
+## モノレポ構成（npm workspaces）
+
+このプロジェクトは**npm workspaces**を使用したmonorepo構成です。
+
+### ワークスペース一覧
+
+| パッケージ | 説明 | 技術スタック | ポート |
+|:-----------|:-----|:------------|:-------|
+| `@daily-report/web` | フロントエンド | Angular 19, Tailwind CSS, Storybook | 4200 |
+| `@daily-report/api` | バックエンド | Express, TypeScript, JWT | 3000 |
+| `@daily-report/shared` | 共通 | TypeScript型定義、ユーティリティ | - |
+
+### ディレクトリ構造
 
 ```
 daily-report/
