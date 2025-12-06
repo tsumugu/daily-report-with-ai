@@ -22,57 +22,37 @@
   <!-- フォーム -->
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
     <!-- 日付 -->
-    <div class="form-group">
-      <label class="label">日付 <span class="required">*</span></label>
-      <input
-        type="date"
-        formControlName="date"
-        class="date-input"
-        [class.error]="form.get('date')?.touched && form.get('date')?.invalid"
-      />
-      @if (getFieldError('date')) {
-        <span class="error-message">{{ getFieldError('date') }}</span>
-      }
-    </div>
+    <app-date-field
+      label="日付"
+      id="date"
+      formControlName="date"
+      [required]="true"
+      [errorMessage]="getFieldError('date') || ''"
+    />
 
     <!-- できごと -->
-    <div class="form-group">
-      <label class="label">
-        <span class="label-icon">📝</span>
-        できごと <span class="required">*</span>
-      </label>
-      <textarea
-        formControlName="events"
-        class="textarea"
-        [class.error]="form.get('events')?.touched && form.get('events')?.invalid"
-        placeholder="今日の主な業務内容、出来事を記入してください"
-        rows="4"
-      ></textarea>
-      <div class="char-count" [class.over]="eventsCharCount() > MAX_LENGTH">
-        {{ eventsCharCount() }}/{{ MAX_LENGTH }}
-      </div>
-      @if (getFieldError('events')) {
-        <span class="error-message">{{ getFieldError('events') }}</span>
-      }
-    </div>
+    <app-textarea-field
+      label="できごと"
+      id="events"
+      labelIcon="📝"
+      formControlName="events"
+      [required]="true"
+      [maxLength]="MAX_LENGTH"
+      [rows]="4"
+      placeholder="今日の主な業務内容、出来事を記入してください"
+      [errorMessage]="getFieldError('events') || ''"
+    />
 
     <!-- 学び -->
-    <div class="form-group">
-      <label class="label">
-        <span class="label-icon">💡</span>
-        学び
-      </label>
-      <textarea
-        formControlName="learnings"
-        class="textarea"
-        [class.error]="form.get('learnings')?.touched && form.get('learnings')?.invalid"
-        placeholder="業務を通じて得た気づき、学びを記入してください"
-        rows="3"
-      ></textarea>
-      <div class="char-count" [class.over]="learningsCharCount() > MAX_LENGTH">
-        {{ learningsCharCount() }}/{{ MAX_LENGTH }}
-      </div>
-    </div>
+    <app-textarea-field
+      label="学び"
+      id="learnings"
+      labelIcon="💡"
+      formControlName="learnings"
+      [maxLength]="MAX_LENGTH"
+      [rows]="3"
+      placeholder="業務を通じて得た気づき、学びを記入してください"
+    />
 
     <!-- よかったこと -->
     <div class="form-group">
@@ -82,41 +62,35 @@
       </label>
 
       @for (gp of goodPoints(); track $index) {
-        <div class="card">
-          <button type="button" class="card-remove" (click)="removeGoodPoint($index)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-            </svg>
-          </button>
+        <app-form-card (removed)="removeGoodPoint($index)" class="form-group__card">
           <div class="card-field">
-            <label class="card-label">内容</label>
-            <textarea
-              class="textarea textarea--small"
-              [value]="gp.content"
-              (input)="updateGoodPoint($index, 'content', $any($event.target).value)"
+            <app-textarea-field
+              [label]="'内容'"
+              [id]="'good-point-content-' + $index"
+              [maxLength]="MAX_LENGTH"
+              [rows]="2"
+              [showCharCount]="false"
               placeholder="うまくいったこと、成功体験"
-              rows="2"
-            ></textarea>
+              [value]="gp.content"
+              (valueChange)="updateGoodPoint($index, 'content', $event)"
+            />
           </div>
           <div class="card-field">
-            <label class="card-label">要因・背景</label>
-            <textarea
-              class="textarea textarea--small"
-              [value]="gp.factors"
-              (input)="updateGoodPoint($index, 'factors', $any($event.target).value)"
+            <app-textarea-field
+              [label]="'要因・背景'"
+              [id]="'good-point-factors-' + $index"
+              [maxLength]="MAX_LENGTH"
+              [rows]="2"
+              [showCharCount]="false"
               placeholder="なぜうまくいったか"
-              rows="2"
-            ></textarea>
+              [value]="gp.factors"
+              (valueChange)="updateGoodPoint($index, 'factors', $event)"
+            />
           </div>
-        </div>
+        </app-form-card>
       }
 
-      <button type="button" class="add-button" (click)="addGoodPoint()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 12h14"/><path d="M12 5v14"/>
-        </svg>
-        追加
-      </button>
+      <app-add-button (clicked)="addGoodPoint()" />
     </div>
 
     <!-- 改善点/アクション -->
@@ -127,41 +101,35 @@
       </label>
 
       @for (imp of improvements(); track $index) {
-        <div class="card">
-          <button type="button" class="card-remove" (click)="removeImprovement($index)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-            </svg>
-          </button>
+        <app-form-card (removed)="removeImprovement($index)" class="form-group__card">
           <div class="card-field">
-            <label class="card-label">改善したいこと</label>
-            <textarea
-              class="textarea textarea--small"
-              [value]="imp.content"
-              (input)="updateImprovement($index, 'content', $any($event.target).value)"
+            <app-textarea-field
+              [label]="'改善したいこと'"
+              [id]="'improvement-content-' + $index"
+              [maxLength]="MAX_LENGTH"
+              [rows]="2"
+              [showCharCount]="false"
               placeholder="改善したい点、課題"
-              rows="2"
-            ></textarea>
+              [value]="imp.content"
+              (valueChange)="updateImprovement($index, 'content', $event)"
+            />
           </div>
           <div class="card-field">
-            <label class="card-label">アクション</label>
-            <textarea
-              class="textarea textarea--small"
-              [value]="imp.action"
-              (input)="updateImprovement($index, 'action', $any($event.target).value)"
+            <app-textarea-field
+              [label]="'アクション'"
+              [id]="'improvement-action-' + $index"
+              [maxLength]="MAX_LENGTH"
+              [rows]="2"
+              [showCharCount]="false"
               placeholder="明日以降に試したいこと"
-              rows="2"
-            ></textarea>
+              [value]="imp.action"
+              (valueChange)="updateImprovement($index, 'action', $event)"
+            />
           </div>
-        </div>
+        </app-form-card>
       }
 
-      <button type="button" class="add-button" (click)="addImprovement()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 12h14"/><path d="M12 5v14"/>
-        </svg>
-        追加
-      </button>
+      <app-add-button (clicked)="addImprovement()" />
     </div>
 
     <!-- 保存ボタン -->
@@ -178,4 +146,3 @@
     </div>
   </form>
 </div>
-

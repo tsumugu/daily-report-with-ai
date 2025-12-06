@@ -4,7 +4,14 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { DailyReportService } from '../../services/daily-report.service';
 import { GoodPointForm, ImprovementForm, CreateDailyReportRequest } from '../../models/daily-report.model';
-import { ButtonComponent, AlertBannerComponent } from '../../../../shared/components';
+import {
+  ButtonComponent,
+  AlertBannerComponent,
+  DateFieldComponent,
+  TextareaFieldComponent,
+  FormCardComponent,
+  AddButtonComponent,
+} from '../../../../shared/components';
 
 @Component({
   selector: 'app-daily-report-input-page',
@@ -15,6 +22,10 @@ import { ButtonComponent, AlertBannerComponent } from '../../../../shared/compon
     RouterLink,
     ButtonComponent,
     AlertBannerComponent,
+    DateFieldComponent,
+    TextareaFieldComponent,
+    FormCardComponent,
+    AddButtonComponent,
   ],
   templateUrl: './daily-report-input-page.component.html',
   styleUrl: './daily-report-input-page.component.scss',
@@ -47,19 +58,6 @@ export class DailyReportInputPageComponent {
     });
   }
 
-  /**
-   * できごとの文字数
-   */
-  eventsCharCount(): number {
-    return this.form.get('events')?.value?.length || 0;
-  }
-
-  /**
-   * 学びの文字数
-   */
-  learningsCharCount(): number {
-    return this.form.get('learnings')?.value?.length || 0;
-  }
 
   /**
    * よかったことを追加

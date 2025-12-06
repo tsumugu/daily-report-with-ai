@@ -1,0 +1,38 @@
+<div class="textarea-field">
+  @if (label) {
+    <label [for]="id" class="textarea-field__label">
+      @if (labelIcon) {
+        <span class="textarea-field__icon">{{ labelIcon }}</span>
+      }
+      {{ label }}
+      @if (required) {
+        <span class="textarea-field__required">*</span>
+      }
+    </label>
+  }
+  
+  <textarea
+    [id]="id"
+    [value]="_value()"
+    [placeholder]="placeholder"
+    [disabled]="disabled"
+    [rows]="rows"
+    [maxlength]="maxLength"
+    [class.textarea-field__textarea--error]="hasError"
+    [class.textarea-field__textarea--disabled]="disabled"
+    class="textarea-field__textarea"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+  ></textarea>
+  
+  @if (showCharCount) {
+    <div class="textarea-field__char-count" [class.textarea-field__char-count--over]="isOverLimit()">
+      {{ charCount() }}/{{ maxLength }}
+    </div>
+  }
+  
+  @if (errorMessage) {
+    <span class="textarea-field__error">{{ errorMessage }}</span>
+  }
+</div>
+

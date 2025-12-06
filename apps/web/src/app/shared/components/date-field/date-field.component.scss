@@ -1,0 +1,48 @@
+.date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-field__label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-gray-800);
+}
+
+.date-field__required {
+  color: var(--color-error-500);
+  font-weight: 500;
+}
+
+.date-field__input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  border: 1px solid var(--color-gray-300);
+  border-radius: 8px;
+  background: var(--color-white);
+  color: var(--color-gray-900);
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px var(--color-primary-100);
+  }
+
+  &--error {
+    border-color: var(--color-error-500);
+  }
+
+  &--disabled {
+    background: var(--color-gray-100);
+    cursor: not-allowed;
+  }
+}
+
+.date-field__error {
+  font-size: 0.85rem;
+  color: var(--color-error-500);
+}
+
