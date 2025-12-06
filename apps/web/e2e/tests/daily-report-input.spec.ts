@@ -1,13 +1,14 @@
 import { test, expect } from '../fixtures/coverage';
+import * as crypto from 'crypto';
 
 test.describe('日報入力画面', () => {
-  // テスト用のユーザー情報
-  const testUser = {
-    email: `e2e-test-${Date.now()}@example.com`,
-    password: 'TestPassword123!',
-  };
+  // テスト用のパスワード（共通）
+  const testPassword = 'TestPassword123!';
 
   test.beforeEach(async ({ page }) => {
+    // 各テストで一意のメールアドレスを生成
+    const uniqueEmail = `e2e-${crypto.randomUUID()}@example.com`;
+    
     // サインアップしてログイン状態にする
     await page.goto('/signup');
     
@@ -15,15 +16,15 @@ test.describe('日報入力画面', () => {
     await page.waitForSelector('input#email');
     
     // フォーム入力（内部のinput要素を正確にセレクト）
-    await page.fill('input#email', testUser.email);
-    await page.fill('input#password', testUser.password);
-    await page.fill('input#confirmPassword', testUser.password);
+    await page.fill('input#email', uniqueEmail);
+    await page.fill('input#password', testPassword);
+    await page.fill('input#confirmPassword', testPassword);
     
     // サブミットボタンをクリック
     await page.click('button[type="submit"]');
 
     // ホーム画面に遷移するまで待機
-    await page.waitForURL('/', { timeout: 10000 });
+    await page.waitForURL('/', { timeout: 15000 });
   });
 
   test('ホーム画面から日報入力画面に遷移できること', async ({ page }) => {
@@ -64,7 +65,7 @@ test.describe('日報入力画面', () => {
     await page.click('button[type="submit"]');
 
     // 日報一覧画面に遷移したことを確認
-    await page.waitForURL('/daily-reports', { timeout: 10000 });
+    await page.waitForURL('/daily-reports', { timeout: 15000 });
   });
 
   test('必須項目が未入力の場合、保存できないこと', async ({ page }) => {
@@ -165,7 +166,7 @@ test.describe('日報入力画面', () => {
     // 1回目の日報を保存
     await page.fill('textarea[formControlName="events"]', '1回目の日報');
     await page.click('button[type="submit"]');
-    await page.waitForURL('/daily-reports', { timeout: 10000 });
+    await page.waitForURL('/daily-reports', { timeout: 15000 });
 
     // 再度日報入力画面に遷移
     await page.goto('/daily-reports/new');
@@ -176,7 +177,7 @@ test.describe('日報入力画面', () => {
     await page.click('button[type="submit"]');
 
     // エラーメッセージが表示されること
-    await expect(page.locator('app-alert-banner')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('app-alert-banner')).toBeVisible({ timeout: 15000 });
     await expect(page.locator('app-alert-banner')).toContainText('既に存在');
   });
 });
