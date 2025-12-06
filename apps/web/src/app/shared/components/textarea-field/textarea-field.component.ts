@@ -55,10 +55,12 @@ export class TextareaFieldComponent implements ControlValueAccessor {
 
   registerOnChange(fn: (value: string) => void): void {
     this.onChange = fn;
+    this.isFormControl = true;
   }
 
   registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
+    this.isFormControl = true;
   }
 
   setDisabledState(isDisabled: boolean): void {

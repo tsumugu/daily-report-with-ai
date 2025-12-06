@@ -2,7 +2,38 @@
 
 本プロジェクトでは、t-wada提唱のred-green テスト駆動開発を実践します。
 
+---
+
+## ⚠️ カバレッジ100%必須ルール
+
+**本プロジェクトでは、カバレッジ閾値100%を厳守します。**
+
+### 絶対ルール
+
+1. **カバレッジ閾値は下げない** - `karma.conf.cjs` の閾値設定を変更してはいけない
+2. **既存テストを壊さない** - 新機能追加時に既存テストが失敗した場合は修正する
+3. **新規コードは100%カバー** - 追加したコードはすべてテストでカバーする
+
+### カバレッジが足りない場合の対応
+
+閾値を下げるのではなく、以下の手順でテストを追加：
+
+1. **未カバーの行を特定** - `coverage/lcov-report/index.html` を確認
+2. **分岐（branches）を網羅** - if/else、三項演算子、|| 演算子の両パスをテスト
+3. **関数（functions）を網羅** - デフォルト値の関数も含めすべて呼び出す
+4. **エッジケースを追加** - null、undefined、空文字などの境界値をテスト
+
+```bash
+# 未カバー箇所の確認
+cd apps/web && npm test -- --no-watch --browsers=ChromeHeadless
+cat coverage/lcov.info | grep -E "DA:.*,0"  # 未カバーの行
+cat coverage/lcov.info | grep -E "BRDA:.*,0"  # 未カバーの分岐
+```
+
+---
+
 ## red-green TDD手順
+
 1. **Red：失敗するテストを書く**
    - 実装前に必ず、意図通り動作するなら通るはずのテストを書く
    - テストが失敗（redになる）ことを確認する
@@ -13,6 +44,7 @@
    - テストがGreenを維持している状態で、安心して改善・整理・最適化を行う
 
 ## 補足
+
 - 小さな単位でRed/Green/Refactorサイクルを高速で回すことを意識
 - テストが失敗しない状態で新規実装や変更は原則行わない
 - 不明点や悩んだ場合はプロジェクト内で相談推奨
@@ -24,7 +56,7 @@
 ### コンポーネントテスト（RouterLink含む）
 
 ```typescript
-import { RouterTestingModule } from '@angular/router/testing';
+import { RouterTestingModule } from "@angular/router/testing";
 
 TestBed.configureTestingModule({
   imports: [ComponentUnderTest, RouterTestingModule.withRoutes([])],
@@ -35,9 +67,12 @@ TestBed.configureTestingModule({
 ### HTTP テスト（Interceptor含む）
 
 ```typescript
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from "@angular/common/http/testing";
+import { provideHttpClient, withInterceptors } from "@angular/common/http";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
 
 TestBed.configureTestingModule({
   providers: [
@@ -50,7 +85,10 @@ TestBed.configureTestingModule({
 ### サービステスト（HttpClient モック）
 
 ```typescript
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from "@angular/common/http/testing";
 
 let httpMock: HttpTestingController;
 
@@ -70,12 +108,12 @@ afterEach(() => {
 ### fakeAsync / tick の使い方
 
 ```typescript
-import { fakeAsync, tick } from '@angular/core/testing';
+import { fakeAsync, tick } from "@angular/core/testing";
 
-it('非同期処理のテスト', fakeAsync(() => {
+it("非同期処理のテスト", fakeAsync(() => {
   component.doAsyncOperation();
   tick(); // 非同期処理を完了させる
-  expect(component.result).toBe('expected');
+  expect(component.result).toBe("expected");
 }));
 ```
 
@@ -83,11 +121,13 @@ it('非同期処理のテスト', fakeAsync(() => {
 
 ```typescript
 // メソッドスパイ
-const serviceSpy = jasmine.createSpyObj('ServiceName', ['methodA', 'methodB']);
+const serviceSpy = jasmine.createSpyObj("ServiceName", ["methodA", "methodB"]);
 serviceSpy.methodA.and.returnValue(of(mockData));
 
 // プロパティスパイ
-const serviceSpy = jasmine.createSpyObj('ServiceName', [], { propertyA: 'value' });
+const serviceSpy = jasmine.createSpyObj("ServiceName", [], {
+  propertyA: "value",
+});
 ```
 
 ---
@@ -131,20 +171,20 @@ apps/web/e2e/
 ### テストの書き方
 
 ```typescript
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('日報を保存できること', async ({ page }) => {
+test("日報を保存できること", async ({ page }) => {
   // ページ遷移
-  await page.goto('/daily-reports/new');
+  await page.goto("/daily-reports/new");
 
   // フォーム入力
-  await page.fill('textarea[formControlName="events"]', '今日のできごと');
+  await page.fill('textarea[formControlName="events"]', "今日のできごと");
 
   // ボタンクリック
   await page.click('button[type="submit"]');
 
   // アサーション
-  await expect(page).toHaveURL('/daily-reports');
+  await expect(page).toHaveURL("/daily-reports");
 });
 ```
 

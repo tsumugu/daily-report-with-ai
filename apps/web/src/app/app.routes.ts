@@ -18,6 +18,14 @@ export const routes: Routes = [
 
   // Daily Report routes
   {
+    path: 'daily-reports',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/daily-report/pages/daily-report-list-page/daily-report-list-page.component').then(
+        (m) => m.DailyReportListPageComponent
+      ),
+  },
+  {
     path: 'daily-reports/new',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -26,13 +34,12 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'daily-reports',
+    path: 'daily-reports/:id',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/home/pages/home-page/home-page.component').then(
-        (m) => m.HomePageComponent
+      import('./features/daily-report/pages/daily-report-detail-page/daily-report-detail-page.component').then(
+        (m) => m.DailyReportDetailPageComponent
       ),
-    // TODO: Replace with DailyReportListPageComponent
   },
 
   // Fallback

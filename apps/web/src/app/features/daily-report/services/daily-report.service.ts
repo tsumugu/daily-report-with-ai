@@ -33,6 +33,15 @@ export class DailyReportService {
   }
 
   /**
+   * 日報一覧を取得（ページング対応）
+   */
+  getAllWithPaging(limit: number, offset: number): Observable<DailyReport[]> {
+    return this.http.get<DailyReport[]>(
+      `${this.baseUrl}/daily-reports?limit=${limit}&offset=${offset}`
+    );
+  }
+
+  /**
    * 日報詳細を取得
    */
   getById(id: string): Observable<DailyReport> {

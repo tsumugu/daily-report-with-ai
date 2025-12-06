@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { TextareaFieldComponent } from './textarea-field.component';
 
 describe('TextareaFieldComponent', () => {
@@ -26,6 +26,11 @@ describe('TextareaFieldComponent', () => {
       expect(component._value()).toBe('テストテキスト');
     });
 
+    it('writeValueでnullの場合は空文字になること', () => {
+      component.writeValue(null as unknown as string);
+      expect(component._value()).toBe('');
+    });
+
     it('registerOnChangeでonChangeが登録されること', () => {
       const onChangeSpy = jasmine.createSpy('onChange');
       component.registerOnChange(onChangeSpy);
@@ -47,6 +52,36 @@ describe('TextareaFieldComponent', () => {
     it('setDisabledStateでdisabled状態を設定できること', () => {
       component.setDisabledState(true);
       expect(component.disabled).toBeTrue();
+    });
+
+    it('デフォルトのonChangeが呼ばれてもエラーにならないこと', () => {
+      // フォームコントロールでない状態で呼ぶ
+      expect(() => {
+        component.onInput({ target: { value: 'テスト' } } as any);
+      }).not.toThrow();
+    });
+
+    it('デフォルトのonTouchedが呼ばれてもエラーにならないこと', () => {
+      // フォームコントロールでない状態で呼ぶ
+      expect(() => {
+        component.onBlur();
+      }).not.toThrow();
+    });
+
+    it('writeValue後にデフォルトのonChangeが呼ばれてもエラーにならないこと', () => {
+      // writeValueでisFormControlをtrueにするが、registerOnChangeは呼ばない
+      component.writeValue('初期値');
+      expect(() => {
+        component.onInput({ target: { value: 'テスト' } } as any);
+      }).not.toThrow();
+    });
+
+    it('writeValue後にデフォルトのonTouchedが呼ばれてもエラーにならないこと', () => {
+      // writeValueでisFormControlをtrueにするが、registerOnTouchedは呼ばない
+      component.writeValue('初期値');
+      expect(() => {
+        component.onBlur();
+      }).not.toThrow();
     });
   });
 
@@ -78,6 +113,16 @@ describe('TextareaFieldComponent', () => {
     it('valueセッターで値を設定できること', () => {
       component.value = 'セッター経由の値';
       expect(component._value()).toBe('セッター経由の値');
+    });
+
+    it('valueセッターにnullを渡すと空文字になること', () => {
+      component.value = null as unknown as string;
+      expect(component._value()).toBe('');
+    });
+
+    it('valueセッターに空文字を渡すと空文字になること', () => {
+      component.value = '';
+      expect(component._value()).toBe('');
     });
   });
 

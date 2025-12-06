@@ -8,4 +8,5 @@ export * from './alert-banner';
 export * from './date-field';
 export * from './textarea-field';
 export * from './form-card';
+export * from './report-card';
 

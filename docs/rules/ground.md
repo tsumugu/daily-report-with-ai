@@ -35,6 +35,7 @@ docs/
 ├── rules/                    # ルール定義
 │   ├── ground.md             # 憲法（このファイル）
 │   ├── development-flow.md   # 開発フロー
+│   ├── documentation.md      # ドキュメント作成ルール
 │   └── jobs/                 # ロール別ルール
 ├── general/                  # 全体共通の設計・ルール
 ├── features/{feature_name}/  # 機能別ドキュメント
@@ -65,6 +66,16 @@ docs/
 ---
 
 ## 5. ドキュメント運用
+
+**詳細は `docs/rules/documentation.md` を参照**
+
+### 必須原則
+
+| 原則                     | 説明                                           |
+| ------------------------ | ---------------------------------------------- |
+| **DRY**                  | 同じ情報を複数の場所に書かない。参照で解決する |
+| **1ファイル1目的**       | 異なる目的の情報は別ファイルに分離する         |
+| **ディレクトリ構造遵守** | 定義された構造に従って配置する                 |
 
 ### ファイル配置
 
@@ -104,7 +115,8 @@ docs/
 | ドキュメント                     | 内容                       |
 | -------------------------------- | -------------------------- |
 | `docs/rules/development-flow.md` | 開発フロー詳細             |
+| `docs/rules/documentation.md`    | ドキュメント作成ルール     |
 | `docs/rules/jobs/*.md`           | ロール別ルール             |
 | `docs/general/general_prd.md`    | 全体要件定義（憲法と同等） |
-| `docs/general/test_rules.md`     | テストスニペット集         |
+| `docs/general/test_rules.md`     | テストルール・スニペット集 |
 | `docs/general/design_system.md`  | デザインシステム           |

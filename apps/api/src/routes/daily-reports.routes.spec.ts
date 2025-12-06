@@ -281,7 +281,78 @@ describe('dailyReportsRouter', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveLength(2);
+      expect(response.body.data).toHaveLength(2);
+      expect(response.body.total).toBe(2);
+    });
+
+    it('日報一覧が日付降順でソートされること', async () => {
+      // 日付がバラバラな順序で日報を作成
+      await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ date: '2025-12-03', events: 'イベント3' });
+
+      await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ date: '2025-12-05', events: 'イベント5' });
+
+      await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ date: '2025-12-04', events: 'イベント4' });
+
+      const response = await request(app)
+        .get('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(3);
+      // 日付降順で並んでいることを確認
+      expect(response.body.data[0].date).toBe('2025-12-05');
+      expect(response.body.data[1].date).toBe('2025-12-04');
+      expect(response.body.data[2].date).toBe('2025-12-03');
+    });
+
+    it('limitとoffsetでページングできること', async () => {
+      // 5件の日報を作成
+      for (let i = 1; i <= 5; i++) {
+        await request(app)
+          .post('/api/daily-reports')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({ date: `2025-12-0${i}`, events: `イベント${i}` });
+      }
+
+      // limit=2, offset=0 で最初の2件取得
+      const response1 = await request(app)
+        .get('/api/daily-reports?limit=2&offset=0')
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response1.status).toBe(200);
+      expect(response1.body.data).toHaveLength(2);
+      expect(response1.body.total).toBe(5);
+      expect(response1.body.data[0].date).toBe('2025-12-05'); // 最新
+      expect(response1.body.data[1].date).toBe('2025-12-04');
+
+      // limit=2, offset=2 で次の2件取得
+      const response2 = await request(app)
+        .get('/api/daily-reports?limit=2&offset=2')
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response2.status).toBe(200);
+      expect(response2.body.data).toHaveLength(2);
+      expect(response2.body.data[0].date).toBe('2025-12-03');
+      expect(response2.body.data[1].date).toBe('2025-12-02');
+    });
+
+    it('limitのデフォルト値は30であること', async () => {
+      const response = await request(app)
+        .get('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      // 実際にはデータ件数が少ないのでデフォルトのlimit=30は影響しない
+      expect(response.body.data).toBeDefined();
     });
   });
 

@@ -1,0 +1,139 @@
+<div class="detail-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <a routerLink="/" class="logo">📝 Daily Report</a>
+      <div class="user-menu">
+        @if (currentUser()) {
+          <span class="user-email">{{ currentUser()?.email }}</span>
+        }
+        <button class="logout-button" (click)="logout()">ログアウト</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Back button -->
+    <div class="back-nav">
+      <button class="back-button" (click)="goBack()">
+        <span class="back-icon">←</span>
+        一覧に戻る
+      </button>
+    </div>
+
+    <!-- Loading -->
+    @if (isLoading()) {
+      <div class="loading-container">
+        <div class="spinner"></div>
+        <p>読み込み中...</p>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (errorMessage()) {
+      <div class="error-container">
+        <app-alert-banner variant="error" [message]="errorMessage()!" />
+        <div class="error-actions">
+          <app-button variant="outline" (clicked)="goBack()">一覧に戻る</app-button>
+          <app-button variant="primary" (clicked)="retry()">再読み込み</app-button>
+        </div>
+      </div>
+    }
+
+    <!-- Report Detail -->
+    @if (!isLoading() && !errorMessage() && report()) {
+      <article class="report-detail">
+        <header class="report-header">
+          <h1 class="report-date">
+            <span class="date-icon">📅</span>
+            {{ formatDate(report()!.date) }}
+          </h1>
+          <!-- 編集ボタン（Phase 1では非活性） -->
+          <button class="edit-button" disabled title="編集機能は準備中です">
+            編集する
+          </button>
+        </header>
+
+        <!-- できごと -->
+        <section class="section">
+          <h2 class="section-title">できごと</h2>
+          <div class="section-content">
+            <p class="content-text">{{ report()!.events }}</p>
+          </div>
+        </section>
+
+        <!-- 学び -->
+        @if (report()!.learnings) {
+          <section class="section">
+            <h2 class="section-title">学び</h2>
+            <div class="section-content">
+              <p class="content-text">{{ report()!.learnings }}</p>
+            </div>
+          </section>
+        }
+
+        <!-- よかったこと -->
+        @if (report()!.goodPoints && report()!.goodPoints.length > 0) {
+          <section class="section">
+            <h2 class="section-title">
+              <span class="title-icon">✨</span>
+              よかったこと
+            </h2>
+            <div class="items-list">
+              @for (gp of report()!.goodPoints; track gp.id) {
+                <div class="item-card">
+                  <p class="item-content">{{ gp.content }}</p>
+                  @if (gp.factors) {
+                    <div class="item-sub">
+                      <span class="sub-label">要因：</span>
+                      <span class="sub-value">{{ gp.factors }}</span>
+                    </div>
+                  }
+                  <span class="status-badge status-badge--{{ gp.status === '未対応' ? 'pending' : gp.status === '再現成功' ? 'success' : 'failed' }}">
+                    {{ gp.status }}
+                  </span>
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- 改善点 -->
+        @if (report()!.improvements && report()!.improvements.length > 0) {
+          <section class="section">
+            <h2 class="section-title">
+              <span class="title-icon">📝</span>
+              改善点 / アクション
+            </h2>
+            <div class="items-list">
+              @for (imp of report()!.improvements; track imp.id) {
+                <div class="item-card">
+                  <p class="item-content">{{ imp.content }}</p>
+                  @if (imp.action) {
+                    <div class="item-sub">
+                      <span class="sub-label">アクション：</span>
+                      <span class="sub-value">{{ imp.action }}</span>
+                    </div>
+                  }
+                  <span class="status-badge status-badge--{{ imp.status === '未着手' ? 'pending' : imp.status === '進行中' ? 'in-progress' : 'completed' }}">
+                    {{ imp.status }}
+                  </span>
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- メタ情報 -->
+        <footer class="report-footer">
+          <span class="meta-text">作成: {{ report()!.createdAt | date:'yyyy/MM/dd HH:mm' }}</span>
+          @if (report()!.updatedAt !== report()!.createdAt) {
+            <span class="meta-text">更新: {{ report()!.updatedAt | date:'yyyy/MM/dd HH:mm' }}</span>
+          }
+        </footer>
+      </article>
+    }
+  </main>
+</div>
+

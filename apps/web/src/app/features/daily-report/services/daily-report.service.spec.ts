@@ -93,6 +93,20 @@ describe('DailyReportService', () => {
     });
   });
 
+  describe('getAllWithPaging', () => {
+    it('ページング付きで日報一覧を取得できること', () => {
+      const mockReports = [mockDailyReport];
+
+      service.getAllWithPaging(10, 5).subscribe((result) => {
+        expect(result).toEqual(mockReports);
+      });
+
+      const req = httpMock.expectOne('/api/daily-reports?limit=10&offset=5');
+      expect(req.request.method).toBe('GET');
+      req.flush(mockReports);
+    });
+  });
+
   describe('getById', () => {
     it('指定IDの日報を取得できること', () => {
       service.getById('report-1').subscribe((result) => {

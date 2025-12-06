@@ -100,6 +100,9 @@ PdMがPRDの要件充足を確認
 - [ ] `npm run e2e` パス
 - [ ] Storybook に全コンポーネント反映
 
+> ⚠️ **カバレッジ100%は必須**
+> 詳細は `docs/general/test_rules.md` の「カバレッジ100%必須ルール」を参照
+
 ### 振り返り
 
 `docs/retro/{feature_name}/` に以下を作成：

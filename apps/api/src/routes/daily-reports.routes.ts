@@ -177,6 +177,19 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
 });
 
 /**
+ * 一覧用のレスポンス形式に変換（軽量版）
+ */
+function toDailyReportListItem(report: DailyReport) {
+  return {
+    id: report.id,
+    date: report.date,
+    events: report.events,
+    goodPointIds: report.goodPointIds,
+    improvementIds: report.improvementIds,
+  };
+}
+
+/**
  * GET /api/daily-reports
  * 日報一覧を取得
  */
@@ -187,10 +200,26 @@ dailyReportsRouter.get('/daily-reports', (req: Request, res: Response) => {
     return;
   }
 
-  const reports = dailyReportsDb.findAllByUserId(userId);
-  const response = reports.map(toDailyReportResponse);
+  // クエリパラメータの取得
+  const limit = parseInt(req.query.limit as string) || 30;
+  const offset = parseInt(req.query.offset as string) || 0;
 
-  res.status(200).json(response);
+  // 全件取得
+  const allReports = dailyReportsDb.findAllByUserId(userId);
+  const total = allReports.length;
+
+  // 日付降順でソート
+  const sortedReports = allReports.sort((a, b) => {
+    return b.date.localeCompare(a.date);
+  });
+
+  // ページング適用
+  const paginatedReports = sortedReports.slice(offset, offset + limit);
+
+  // レスポンス作成（一覧用の軽量版）
+  const data = paginatedReports.map(toDailyReportListItem);
+
+  res.status(200).json({ data, total });
 });
 
 /**

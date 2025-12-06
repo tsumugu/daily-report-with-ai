@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { DateFieldComponent } from './date-field.component';
 
 describe('DateFieldComponent', () => {
@@ -26,6 +26,11 @@ describe('DateFieldComponent', () => {
       expect(component.value).toBe('2025-12-06');
     });
 
+    it('writeValueでnullの場合は空文字になること', () => {
+      component.writeValue(null as unknown as string);
+      expect(component.value).toBe('');
+    });
+
     it('registerOnChangeでonChangeが登録されること', () => {
       const onChangeSpy = jasmine.createSpy('onChange');
       component.registerOnChange(onChangeSpy);
@@ -47,6 +52,20 @@ describe('DateFieldComponent', () => {
     it('setDisabledStateでdisabled状態を設定できること', () => {
       component.setDisabledState(true);
       expect(component.disabled).toBeTrue();
+    });
+
+    it('デフォルトのonChangeが呼ばれてもエラーにならないこと', () => {
+      // registerOnChangeを呼ばずにonInputを呼ぶ（デフォルト関数を実行）
+      expect(() => {
+        component.onInput({ target: { value: '2025-12-07' } } as any);
+      }).not.toThrow();
+    });
+
+    it('デフォルトのonTouchedが呼ばれてもエラーにならないこと', () => {
+      // registerOnTouchedを呼ばずにonBlurを呼ぶ（デフォルト関数を実行）
+      expect(() => {
+        component.onBlur();
+      }).not.toThrow();
     });
   });
 
