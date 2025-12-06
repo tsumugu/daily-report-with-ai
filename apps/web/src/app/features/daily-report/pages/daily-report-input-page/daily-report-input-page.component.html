@@ -90,7 +90,7 @@
         </app-form-card>
       }
 
-      <app-add-button (clicked)="addGoodPoint()" />
+      <app-button variant="add" icon="plus" [fullWidth]="true" (clicked)="addGoodPoint()">追加</app-button>
     </div>
 
     <!-- 改善点/アクション -->
@@ -129,7 +129,7 @@
         </app-form-card>
       }
 
-      <app-add-button (clicked)="addImprovement()" />
+      <app-button variant="add" icon="plus" [fullWidth]="true" (clicked)="addImprovement()">追加</app-button>
     </div>
 
     <!-- 保存ボタン -->

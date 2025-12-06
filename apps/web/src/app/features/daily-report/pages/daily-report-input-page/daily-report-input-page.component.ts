@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -10,7 +10,6 @@ import {
   DateFieldComponent,
   TextareaFieldComponent,
   FormCardComponent,
-  AddButtonComponent,
 } from '../../../../shared/components';
 
 @Component({
@@ -25,7 +24,6 @@ import {
     DateFieldComponent,
     TextareaFieldComponent,
     FormCardComponent,
-    AddButtonComponent,
   ],
   templateUrl: './daily-report-input-page.component.html',
   styleUrl: './daily-report-input-page.component.scss',

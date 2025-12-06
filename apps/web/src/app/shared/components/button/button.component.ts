@@ -1,8 +1,9 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'add';
 export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonIcon = 'none' | 'plus';
 
 @Component({
   selector: 'app-button',
@@ -19,6 +20,7 @@ export class ButtonComponent {
   @Input() loading = false;
   @Input() fullWidth = false;
   @Input() ariaLabel = '';
+  @Input() icon: ButtonIcon = 'none';
 
   @Output() clicked = new EventEmitter<MouseEvent>();
 

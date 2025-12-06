@@ -105,6 +105,26 @@
     }
   }
 
+  &--add {
+    color: var(--color-primary-600);
+    background: var(--color-bg-primary);
+    border: 2px dashed var(--color-primary-300);
+    font-weight: 500;
+
+    &:hover:not(:disabled) {
+      background: var(--color-primary-50);
+      border-color: var(--color-primary-500);
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px var(--color-primary-100);
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+  }
+
   // States
   &--disabled {
     opacity: 0.6;

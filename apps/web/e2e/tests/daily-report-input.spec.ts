@@ -39,25 +39,24 @@ test.describe('日報入力画面', () => {
   test('日報を入力して保存できること', async ({ page }) => {
     await page.goto('/daily-reports/new');
     
-    // ページが読み込まれるまで待機
-    await page.waitForSelector('textarea[formControlName="events"]');
+    // ページが読み込まれるまで待機（id セレクタを使用）
+    await page.waitForSelector('textarea#events');
 
     // フォームに入力
-    await page.fill('textarea[formControlName="events"]', '今日はE2Eテストを書きました');
-    await page.fill('textarea[formControlName="learnings"]', 'Playwrightの使い方を学びました');
+    await page.fill('textarea#events', '今日はE2Eテストを書きました');
+    await page.fill('textarea#learnings', 'Playwrightの使い方を学びました');
 
     // よかったことを追加
-    await page.click('button:has-text("追加"):first-of-type');
-    await page.waitForSelector('.card');
-    const goodPointCard = page.locator('.form-group:has-text("よかったこと") .card').first();
+    await page.click('.form-group:has-text("よかったこと") button:has-text("追加")');
+    await page.waitForSelector('.form-group:has-text("よかったこと") .form-card');
+    const goodPointCard = page.locator('.form-group:has-text("よかったこと") .form-card').first();
     await goodPointCard.locator('textarea').first().fill('テストが通った');
     await goodPointCard.locator('textarea').last().fill('丁寧に書いたから');
 
     // 改善点を追加
-    const addButtons = page.locator('button:has-text("追加")');
-    await addButtons.last().click();
-    await page.waitForSelector('.form-group:has-text("改善点") .card');
-    const improvementCard = page.locator('.form-group:has-text("改善点") .card').first();
+    await page.click('.form-group:has-text("改善点") button:has-text("追加")');
+    await page.waitForSelector('.form-group:has-text("改善点") .form-card');
+    const improvementCard = page.locator('.form-group:has-text("改善点") .form-card').first();
     await improvementCard.locator('textarea').first().fill('テストカバレッジを上げる');
     await improvementCard.locator('textarea').last().fill('エッジケースも網羅する');
 
@@ -77,21 +76,21 @@ test.describe('日報入力画面', () => {
     // できごとを空のまま保存ボタンをクリック
     await page.click('button[type="submit"]');
 
-    // エラーメッセージが表示されること
-    await expect(page.locator('.error-message')).toBeVisible();
+    // エラーメッセージが表示されること（textarea-field__error クラスを使用）
+    await expect(page.locator('.textarea-field__error')).toBeVisible();
   });
 
   test('文字数カウントが正しく表示されること', async ({ page }) => {
     await page.goto('/daily-reports/new');
     
-    // ページが読み込まれるまで待機
-    await page.waitForSelector('textarea[formControlName="events"]');
+    // ページが読み込まれるまで待機（id セレクタを使用）
+    await page.waitForSelector('textarea#events');
 
     // できごとに入力
-    await page.fill('textarea[formControlName="events"]', 'テスト');
+    await page.fill('textarea#events', 'テスト');
 
-    // 文字数カウントが更新されること
-    await expect(page.locator('.char-count').first()).toContainText('3/1000');
+    // 文字数カウントが更新されること（textarea-field__char-count クラスを使用）
+    await expect(page.locator('.textarea-field__char-count').first()).toContainText('3/1000');
   });
 
   test('よかったことを複数追加・削除できること', async ({ page }) => {
@@ -103,17 +102,17 @@ test.describe('日報入力画面', () => {
     // よかったことセクションの追加ボタン
     const addGoodPointButton = page.locator('.form-group:has-text("よかったこと") button:has-text("追加")');
     
-    // よかったことを2つ追加
+    // よかったことを2つ追加（form-card クラスを使用）
     await addGoodPointButton.click();
-    await page.waitForSelector('.form-group:has-text("よかったこと") .card');
+    await page.waitForSelector('.form-group:has-text("よかったこと") .form-card');
     await addGoodPointButton.click();
 
     // カードが2つあることを確認
-    const goodPointCards = page.locator('.form-group:has-text("よかったこと") .card');
+    const goodPointCards = page.locator('.form-group:has-text("よかったこと") .form-card');
     await expect(goodPointCards).toHaveCount(2);
 
-    // 1つ削除
-    await page.locator('.form-group:has-text("よかったこと") .card-remove').first().click();
+    // 1つ削除（form-card__remove クラスを使用）
+    await page.locator('.form-group:has-text("よかったこと") .form-card__remove').first().click();
 
     // カードが1つになったことを確認
     await expect(goodPointCards).toHaveCount(1);
@@ -128,17 +127,17 @@ test.describe('日報入力画面', () => {
     // 改善点セクションの追加ボタン
     const addImprovementButton = page.locator('.form-group:has-text("改善点") button:has-text("追加")');
     
-    // 改善点を2つ追加
+    // 改善点を2つ追加（form-card クラスを使用）
     await addImprovementButton.click();
-    await page.waitForSelector('.form-group:has-text("改善点") .card');
+    await page.waitForSelector('.form-group:has-text("改善点") .form-card');
     await addImprovementButton.click();
 
     // カードが2つあることを確認
-    const improvementCards = page.locator('.form-group:has-text("改善点") .card');
+    const improvementCards = page.locator('.form-group:has-text("改善点") .form-card');
     await expect(improvementCards).toHaveCount(2);
 
-    // 1つ削除
-    await page.locator('.form-group:has-text("改善点") .card-remove').first().click();
+    // 1つ削除（form-card__remove クラスを使用）
+    await page.locator('.form-group:has-text("改善点") .form-card__remove').first().click();
 
     // カードが1つになったことを確認
     await expect(improvementCards).toHaveCount(1);
@@ -160,20 +159,20 @@ test.describe('日報入力画面', () => {
   test('同じ日付の日報が既に存在する場合、エラーが表示されること', async ({ page }) => {
     await page.goto('/daily-reports/new');
     
-    // ページが読み込まれるまで待機
-    await page.waitForSelector('textarea[formControlName="events"]');
+    // ページが読み込まれるまで待機（id セレクタを使用）
+    await page.waitForSelector('textarea#events');
 
     // 1回目の日報を保存
-    await page.fill('textarea[formControlName="events"]', '1回目の日報');
+    await page.fill('textarea#events', '1回目の日報');
     await page.click('button[type="submit"]');
     await page.waitForURL('/daily-reports', { timeout: 15000 });
 
     // 再度日報入力画面に遷移
     await page.goto('/daily-reports/new');
-    await page.waitForSelector('textarea[formControlName="events"]');
+    await page.waitForSelector('textarea#events');
 
     // 同じ日付で2回目の日報を保存しようとする
-    await page.fill('textarea[formControlName="events"]', '2回目の日報');
+    await page.fill('textarea#events', '2回目の日報');
     await page.click('button[type="submit"]');
 
     // エラーメッセージが表示されること

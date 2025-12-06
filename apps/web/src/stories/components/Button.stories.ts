@@ -8,7 +8,7 @@ const meta: Meta<ButtonComponent> = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'secondary', 'outline', 'ghost', 'danger'],
+      options: ['primary', 'secondary', 'outline', 'ghost', 'danger', 'add'],
     },
     size: {
       control: 'select',
@@ -17,6 +17,10 @@ const meta: Meta<ButtonComponent> = {
     type: {
       control: 'select',
       options: ['button', 'submit', 'reset'],
+    },
+    icon: {
+      control: 'select',
+      options: ['none', 'plus'],
     },
     disabled: { control: 'boolean' },
     loading: { control: 'boolean' },
@@ -137,6 +141,19 @@ export const FullWidth: Story = {
   render: (args) => ({
     props: args,
     template: '<app-button [variant]="variant" [size]="size" [fullWidth]="fullWidth">全幅ボタン</app-button>',
+  }),
+};
+
+export const Add: Story = {
+  args: {
+    variant: 'add',
+    size: 'md',
+    icon: 'plus',
+    fullWidth: true,
+  },
+  render: (args) => ({
+    props: args,
+    template: '<app-button [variant]="variant" [size]="size" [icon]="icon" [fullWidth]="fullWidth">追加</app-button>',
   }),
 };
 
