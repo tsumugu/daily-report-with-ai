@@ -135,12 +135,30 @@ lint-staged
 | `apps/web/src/**/*.{ts,html}` | ESLint（自動修正あり） |
 | `**/*.{json,md}` | Prettier（自動整形） |
 
+### Pre-push Hook（E2Eテスト）
+
+プッシュ前に自動的にE2Eテストが実行されます。
+
+```
+git push
+    ↓
+pre-push hook (Husky)
+    ↓
+npm run e2e
+    ↓
+テスト失敗ならpush中断
+```
+
 ### Hookをスキップする方法（非推奨）
 
 緊急時のみ使用してください：
 
 ```bash
+# コミット時のLintをスキップ
 git commit --no-verify -m "緊急修正"
+
+# プッシュ時のE2Eテストをスキップ
+git push --no-verify
 ```
 
 ⚠️ **注意:** チーム開発では原則として`--no-verify`の使用は禁止です。

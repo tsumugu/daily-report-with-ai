@@ -1,0 +1,4 @@
+# Run E2E tests before push
+echo "🧪 Running E2E tests..."
+npm run e2e -w @daily-report/web
+

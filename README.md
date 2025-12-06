@@ -105,12 +105,20 @@ npm run storybook    # Storybook起動
 
 ## コード品質保証
 
-このプロジェクトでは、commit時に自動的にLintが実行されます。
+このプロジェクトでは、Git Hooksにより自動的に品質チェックが実行されます。
 
+### Pre-commit（コミット時）
 ```bash
 git commit -m "feat: 新機能追加"
-# → 変更されたファイルのみ自動チェック
+# → 変更されたファイルのみLint自動チェック
 # → エラーがあればcommit中断
+```
+
+### Pre-push（プッシュ時）
+```bash
+git push
+# → E2Eテスト自動実行
+# → テスト失敗ならpush中断
 ```
 
 詳細は [Lint設定ガイド](./docs/general/lint-rules.md) を参照してください。
