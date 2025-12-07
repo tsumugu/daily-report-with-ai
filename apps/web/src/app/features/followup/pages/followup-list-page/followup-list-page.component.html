@@ -66,8 +66,12 @@
       <app-followup-card
         *ngFor="let item of items()"
         [item]="item"
+        [isInWeeklyFocus]="isInWeeklyFocus(item)"
+        [isAddingToWeeklyFocus]="isAddingToWeeklyFocus(item)"
+        [isWeeklyFocusLimitReached]="isWeeklyFocusLimitReached()"
         (cardClick)="onCardClick($event)"
         (followupClick)="onFollowupClick($event)"
+        (addToWeeklyFocus)="onAddToWeeklyFocus($event)"
       ></app-followup-card>
     </div>
 
@@ -90,5 +94,13 @@
     (closed)="onModalClosed()"
     (saved)="onModalSaved()"
   ></app-followup-input-modal>
+
+  <!-- トースト通知 -->
+  <div *ngIf="toastMessage()" class="followup-list-page__toast">
+    <app-toast
+      [variant]="toastVariant()"
+      [message]="toastMessage()!"
+    ></app-toast>
+  </div>
 </div>
 

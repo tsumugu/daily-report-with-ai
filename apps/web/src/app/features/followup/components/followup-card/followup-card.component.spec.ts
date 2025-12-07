@@ -175,5 +175,93 @@ describe('FollowupCardComponent', () => {
     fixture.detectChanges();
     expect(component.successCount).toBe(0);
   });
+
+  it('isInWeeklyFocusがtrueの場合、「今週のフォーカス」バッジが表示されること', () => {
+    component.item = {
+      itemType: 'goodPoint',
+      item: {
+        id: 'gp-1',
+        content: 'テスト',
+        status: '進行中',
+        success_count: 1,
+        createdAt: '2025-12-05T12:00:00Z',
+      },
+      reportDate: '2025-12-05',
+      reportId: 'report-1',
+    };
+    component.isInWeeklyFocus = true;
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    const badge = element.querySelector('.followup-card__weekly-focus-badge');
+    expect(badge).toBeTruthy();
+    expect(badge?.textContent?.trim()).toBe('🎯 今週のフォーカス');
+  });
+
+  it('isInWeeklyFocusがtrueの場合、「フォーカスに追加」ボタンが非表示になること', () => {
+    component.item = {
+      itemType: 'goodPoint',
+      item: {
+        id: 'gp-1',
+        content: 'テスト',
+        status: '進行中',
+        success_count: 1,
+        createdAt: '2025-12-05T12:00:00Z',
+      },
+      reportDate: '2025-12-05',
+      reportId: 'report-1',
+    };
+    component.isInWeeklyFocus = true;
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    const buttons = element.querySelectorAll('app-button');
+    const addButton = Array.from(buttons).find((btn) =>
+      btn.getAttribute('arialabel')?.includes('フォーカスに追加')
+    );
+    expect(addButton).toBeFalsy();
+  });
+
+  it('isAddingToWeeklyFocusがtrueの場合、ボタンが無効化されること', () => {
+    component.item = {
+      itemType: 'goodPoint',
+      item: {
+        id: 'gp-1',
+        content: 'テスト',
+        status: '進行中',
+        success_count: 1,
+        createdAt: '2025-12-05T12:00:00Z',
+      },
+      reportDate: '2025-12-05',
+      reportId: 'report-1',
+    };
+    component.isInWeeklyFocus = false;
+    component.isAddingToWeeklyFocus = true;
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    const button = element.querySelector('app-button[arialabel="フォーカスに追加"]');
+    expect(button).toBeTruthy();
+    expect(button?.getAttribute('ng-reflect-disabled')).toBe('true');
+  });
+
+  it('フォーカスに追加ボタンクリック時、addToWeeklyFocusイベントが発火されること', () => {
+    const item: FollowupItem = {
+      itemType: 'goodPoint',
+      item: {
+        id: 'gp-1',
+        content: 'テスト',
+        status: '進行中',
+        success_count: 0,
+        createdAt: '2025-12-05T12:00:00Z',
+      },
+      reportDate: '2025-12-05',
+      reportId: 'report-1',
+    };
+    component.item = item;
+    component.isInWeeklyFocus = false;
+    fixture.detectChanges();
+
+    spyOn(component.addToWeeklyFocus, 'emit');
+    component.onAddToWeeklyFocus();
+    expect(component.addToWeeklyFocus.emit).toHaveBeenCalledWith(item);
+  });
 });
 

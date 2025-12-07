@@ -3,16 +3,23 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { FollowupListPageComponent } from './followup-list-page.component';
 import { FollowupService } from '../../../../shared/services/followup.service';
+import { WeeklyFocusService } from '../../../../shared/services/weekly-focus.service';
 import { FollowupItemsResponse, FollowupItem } from '../../../../shared/models/followup.model';
+import { WeeklyFocusResponse } from '../../../../shared/models/weekly-focus.model';
 
 describe('FollowupListPageComponent', () => {
   let component: FollowupListPageComponent;
   let fixture: ComponentFixture<FollowupListPageComponent>;
   let followupService: jasmine.SpyObj<FollowupService>;
+  let weeklyFocusService: jasmine.SpyObj<WeeklyFocusService>;
   let router: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
     const followupServiceSpy = jasmine.createSpyObj('FollowupService', ['getFollowupItems']);
+    const weeklyFocusServiceSpy = jasmine.createSpyObj('WeeklyFocusService', [
+      'getCurrentWeekFocuses',
+      'addWeeklyFocus',
+    ]);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
       snapshot: { params: {} },
@@ -22,12 +29,14 @@ describe('FollowupListPageComponent', () => {
       imports: [FollowupListPageComponent],
       providers: [
         { provide: FollowupService, useValue: followupServiceSpy },
+        { provide: WeeklyFocusService, useValue: weeklyFocusServiceSpy },
         { provide: Router, useValue: routerSpy },
         { provide: ActivatedRoute, useValue: activatedRouteSpy },
       ],
     }).compileComponents();
 
     followupService = TestBed.inject(FollowupService) as jasmine.SpyObj<FollowupService>;
+    weeklyFocusService = TestBed.inject(WeeklyFocusService) as jasmine.SpyObj<WeeklyFocusService>;
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     fixture = TestBed.createComponent(FollowupListPageComponent);
     component = fixture.componentInstance;
@@ -37,7 +46,7 @@ describe('FollowupListPageComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('初期化時にフォロー項目を読み込むこと', () => {
+  it('初期化時にフォロー項目と週次フォーカスを読み込むこと', () => {
     const mockResponse: FollowupItemsResponse = {
       data: [
         {
@@ -55,17 +64,15 @@ describe('FollowupListPageComponent', () => {
       ],
       total: 1,
     };
+    const mockWeeklyFocuses: WeeklyFocusResponse[] = [];
 
     followupService.getFollowupItems.and.returnValue(of(mockResponse));
+    weeklyFocusService.getCurrentWeekFocuses.and.returnValue(of(mockWeeklyFocuses));
 
     fixture.detectChanges();
 
-    expect(followupService.getFollowupItems).toHaveBeenCalledWith({
-      status: '未着手,進行中',
-      itemType: undefined,
-      limit: 20,
-      offset: 0,
-    });
+    expect(followupService.getFollowupItems).toHaveBeenCalled();
+    expect(weeklyFocusService.getCurrentWeekFocuses).toHaveBeenCalled();
     expect(component.items().length).toBe(1);
     expect(component.total()).toBe(1);
   });
@@ -309,10 +316,116 @@ describe('FollowupListPageComponent', () => {
 
   it('ngOnDestroy()が呼ばれた場合、subscriptionがundefinedでもエラーにならないこと', () => {
     followupService.getFollowupItems.and.returnValue(of({ data: [], total: 0 }));
+    weeklyFocusService.getCurrentWeekFocuses.and.returnValue(of([]));
     fixture.detectChanges();
 
     component['subscription'] = undefined;
     expect(() => component.ngOnDestroy()).not.toThrow();
+  });
+
+  it('isInWeeklyFocus()が正しく判定すること', () => {
+    const item: FollowupItem = {
+      itemType: 'goodPoint',
+      item: {
+        id: 'gp-1',
+        content: 'テスト',
+        status: '進行中',
+        success_count: 0,
+        createdAt: '2025-12-05T12:00:00Z',
+      },
+      reportDate: '2025-12-05',
+      reportId: 'report-1',
+    };
+    const mockWeeklyFocuses: WeeklyFocusResponse[] = [
+      {
+        id: 'wf-1',
+        userId: 'user-1',
+        itemType: 'goodPoint',
+        itemId: 'gp-1',
+        weekStartDate: '2025-12-01',
+        createdAt: '2025-12-05T12:00:00Z',
+        item: {
+          id: 'gp-1',
+          content: 'テスト',
+          status: '進行中',
+          success_count: 0,
+        },
+      },
+    ];
+
+    followupService.getFollowupItems.and.returnValue(of({ data: [], total: 0 }));
+    weeklyFocusService.getCurrentWeekFocuses.and.returnValue(of(mockWeeklyFocuses));
+    fixture.detectChanges();
+
+    expect(component.isInWeeklyFocus(item)).toBe(true);
+  });
+
+  it('onAddToWeeklyFocus()が呼ばれた場合、週次フォーカスが追加されること', () => {
+    const item: FollowupItem = {
+      itemType: 'goodPoint',
+      item: {
+        id: 'gp-1',
+        content: 'テスト',
+        status: '進行中',
+        success_count: 0,
+        createdAt: '2025-12-05T12:00:00Z',
+      },
+      reportDate: '2025-12-05',
+      reportId: 'report-1',
+    };
+    const mockResponse: WeeklyFocusResponse = {
+      id: 'wf-1',
+      userId: 'user-1',
+      itemType: 'goodPoint',
+      itemId: 'gp-1',
+      weekStartDate: '2025-12-01',
+      createdAt: '2025-12-05T12:00:00Z',
+      item: {
+        id: 'gp-1',
+        content: 'テスト',
+        status: '進行中',
+        success_count: 0,
+      },
+    };
+
+    followupService.getFollowupItems.and.returnValue(of({ data: [], total: 0 }));
+    weeklyFocusService.getCurrentWeekFocuses.and.returnValue(of([]));
+    weeklyFocusService.addWeeklyFocus.and.returnValue(of(mockResponse));
+    fixture.detectChanges();
+
+    component.onAddToWeeklyFocus(item);
+
+    expect(weeklyFocusService.addWeeklyFocus).toHaveBeenCalledWith({
+      itemType: 'goodPoint',
+      itemId: 'gp-1',
+    });
+  });
+
+  it('onAddToWeeklyFocus()でエラーが発生した場合、トースト通知が表示されること', () => {
+    const item: FollowupItem = {
+      itemType: 'goodPoint',
+      item: {
+        id: 'gp-1',
+        content: 'テスト',
+        status: '進行中',
+        success_count: 0,
+        createdAt: '2025-12-05T12:00:00Z',
+      },
+      reportDate: '2025-12-05',
+      reportId: 'report-1',
+    };
+
+    followupService.getFollowupItems.and.returnValue(of({ data: [], total: 0 }));
+    weeklyFocusService.getCurrentWeekFocuses.and.returnValue(of([]));
+    weeklyFocusService.addWeeklyFocus.and.returnValue(
+      throwError(() => ({ error: { message: 'エラーメッセージ' } }))
+    );
+    fixture.detectChanges();
+
+    component.onAddToWeeklyFocus(item);
+
+    expect(component.toastMessage()).toBe('エラーメッセージ');
+    expect(component.toastVariant()).toBe('error');
   });
 });
 

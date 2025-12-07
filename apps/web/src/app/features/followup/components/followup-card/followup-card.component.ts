@@ -13,8 +13,12 @@ import { FollowupItem } from '../../../../shared/models/followup.model';
 })
 export class FollowupCardComponent {
   @Input() item!: FollowupItem;
+  @Input() isInWeeklyFocus = false;
+  @Input() isAddingToWeeklyFocus = false;
+  @Input() isWeeklyFocusLimitReached = false;
   @Output() cardClick = new EventEmitter<string>();
   @Output() followupClick = new EventEmitter<FollowupItem>();
+  @Output() addToWeeklyFocus = new EventEmitter<FollowupItem>();
 
   onCardClick(): void {
     this.cardClick.emit(this.item.reportId);
@@ -22,6 +26,10 @@ export class FollowupCardComponent {
 
   onFollowupClick(): void {
     this.followupClick.emit(this.item);
+  }
+
+  onAddToWeeklyFocus(): void {
+    this.addToWeeklyFocus.emit(this.item);
   }
 
   get itemTypeLabel(): string {

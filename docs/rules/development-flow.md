@@ -25,7 +25,7 @@ Phase 3: 検証
 
 Phase 4: 完了
 ├── [PdM] 受け入れ確認
-└── 振り返り（Retro）
+└── 振り返り（Retro）[PdM, Eng, Des]
 ```
 
 ---
@@ -105,10 +105,16 @@ PdMがPRDの要件充足を確認
 
 ### 振り返り
 
+**PdM、Eng、Desの3者で実施**
+
 `docs/retro/{feature_name}/` に以下を作成：
 
-- `retro.md` - 全体まとめ
-- 学びを `docs/rules/jobs/*.md` に反映
+- `retro.md` - 全体まとめ（Keep/Problem/Try/Learnings）
+- `pdm.md` - PdMロール別振り返り（必須）
+- `eng.md` - Engロール別振り返り（必須）
+- `des.md` - Desロール別振り返り（必須）
+
+各ロールは自身の観点から振り返りを行い、学びを `docs/rules/jobs/*.md` に反映する。
 
 ---
 

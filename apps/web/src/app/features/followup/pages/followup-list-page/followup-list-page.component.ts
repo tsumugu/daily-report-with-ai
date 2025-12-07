@@ -2,12 +2,15 @@ import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FollowupService } from '../../../../shared/services/followup.service';
+import { WeeklyFocusService } from '../../../../shared/services/weekly-focus.service';
 import { FollowupItem } from '../../../../shared/models/followup.model';
+import { WeeklyFocusResponse } from '../../../../shared/models/weekly-focus.model';
 import { FollowupCardComponent } from '../../components/followup-card/followup-card.component';
 import { FollowupInputModalComponent } from '../../components/followup-input-modal/followup-input-modal.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { AlertBannerComponent } from '../../../../shared/components/alert-banner/alert-banner.component';
-import { Subscription } from 'rxjs';
+import { ToastComponent } from '../../../../shared/components/toast/toast.component';
+import { Subscription, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-followup-list-page',
@@ -19,6 +22,7 @@ import { Subscription } from 'rxjs';
     FollowupInputModalComponent,
     ButtonComponent,
     AlertBannerComponent,
+    ToastComponent,
   ],
   templateUrl: './followup-list-page.component.html',
   styleUrl: './followup-list-page.component.scss',
@@ -39,6 +43,15 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
   statusFilter = signal<string>('未着手,進行中'); // デフォルト: 未完了
   itemTypeFilter = signal<'goodPoint' | 'improvement' | 'すべて'>('すべて');
 
+  // 週次フォーカス
+  private weeklyFocusMap = new Map<string, boolean>();
+  weeklyFocusCount = signal(0);
+  addingToWeeklyFocusItemId = signal<string | null>(null);
+
+  // トースト通知
+  toastMessage = signal<string | null>(null);
+  toastVariant = signal<'success' | 'error' | 'info'>('success');
+
   // ページング
   private offset = 0;
   private readonly limit = 20;
@@ -47,10 +60,14 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
 
   readonly router = inject(Router);
 
-  constructor(private followupService: FollowupService) {}
+  constructor(
+    private followupService: FollowupService,
+    private weeklyFocusService: WeeklyFocusService
+  ) {}
 
   ngOnInit(): void {
     this.loadItems();
+    this.loadWeeklyFocuses();
   }
 
   ngOnDestroy(): void {
@@ -71,31 +88,81 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
     const itemType: 'goodPoint' | 'improvement' | undefined =
       itemTypeValue === 'すべて' ? undefined : itemTypeValue;
 
-    this.subscription = this.followupService
-      .getFollowupItems({
-        status,
-        itemType,
-        limit: this.limit,
-        offset: this.offset,
-      })
-      .subscribe({
-        next: (response) => {
-          if (reset) {
-            this.items.set(response.data);
-          } else {
-            this.items.update((items) => [...items, ...response.data]);
-          }
-          this.total.set(response.total);
-          this.offset += response.data.length;
-          this.isLoading.set(false);
-          this.isLoadingMore.set(false);
-        },
-        error: (_err) => {
-          this.errorMessage.set('フォロー項目の読み込みに失敗しました');
-          this.isLoading.set(false);
-          this.isLoadingMore.set(false);
-        },
-      });
+    // フォロー項目と週次フォーカスを並列で取得
+    const followupItems$ = this.followupService.getFollowupItems({
+      status,
+      itemType,
+      limit: this.limit,
+      offset: this.offset,
+    });
+    const weeklyFocuses$ = this.weeklyFocusService.getCurrentWeekFocuses();
+
+    this.subscription = forkJoin({
+      followupItems: followupItems$,
+      weeklyFocuses: weeklyFocuses$,
+    }).subscribe({
+      next: ({ followupItems, weeklyFocuses }) => {
+        // 週次フォーカス一覧をMap構造に変換（O(1)判定のため）
+        this.updateWeeklyFocusMap(weeklyFocuses);
+
+        if (reset) {
+          this.items.set(followupItems.data);
+        } else {
+          this.items.update((items) => [...items, ...followupItems.data]);
+        }
+        this.total.set(followupItems.total);
+        this.offset += followupItems.data.length;
+        this.isLoading.set(false);
+        this.isLoadingMore.set(false);
+      },
+      error: (_err) => {
+        this.errorMessage.set('フォロー項目の読み込みに失敗しました');
+        this.isLoading.set(false);
+        this.isLoadingMore.set(false);
+      },
+    });
+  }
+
+  /**
+   * 週次フォーカス一覧を取得
+   */
+  loadWeeklyFocuses(): void {
+    this.subscription = this.weeklyFocusService.getCurrentWeekFocuses().subscribe({
+      next: (weeklyFocuses) => {
+        this.updateWeeklyFocusMap(weeklyFocuses);
+      },
+      error: (_err) => {
+        // エラー時は既存のMapを維持
+      },
+    });
+  }
+
+  /**
+   * 週次フォーカス一覧をMap構造に変換（O(1)判定のため）
+   */
+  private updateWeeklyFocusMap(weeklyFocuses: WeeklyFocusResponse[]): void {
+    this.weeklyFocusMap.clear();
+    weeklyFocuses.forEach((focus) => {
+      const key = `${focus.itemType}-${focus.itemId}`;
+      this.weeklyFocusMap.set(key, true);
+    });
+    // 週次フォーカスの件数を更新
+    this.weeklyFocusCount.set(weeklyFocuses.length);
+  }
+
+  /**
+   * フォロー項目が週次フォーカスに設定されているか判定
+   */
+  isInWeeklyFocus(item: FollowupItem): boolean {
+    const key = `${item.itemType}-${item.item.id}`;
+    return this.weeklyFocusMap.has(key);
+  }
+
+  /**
+   * 週次フォーカスが最大件数（5件）に達しているか判定
+   */
+  isWeeklyFocusLimitReached(): boolean {
+    return this.weeklyFocusCount() >= 5;
   }
 
   onStatusFilterChange(status: string): void {
@@ -129,6 +196,76 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
   onModalSaved(): void {
     this.loadItems();
     this.onModalClosed();
+  }
+
+  /**
+   * 週次フォーカスに追加
+   */
+  onAddToWeeklyFocus(item: FollowupItem): void {
+    // 既にフォーカスに設定されている場合は何もしない
+    if (this.isInWeeklyFocus(item)) {
+      return;
+    }
+
+    // 最大件数に達している場合はエラーを表示
+    if (this.isWeeklyFocusLimitReached()) {
+      this.showToast('今週のフォーカスは最大5件まで設定できます', 'error');
+      return;
+    }
+
+    this.addingToWeeklyFocusItemId.set(`${item.itemType}-${item.item.id}`);
+    this.toastMessage.set(null);
+
+    this.subscription = this.weeklyFocusService
+      .addWeeklyFocus({
+        itemType: item.itemType,
+        itemId: item.item.id,
+      })
+      .subscribe({
+        next: () => {
+          // 成功時：トースト通知を表示
+          this.showToast('今週のフォーカスに追加しました', 'success');
+          // 週次フォーカス一覧を再取得
+          this.loadWeeklyFocuses();
+          // フォロー項目一覧を更新（各カードのisInWeeklyFocusを更新）
+          // リセットして再読み込み（週次フォーカス情報も含めて更新）
+          this.loadItems(true);
+        },
+        error: (err) => {
+          // エラー時：トースト通知でエラーメッセージ表示
+          const errorMessage =
+            err.error?.message || '週次フォーカスの追加に失敗しました';
+          this.showToast(errorMessage, 'error');
+          this.addingToWeeklyFocusItemId.set(null);
+        },
+      });
+  }
+
+  /**
+   * トースト通知を表示
+   */
+  private showToast(message: string, variant: 'success' | 'error' | 'info'): void {
+    this.toastMessage.set(message);
+    this.toastVariant.set(variant);
+    // 3秒後に自動で非表示
+    setTimeout(() => {
+      this.toastMessage.set(null);
+    }, 3000);
+  }
+
+  /**
+   * トースト通知を閉じる
+   */
+  onToastDismiss(): void {
+    this.toastMessage.set(null);
+  }
+
+  /**
+   * 指定のアイテムが追加中かどうか
+   */
+  isAddingToWeeklyFocus(item: FollowupItem): boolean {
+    const key = `${item.itemType}-${item.item.id}`;
+    return this.addingToWeeklyFocusItemId() === key;
   }
 
   get hasMore(): boolean {

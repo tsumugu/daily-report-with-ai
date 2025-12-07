@@ -1,10 +1,11 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, NavigationEnd } from '@angular/router';
 import { WeeklyFocusService } from '../../services/weekly-focus.service';
 import { WeeklyFocusResponse } from '../../models/weekly-focus.model';
 import { WeeklyFocusCardComponent } from '../weekly-focus-card/weekly-focus-card.component';
 import { ButtonComponent } from '../button/button.component';
-import { Subscription } from 'rxjs';
+import { Subscription, filter } from 'rxjs';
 
 @Component({
   selector: 'app-weekly-focus-section',
@@ -22,15 +23,29 @@ export class WeeklyFocusSectionComponent implements OnInit, OnDestroy {
   error: string | null = null;
 
   private subscription?: Subscription;
+  private routerSubscription?: Subscription;
 
-  constructor(private weeklyFocusService: WeeklyFocusService) {}
+  constructor(
+    private weeklyFocusService: WeeklyFocusService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadFocuses();
+    // ホーム画面に戻った時に自動更新
+    this.routerSubscription = this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        const navigation = event as NavigationEnd;
+        if (navigation.url === '/home' || navigation.url === '/') {
+          this.loadFocuses();
+        }
+      });
   }
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
+    this.routerSubscription?.unsubscribe();
   }
 
   loadFocuses(): void {

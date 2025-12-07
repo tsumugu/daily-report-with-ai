@@ -339,7 +339,6 @@ test.describe('フォローアップ管理機能', () => {
 
       // 最初のカードの内容を記録
       const initialCard = page.locator('.followup-card').first();
-      const initialText = await initialCard.locator('.followup-card__text').textContent();
 
       // フォローアップを入力
       await initialCard.locator('button:has-text("フォローアップ")').click();
@@ -757,6 +756,217 @@ test.describe('フォローアップ管理機能', () => {
       await expect(page.locator('.followup-card__success-count').first()).toContainText('成功: 2回', {
         timeout: 5000,
       });
+    });
+  });
+
+  // ============================================
+  // Phase 2: 週次フォーカス管理機能
+  // ============================================
+
+  test.describe('週次フォーカス管理機能', () => {
+    test('フォロー項目一覧から週次フォーカスを追加できること', async ({ page }) => {
+      // 日報を作成してよかったことを追加
+      await page.goto('/daily-reports/new');
+      await page.waitForSelector('textarea#events');
+      await page.fill('textarea#events', '週次フォーカステスト用日報');
+
+      await page.click('.form-group:has-text("よかったこと") button:has-text("追加")');
+      await page.waitForSelector('.form-group:has-text("よかったこと") .form-card');
+      const goodPointCard = page.locator('.form-group:has-text("よかったこと") .form-card').first();
+      await goodPointCard.locator('textarea').first().fill('週次フォーカステスト用よかったこと');
+
+      await page.click('button[type="submit"]');
+      await page.waitForURL('/daily-reports', { timeout: 15000 });
+
+      // フォロー項目一覧画面に遷移
+      await page.goto('/followups');
+      await page.waitForSelector('.followup-card', { timeout: 5000 });
+
+      // 「フォーカスに追加」ボタンをクリック
+      const firstCard = page.locator('.followup-card').first();
+      await firstCard.locator('button:has-text("フォーカスに追加")').click();
+
+      // トースト通知が表示されることを確認
+      await expect(page.locator('.followup-list-page__toast')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('.toast--success')).toContainText('今週のフォーカスに追加しました');
+
+      // 「今週のフォーカス」バッジが表示されることを確認
+      await expect(firstCard.locator('.followup-card__weekly-focus-badge')).toBeVisible();
+      await expect(firstCard.locator('.followup-card__weekly-focus-badge')).toContainText('今週のフォーカス');
+
+      // 「フォーカスに追加」ボタンが非表示になることを確認
+      await expect(firstCard.locator('button:has-text("フォーカスに追加")')).not.toBeVisible();
+    });
+
+    test('ホーム画面で週次フォーカスが表示されること', async ({ page }) => {
+      // 日報を作成してよかったことを追加
+      await page.goto('/daily-reports/new');
+      await page.waitForSelector('textarea#events');
+      await page.fill('textarea#events', '週次フォーカス表示テスト用日報');
+
+      await page.click('.form-group:has-text("よかったこと") button:has-text("追加")');
+      await page.waitForSelector('.form-group:has-text("よかったこと") .form-card');
+      const goodPointCard = page.locator('.form-group:has-text("よかったこと") .form-card').first();
+      await goodPointCard.locator('textarea').first().fill('週次フォーカス表示テスト用よかったこと');
+
+      await page.click('button[type="submit"]');
+      await page.waitForURL('/daily-reports', { timeout: 15000 });
+
+      // フォロー項目一覧画面で週次フォーカスを追加
+      await page.goto('/followups');
+      await page.waitForSelector('.followup-card', { timeout: 5000 });
+
+      const firstCard = page.locator('.followup-card').first();
+      await firstCard.locator('button:has-text("フォーカスに追加")').click();
+      await page.waitForSelector('.toast--success', { timeout: 5000 });
+
+      // ホーム画面に戻る
+      await page.goto('/home');
+      await page.waitForSelector('.weekly-focus-section', { timeout: 5000 });
+
+      // 週次フォーカスが表示されることを確認
+      await expect(page.locator('.weekly-focus-card')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('.weekly-focus-card').first()).toContainText('週次フォーカス表示テスト用よかったこと');
+    });
+
+    test('週次フォーカスを削除できること', async ({ page }) => {
+      // 日報を作成してよかったことを追加
+      await page.goto('/daily-reports/new');
+      await page.waitForSelector('textarea#events');
+      await page.fill('textarea#events', '週次フォーカス削除テスト用日報');
+
+      await page.click('.form-group:has-text("よかったこと") button:has-text("追加")');
+      await page.waitForSelector('.form-group:has-text("よかったこと") .form-card');
+      const goodPointCard = page.locator('.form-group:has-text("よかったこと") .form-card').first();
+      await goodPointCard.locator('textarea').first().fill('週次フォーカス削除テスト用よかったこと');
+
+      await page.click('button[type="submit"]');
+      await page.waitForURL('/daily-reports', { timeout: 15000 });
+
+      // フォロー項目一覧画面で週次フォーカスを追加
+      await page.goto('/followups');
+      await page.waitForSelector('.followup-card', { timeout: 5000 });
+
+      const firstCard = page.locator('.followup-card').first();
+      await firstCard.locator('button:has-text("フォーカスに追加")').click();
+      await page.waitForSelector('.toast--success', { timeout: 5000 });
+
+      // ホーム画面に戻る
+      await page.goto('/home');
+      await page.waitForSelector('.weekly-focus-card', { timeout: 5000 });
+
+      // 削除ボタンをクリック（ariaLabel="削除"を使用）
+      const weeklyFocusCard = page.locator('.weekly-focus-card').first();
+      await weeklyFocusCard.locator('button[aria-label="削除"]').click();
+
+      // 週次フォーカスが削除されることを確認（空状態が表示される）
+      await expect(page.locator('.weekly-focus-section__empty')).toBeVisible({ timeout: 5000 });
+    });
+
+    test('既にフォーカスに設定されている項目は「フォーカスに追加」ボタンが非表示になること', async ({ page }) => {
+      // 日報を作成してよかったことを追加
+      await page.goto('/daily-reports/new');
+      await page.waitForSelector('textarea#events');
+      await page.fill('textarea#events', '週次フォーカス重複テスト用日報');
+
+      await page.click('.form-group:has-text("よかったこと") button:has-text("追加")');
+      await page.waitForSelector('.form-group:has-text("よかったこと") .form-card');
+      const goodPointCard = page.locator('.form-group:has-text("よかったこと") .form-card').first();
+      await goodPointCard.locator('textarea').first().fill('週次フォーカス重複テスト用よかったこと');
+
+      await page.click('button[type="submit"]');
+      await page.waitForURL('/daily-reports', { timeout: 15000 });
+
+      // フォロー項目一覧画面で週次フォーカスを追加
+      await page.goto('/followups');
+      await page.waitForSelector('.followup-card', { timeout: 5000 });
+
+      const firstCard = page.locator('.followup-card').first();
+      await firstCard.locator('button:has-text("フォーカスに追加")').click();
+      await page.waitForSelector('.toast--success', { timeout: 5000 });
+
+      // ページをリロード
+      await page.reload();
+      await page.waitForSelector('.followup-card', { timeout: 5000 });
+
+      // 「フォーカスに追加」ボタンが非表示で、「今週のフォーカス」バッジが表示されることを確認
+      await expect(firstCard.locator('button:has-text("フォーカスに追加")')).not.toBeVisible();
+      await expect(firstCard.locator('.followup-card__weekly-focus-badge')).toBeVisible();
+    });
+
+    test('最大5件制限でエラーが表示されること', async ({ page }) => {
+      test.setTimeout(60000); // テストタイムアウトを60秒に設定
+
+      // ヘルパー関数: 日報を作成してフォロー項目を追加
+      async function createDailyReportWithGoodPoint(index: number): Promise<void> {
+        await page.goto('/daily-reports/new');
+        await page.waitForSelector('textarea#events', { timeout: 5000 });
+        
+        // 日付を設定（各日報で異なる日付を使用）
+        const testDate = new Date();
+        testDate.setDate(testDate.getDate() + index + 100); // 100日後以降（重複回避）
+        const dateString = testDate.toISOString().split('T')[0];
+        await page.locator('input#date').fill(dateString);
+        
+        await page.fill('textarea#events', `週次フォーカス制限テスト用日報${index}`);
+
+        // よかったことを追加
+        await page.click('.form-group:has-text("よかったこと") button:has-text("追加")');
+        await page.waitForSelector('.form-group:has-text("よかったこと") .form-card', { timeout: 5000 });
+        await page.locator('.form-group:has-text("よかったこと") .form-card').first()
+          .locator('textarea').first().fill(`週次フォーカス制限テスト用よかったこと${index}`);
+
+        // 日報を保存
+        await page.click('button[type="submit"]');
+        await page.waitForURL(/\/(daily-reports|home)/, { timeout: 5000 });
+      }
+
+      // ヘルパー関数: フォロー項目一覧で特定のカードをフォーカスに追加
+      async function addToWeeklyFocus(cardText: string): Promise<void> {
+        await page.goto('/followups');
+        await page.waitForSelector('.followup-list-page__filter', { timeout: 5000 });
+        
+        // フィルタを「すべて」に変更
+        await page.locator('.followup-list-page__filter').first().selectOption('すべて');
+        await page.waitForSelector('.followup-card', { timeout: 5000 });
+        
+        // カードを探す
+        const targetCard = page.locator('.followup-card').filter({ hasText: cardText }).first();
+        await targetCard.waitFor({ timeout: 5000, state: 'visible' });
+
+        // 「フォーカスに追加」ボタンをクリック
+        const addButton = targetCard.locator('button:has-text("フォーカスに追加")');
+        await addButton.waitFor({ timeout: 5000, state: 'visible' });
+        await addButton.click();
+        
+        // 成功トーストを待機
+        await page.waitForSelector('.toast--success', { timeout: 5000 });
+      }
+
+      // 5件のフォロー項目を作成して週次フォーカスに追加
+      for (let i = 1; i <= 5; i++) {
+        await createDailyReportWithGoodPoint(i);
+        await addToWeeklyFocus(`週次フォーカス制限テスト用よかったこと${i}`);
+      }
+
+      // 6件目を作成
+      await createDailyReportWithGoodPoint(6);
+
+      // フォロー項目一覧画面に遷移
+      await page.goto('/followups');
+      await page.waitForSelector('.followup-list-page__filter', { timeout: 5000 });
+      
+      // フィルタを「すべて」に変更
+      await page.locator('.followup-list-page__filter').first().selectOption('すべて');
+      await page.waitForSelector('.followup-card', { timeout: 5000 });
+
+      // 6件目のカードを探す
+      const targetCard6 = page.locator('.followup-card').filter({ hasText: '週次フォーカス制限テスト用よかったこと6' }).first();
+      await targetCard6.waitFor({ timeout: 5000, state: 'visible' });
+
+      // 「フォーカスに追加」ボタンが無効化されていることを確認
+      const addButton6 = targetCard6.locator('button:has-text("フォーカスに追加")');
+      await expect(addButton6).toBeDisabled({ timeout: 5000 });
     });
   });
 });

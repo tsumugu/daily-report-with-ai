@@ -10,6 +10,7 @@
     <div class="followup-card__meta">
       <span class="followup-card__success-count">成功: {{ successCount }}回</span>
       <span class="followup-card__settled-badge" *ngIf="isSettled">定着</span>
+      <span class="followup-card__weekly-focus-badge" *ngIf="isInWeeklyFocus">🎯 今週のフォーカス</span>
     </div>
   </div>
   <div class="followup-card__footer">
@@ -22,6 +23,17 @@
         ariaLabel="フォローアップを入力"
       >
         フォローアップ
+      </app-button>
+      <app-button
+        *ngIf="!isInWeeklyFocus"
+        variant="secondary"
+        size="sm"
+        [loading]="isAddingToWeeklyFocus"
+        [disabled]="isAddingToWeeklyFocus || isWeeklyFocusLimitReached"
+        (clicked)="onAddToWeeklyFocus()"
+        ariaLabel="フォーカスに追加"
+      >
+        {{ isAddingToWeeklyFocus ? '追加中...' : 'フォーカスに追加' }}
       </app-button>
       <app-button
         variant="ghost"
