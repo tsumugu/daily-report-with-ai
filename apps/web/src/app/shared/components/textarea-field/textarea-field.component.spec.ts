@@ -35,7 +35,7 @@ describe('TextareaFieldComponent', () => {
       const onChangeSpy = jasmine.createSpy('onChange');
       component.registerOnChange(onChangeSpy);
       
-      component.onInput({ target: { value: '新しいテキスト' } } as any);
+      component.onInput({ target: { value: '新しいテキスト' } } as unknown as Event);
       
       expect(onChangeSpy).toHaveBeenCalledWith('新しいテキスト');
     });
@@ -57,7 +57,7 @@ describe('TextareaFieldComponent', () => {
     it('デフォルトのonChangeが呼ばれてもエラーにならないこと', () => {
       // フォームコントロールでない状態で呼ぶ
       expect(() => {
-        component.onInput({ target: { value: 'テスト' } } as any);
+        component.onInput({ target: { value: 'テスト' } } as unknown as Event);
       }).not.toThrow();
     });
 
@@ -72,7 +72,7 @@ describe('TextareaFieldComponent', () => {
       // writeValueでisFormControlをtrueにするが、registerOnChangeは呼ばない
       component.writeValue('初期値');
       expect(() => {
-        component.onInput({ target: { value: 'テスト' } } as any);
+        component.onInput({ target: { value: 'テスト' } } as unknown as Event);
       }).not.toThrow();
     });
 
@@ -105,7 +105,7 @@ describe('TextareaFieldComponent', () => {
     it('フォームコントロールでない場合、valueChangeが発火すること', () => {
       const emitSpy = spyOn(component.valueChange, 'emit');
       
-      component.onInput({ target: { value: '新しい値' } } as any);
+      component.onInput({ target: { value: '新しい値' } } as unknown as Event);
       
       expect(emitSpy).toHaveBeenCalledWith('新しい値');
     });

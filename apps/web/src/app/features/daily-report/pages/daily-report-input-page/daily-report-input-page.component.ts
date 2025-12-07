@@ -1,5 +1,4 @@
-import { Component, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { DailyReportService } from '../../services/daily-report.service';
@@ -16,7 +15,6 @@ import {
   selector: 'app-daily-report-input-page',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     RouterLink,
     ButtonComponent,
@@ -29,6 +27,10 @@ import {
   styleUrl: './daily-report-input-page.component.scss',
 })
 export class DailyReportInputPageComponent {
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly dailyReportService = inject(DailyReportService);
+
   form: FormGroup;
 
   // よかったこと・改善点の配列（リアクティブ）
@@ -42,11 +44,7 @@ export class DailyReportInputPageComponent {
   // 文字数カウント
   readonly MAX_LENGTH = 1000;
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private dailyReportService: DailyReportService
-  ) {
+  constructor() {
     const today = new Date().toISOString().split('T')[0];
 
     this.form = this.fb.group({
@@ -55,7 +53,6 @@ export class DailyReportInputPageComponent {
       learnings: ['', [Validators.maxLength(this.MAX_LENGTH)]],
     });
   }
-
 
   /**
    * よかったことを追加
@@ -116,9 +113,9 @@ export class DailyReportInputPageComponent {
     this.errorMessage.set(null);
 
     const request: CreateDailyReportRequest = {
-      date: this.form.get('date')?.value,
-      events: this.form.get('events')?.value,
-      learnings: this.form.get('learnings')?.value || undefined,
+      date: this.form.get('date')?.value as string,
+      events: this.form.get('events')?.value as string,
+      learnings: (this.form.get('learnings')?.value as string) || undefined,
       goodPoints: this.goodPoints()
         .filter((gp) => gp.content.trim())
         .map((gp) => ({
@@ -138,7 +135,7 @@ export class DailyReportInputPageComponent {
         this.isLoading.set(false);
         this.router.navigate(['/daily-reports']);
       },
-      error: (err) => {
+      error: (err: { error?: { message?: string } }) => {
         this.isLoading.set(false);
         this.errorMessage.set(
           err.error?.message || '日報の保存に失敗しました。もう一度お試しください。'
@@ -165,4 +162,3 @@ export class DailyReportInputPageComponent {
     return null;
   }
 }
-

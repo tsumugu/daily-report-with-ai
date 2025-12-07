@@ -1,5 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, inject } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { WeeklyFocusService } from '../../services/weekly-focus.service';
 import { WeeklyFocusResponse } from '../../models/weekly-focus.model';
@@ -10,11 +9,14 @@ import { Subscription, filter } from 'rxjs';
 @Component({
   selector: 'app-weekly-focus-section',
   standalone: true,
-  imports: [CommonModule, WeeklyFocusCardComponent, ButtonComponent],
+  imports: [WeeklyFocusCardComponent, ButtonComponent],
   templateUrl: './weekly-focus-section.component.html',
   styleUrl: './weekly-focus-section.component.scss',
 })
 export class WeeklyFocusSectionComponent implements OnInit, OnDestroy {
+  private readonly weeklyFocusService = inject(WeeklyFocusService);
+  private readonly router = inject(Router);
+
   @Input() showAddButton = true;
   @Output() addClicked = new EventEmitter<void>();
 
@@ -24,11 +26,6 @@ export class WeeklyFocusSectionComponent implements OnInit, OnDestroy {
 
   private subscription?: Subscription;
   private routerSubscription?: Subscription;
-
-  constructor(
-    private weeklyFocusService: WeeklyFocusService,
-    private router: Router
-  ) {}
 
   ngOnInit(): void {
     this.loadFocuses();
@@ -56,7 +53,7 @@ export class WeeklyFocusSectionComponent implements OnInit, OnDestroy {
         this.focuses = focuses;
         this.loading = false;
       },
-      error: (_err) => {
+      error: () => {
         this.error = 'フォーカスの読み込みに失敗しました';
         this.loading = false;
       },
@@ -72,7 +69,7 @@ export class WeeklyFocusSectionComponent implements OnInit, OnDestroy {
       next: () => {
         this.loadFocuses();
       },
-      error: (_err) => {
+      error: () => {
         this.error = 'フォーカスの削除に失敗しました';
       },
     });
@@ -82,4 +79,3 @@ export class WeeklyFocusSectionComponent implements OnInit, OnDestroy {
     return !this.loading && this.focuses.length === 0;
   }
 }
-

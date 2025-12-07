@@ -130,7 +130,7 @@ describe('FollowupListPageComponent', () => {
   });
 
   it('hasMoreが正しく計算されること', () => {
-    const mockData: any[] = Array(10).fill({
+    const mockData: FollowupItem[] = Array(10).fill({
       itemType: 'goodPoint',
       item: {
         id: 'gp-1',
@@ -226,7 +226,7 @@ describe('FollowupListPageComponent', () => {
   });
 
   it('onLoadMore()が呼ばれた場合、追加読み込みが実行されること', () => {
-    const initialData: any[] = Array(10).fill({
+    const initialData: FollowupItem[] = Array(10).fill({
       itemType: 'goodPoint',
       item: {
         id: 'gp-1',
@@ -238,7 +238,7 @@ describe('FollowupListPageComponent', () => {
       reportDate: '2025-12-05',
       reportId: 'report-1',
     });
-    const moreData: any[] = Array(10).fill({
+    const moreData: FollowupItem[] = Array(10).fill({
       itemType: 'goodPoint',
       item: {
         id: 'gp-2',
@@ -267,7 +267,7 @@ describe('FollowupListPageComponent', () => {
   });
 
   it('loadItems(reset=false)の場合、既存アイテムに追加されること', () => {
-    const initialData: any[] = Array(10).fill({
+    const initialData: FollowupItem[] = Array(10).fill({
       itemType: 'goodPoint',
       item: {
         id: 'gp-1',
@@ -279,7 +279,7 @@ describe('FollowupListPageComponent', () => {
       reportDate: '2025-12-05',
       reportId: 'report-1',
     });
-    const moreData: any[] = Array(5).fill({
+    const moreData: FollowupItem[] = Array(5).fill({
       itemType: 'goodPoint',
       item: {
         id: 'gp-2',

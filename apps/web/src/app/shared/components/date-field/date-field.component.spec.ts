@@ -35,7 +35,7 @@ describe('DateFieldComponent', () => {
       const onChangeSpy = jasmine.createSpy('onChange');
       component.registerOnChange(onChangeSpy);
       
-      component.onInput({ target: { value: '2025-12-07' } } as any);
+      component.onInput({ target: { value: '2025-12-07' } } as unknown as Event);
       
       expect(onChangeSpy).toHaveBeenCalledWith('2025-12-07');
     });
@@ -57,7 +57,7 @@ describe('DateFieldComponent', () => {
     it('デフォルトのonChangeが呼ばれてもエラーにならないこと', () => {
       // registerOnChangeを呼ばずにonInputを呼ぶ（デフォルト関数を実行）
       expect(() => {
-        component.onInput({ target: { value: '2025-12-07' } } as any);
+        component.onInput({ target: { value: '2025-12-07' } } as unknown as Event);
       }).not.toThrow();
     });
 

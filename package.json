@@ -31,10 +31,12 @@
   },
   "lint-staged": {
     "apps/api/src/**/*.{ts,js}": [
-      "eslint --fix"
+      "eslint --fix",
+      "eslint --max-warnings=0"
     ],
-    "apps/web/src/**/*.{ts,html}": [
-      "eslint --fix"
+    "apps/web/src/**/*.ts": [
+      "eslint --fix",
+      "eslint --max-warnings=0"
     ],
     "**/*.{json,md}": [
       "prettier --write"
@@ -44,4 +46,3 @@
     "node": ">=18.0.0"
   }
 }
-

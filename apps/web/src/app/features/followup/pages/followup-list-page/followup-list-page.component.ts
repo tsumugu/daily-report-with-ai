@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { FollowupService } from '../../../../shared/services/followup.service';
 import { WeeklyFocusService } from '../../../../shared/services/weekly-focus.service';
 import { FollowupItem } from '../../../../shared/models/followup.model';
@@ -16,7 +16,6 @@ import { Subscription, forkJoin } from 'rxjs';
   selector: 'app-followup-list-page',
   standalone: true,
   imports: [
-    CommonModule,
     RouterLink,
     FollowupCardComponent,
     FollowupInputModalComponent,
@@ -28,6 +27,11 @@ import { Subscription, forkJoin } from 'rxjs';
   styleUrl: './followup-list-page.component.scss',
 })
 export class FollowupListPageComponent implements OnInit, OnDestroy {
+  // DI
+  private readonly followupService = inject(FollowupService);
+  private readonly weeklyFocusService = inject(WeeklyFocusService);
+  readonly router = inject(Router);
+
   // 状態管理
   items = signal<FollowupItem[]>([]);
   total = signal(0);
@@ -58,13 +62,6 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
 
   private subscription?: Subscription;
 
-  readonly router = inject(Router);
-
-  constructor(
-    private followupService: FollowupService,
-    private weeklyFocusService: WeeklyFocusService
-  ) {}
-
   ngOnInit(): void {
     this.loadItems();
     this.loadWeeklyFocuses();
@@ -72,6 +69,20 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
+  }
+
+  /**
+   * セレクトボックスから値を取得（型安全）
+   */
+  getSelectValue(event: Event): string {
+    return (event.target as HTMLSelectElement).value;
+  }
+
+  /**
+   * 種別フィルタの値を取得（型安全）
+   */
+  getItemTypeValue(event: Event): 'goodPoint' | 'improvement' | 'すべて' {
+    return (event.target as HTMLSelectElement).value as 'goodPoint' | 'improvement' | 'すべて';
   }
 
   loadItems(reset = true): void {
@@ -115,7 +126,7 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
         this.isLoading.set(false);
         this.isLoadingMore.set(false);
       },
-      error: (_err) => {
+      error: () => {
         this.errorMessage.set('フォロー項目の読み込みに失敗しました');
         this.isLoading.set(false);
         this.isLoadingMore.set(false);
@@ -131,7 +142,7 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
       next: (weeklyFocuses) => {
         this.updateWeeklyFocusMap(weeklyFocuses);
       },
-      error: (_err) => {
+      error: () => {
         // エラー時は既存のMapを維持
       },
     });
@@ -163,6 +174,14 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
    */
   isWeeklyFocusLimitReached(): boolean {
     return this.weeklyFocusCount() >= 5;
+  }
+
+  /**
+   * 指定のアイテムが追加中かどうか
+   */
+  isAddingToWeeklyFocusCheck(item: FollowupItem): boolean {
+    const key = `${item.itemType}-${item.item.id}`;
+    return this.addingToWeeklyFocusItemId() === key;
   }
 
   onStatusFilterChange(status: string): void {
@@ -231,7 +250,7 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
           // リセットして再読み込み（週次フォーカス情報も含めて更新）
           this.loadItems(true);
         },
-        error: (err) => {
+        error: (err: { error?: { message?: string } }) => {
           // エラー時：トースト通知でエラーメッセージ表示
           const errorMessage =
             err.error?.message || '週次フォーカスの追加に失敗しました';
@@ -260,14 +279,6 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
     this.toastMessage.set(null);
   }
 
-  /**
-   * 指定のアイテムが追加中かどうか
-   */
-  isAddingToWeeklyFocus(item: FollowupItem): boolean {
-    const key = `${item.itemType}-${item.item.id}`;
-    return this.addingToWeeklyFocusItemId() === key;
-  }
-
   get hasMore(): boolean {
     return this.items().length < this.total();
   }
@@ -276,4 +287,3 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
     return !this.isLoading() && this.items().length === 0;
   }
 }
-

@@ -1,5 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FollowupService } from '../../../../shared/services/followup.service';
 import { FollowupItem, CreateFollowupRequest, FollowupStatus } from '../../../../shared/models/followup.model';
@@ -12,7 +11,6 @@ import { FormCardComponent } from '../../../../shared/components/form-card/form-
   selector: 'app-followup-input-modal',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     ButtonComponent,
     TextareaFieldComponent,
@@ -23,6 +21,9 @@ import { FormCardComponent } from '../../../../shared/components/form-card/form-
   styleUrl: './followup-input-modal.component.scss',
 })
 export class FollowupInputModalComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly followupService = inject(FollowupService);
+
   @Input() item!: FollowupItem;
   @Input() isOpen = false;
   @Output() closed = new EventEmitter<void>();
@@ -33,11 +34,6 @@ export class FollowupInputModalComponent implements OnInit {
   errorMessage: string | null = null;
 
   readonly statusOptions: { value: FollowupStatus; label: string }[] = [];
-
-  constructor(
-    private fb: FormBuilder,
-    private followupService: FollowupService
-  ) {}
 
   ngOnInit(): void {
     this.initializeStatusOptions();
@@ -70,7 +66,7 @@ export class FollowupInputModalComponent implements OnInit {
     });
 
     // ステータス変更時に日付の必須/任意を切り替え
-    this.form.get('status')?.valueChanges.subscribe((status) => {
+    this.form.get('status')?.valueChanges.subscribe((status: string) => {
       const dateControl = this.form.get('date');
       if (status === '再現成功' || status === '完了') {
         dateControl?.setValidators([Validators.required]);
@@ -92,7 +88,7 @@ export class FollowupInputModalComponent implements OnInit {
   }
 
   get dateRequired(): boolean {
-    const status = this.form.get('status')?.value;
+    const status = this.form.get('status')?.value as string;
     return status === '再現成功' || status === '完了';
   }
 
@@ -109,7 +105,7 @@ export class FollowupInputModalComponent implements OnInit {
     this.isSubmitting = true;
     this.errorMessage = null;
 
-    const formValue = this.form.value;
+    const formValue = this.form.value as { status: FollowupStatus; memo?: string; date?: string };
     const request: CreateFollowupRequest = {
       status: formValue.status,
       ...(formValue.memo ? { memo: formValue.memo } : {}),
@@ -126,7 +122,7 @@ export class FollowupInputModalComponent implements OnInit {
         this.saved.emit();
         this.onClose();
       },
-      error: (err) => {
+      error: (err: { error?: { message?: string } }) => {
         this.errorMessage = err.error?.message || 'フォローアップの保存に失敗しました';
         this.isSubmitting = false;
       },
@@ -140,4 +136,3 @@ export class FollowupInputModalComponent implements OnInit {
     });
   }
 }
-

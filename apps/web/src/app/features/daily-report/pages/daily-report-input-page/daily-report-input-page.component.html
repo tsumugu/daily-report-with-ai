@@ -55,11 +55,11 @@
     />
 
     <!-- よかったこと -->
-    <div class="form-group">
-      <label class="label">
+    <fieldset class="form-group">
+      <legend class="label">
         <span class="label-icon">✨</span>
         よかったこと
-      </label>
+      </legend>
 
       @for (gp of goodPoints(); track $index) {
         <app-form-card (removed)="removeGoodPoint($index)" class="form-group__card">
@@ -91,14 +91,14 @@
       }
 
       <app-button variant="add" icon="plus" [fullWidth]="true" (clicked)="addGoodPoint()">追加</app-button>
-    </div>
+    </fieldset>
 
     <!-- 改善点/アクション -->
-    <div class="form-group">
-      <label class="label">
+    <fieldset class="form-group">
+      <legend class="label">
         <span class="label-icon">📈</span>
         改善点/アクション
-      </label>
+      </legend>
 
       @for (imp of improvements(); track $index) {
         <app-form-card (removed)="removeImprovement($index)" class="form-group__card">
@@ -130,7 +130,7 @@
       }
 
       <app-button variant="add" icon="plus" [fullWidth]="true" (clicked)="addImprovement()">追加</app-button>
-    </div>
+    </fieldset>
 
     <!-- 保存ボタン -->
     <div class="form-actions">

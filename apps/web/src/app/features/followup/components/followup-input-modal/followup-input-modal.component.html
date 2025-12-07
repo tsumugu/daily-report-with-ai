@@ -1,93 +1,112 @@
-<div class="modal-overlay" *ngIf="isOpen" (click)="onClose()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <header class="modal-header">
-      <h2 class="modal-title">{{ modalTitle }}</h2>
-      <button class="modal-close" (click)="onClose()" aria-label="閉じる">×</button>
-    </header>
+@if (isOpen) {
+  <div
+    class="modal-overlay"
+    (click)="onClose()"
+    (keydown.escape)="onClose()"
+    tabindex="0"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+  >
+    <div
+      class="modal-content"
+      (click)="$event.stopPropagation()"
+      (keydown.escape)="$event.stopPropagation()"
+      role="document"
+    >
+      <header class="modal-header">
+        <h2 id="modal-title" class="modal-title">{{ modalTitle }}</h2>
+        <button class="modal-close" (click)="onClose()" aria-label="閉じる">×</button>
+      </header>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="modal-form">
-      <app-form-card>
-        <div class="form-field">
-          <label class="form-label" for="status">
-            ステータス <span class="form-required">*</span>
-          </label>
-          <select
-            id="status"
-            formControlName="status"
-            class="form-select"
-            [class.form-select--error]="form.get('status')?.invalid && form.get('status')?.touched"
-          >
-            <option *ngFor="let option of statusOptions" [value]="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-          <span
-            *ngIf="form.get('status')?.invalid && form.get('status')?.touched"
-            class="form-error"
-          >
-            ステータスは必須です
-          </span>
-        </div>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="modal-form">
+        <app-form-card>
+          <div class="form-field">
+            <label class="form-label" for="status">
+              ステータス <span class="form-required">*</span>
+            </label>
+            <select
+              id="status"
+              formControlName="status"
+              class="form-select"
+              [class.form-select--error]="form.get('status')?.invalid && form.get('status')?.touched"
+            >
+              @for (option of statusOptions; track option.value) {
+                <option [value]="option.value">
+                  {{ option.label }}
+                </option>
+              }
+            </select>
+            @if (form.get('status')?.invalid && form.get('status')?.touched) {
+              <span class="form-error">
+                ステータスは必須です
+              </span>
+            }
+          </div>
 
-        <div class="form-field">
-          <app-textarea-field
-            label="再現メモ"
-            id="memo"
-            formControlName="memo"
-            placeholder="どのように再現したか、実施内容などを記録してください"
-            [maxLength]="500"
-            [showCharCount]="true"
-            [errorMessage]="
-              form.get('memo')?.invalid && form.get('memo')?.touched
-                ? 'メモは500文字以内で入力してください'
-                : ''
-            "
-          ></app-textarea-field>
-        </div>
+          <div class="form-field">
+            <app-textarea-field
+              label="再現メモ"
+              id="memo"
+              formControlName="memo"
+              placeholder="どのように再現したか、実施内容などを記録してください"
+              [maxLength]="500"
+              [showCharCount]="true"
+              [errorMessage]="
+                form.get('memo')?.invalid && form.get('memo')?.touched
+                  ? 'メモは500文字以内で入力してください'
+                  : ''
+              "
+            ></app-textarea-field>
+          </div>
 
-        <div class="form-field">
-          <app-date-field
-            [label]="dateLabel"
-            id="date"
-            formControlName="date"
-            [required]="dateRequired"
-            [errorMessage]="
-              form.get('date')?.invalid && form.get('date')?.touched
-                ? dateLabel + 'は必須です'
-                : ''
-            "
-          ></app-date-field>
-          <p *ngIf="dateRequired" class="form-hint">
-            ※ ステータスが「{{ form.get('status')?.value }}」の場合は必須
-          </p>
-        </div>
+          <div class="form-field">
+            <app-date-field
+              [label]="dateLabel"
+              id="date"
+              formControlName="date"
+              [required]="dateRequired"
+              [errorMessage]="
+                form.get('date')?.invalid && form.get('date')?.touched
+                  ? dateLabel + 'は必須です'
+                  : ''
+              "
+            ></app-date-field>
+            @if (dateRequired) {
+              <p class="form-hint">
+                ※ ステータスが「{{ form.get('status')?.value }}」の場合は必須
+              </p>
+            }
+          </div>
 
-        <div *ngIf="errorMessage" class="form-error-message">
-          {{ errorMessage }}
-        </div>
+          @if (errorMessage) {
+            <div class="form-error-message">
+              {{ errorMessage }}
+            </div>
+          }
 
-        <div class="form-actions">
-          <app-button
-            type="button"
-            variant="outline"
-            (clicked)="onClose()"
-            [disabled]="isSubmitting"
-            ariaLabel="キャンセル"
-          >
-            キャンセル
-          </app-button>
-          <app-button
-            type="submit"
-            variant="primary"
-            [loading]="isSubmitting"
-            [disabled]="form.invalid || isSubmitting"
-            ariaLabel="保存"
-          >
-            保存する
-          </app-button>
-        </div>
-      </app-form-card>
-    </form>
+          <div class="form-actions">
+            <app-button
+              type="button"
+              variant="outline"
+              (clicked)="onClose()"
+              [disabled]="isSubmitting"
+              ariaLabel="キャンセル"
+            >
+              キャンセル
+            </app-button>
+            <app-button
+              type="submit"
+              variant="primary"
+              [loading]="isSubmitting"
+              [disabled]="form.invalid || isSubmitting"
+              ariaLabel="保存"
+            >
+              保存する
+            </app-button>
+          </div>
+        </app-form-card>
+      </form>
+    </div>
   </div>
-</div>
-
+}

@@ -1,49 +1,57 @@
-<div class="followup-card" *ngIf="item">
-  <div class="followup-card__header">
-    <span class="followup-card__type">
-      {{ itemTypeIcon }} {{ itemTypeLabel }}
-    </span>
-      <app-status-badge [status]="status!" *ngIf="status"></app-status-badge>
-  </div>
-  <div class="followup-card__content">
-    <p class="followup-card__text">{{ item.item.content }}</p>
-    <div class="followup-card__meta">
-      <span class="followup-card__success-count">成功: {{ successCount }}回</span>
-      <span class="followup-card__settled-badge" *ngIf="isSettled">定着</span>
-      <span class="followup-card__weekly-focus-badge" *ngIf="isInWeeklyFocus">🎯 今週のフォーカス</span>
+@if (item) {
+  <div class="followup-card">
+    <div class="followup-card__header">
+      <span class="followup-card__type">
+        {{ itemTypeIcon }} {{ itemTypeLabel }}
+      </span>
+      @if (status) {
+        <app-status-badge [status]="status!"></app-status-badge>
+      }
+    </div>
+    <div class="followup-card__content">
+      <p class="followup-card__text">{{ item.item.content }}</p>
+      <div class="followup-card__meta">
+        <span class="followup-card__success-count">成功: {{ successCount }}回</span>
+        @if (isSettled) {
+          <span class="followup-card__settled-badge">定着</span>
+        }
+        @if (isInWeeklyFocus) {
+          <span class="followup-card__weekly-focus-badge">🎯 今週のフォーカス</span>
+        }
+      </div>
+    </div>
+    <div class="followup-card__footer">
+      <span class="followup-card__date">📅 {{ item.reportDate }}</span>
+      <div class="followup-card__actions">
+        <app-button
+          variant="outline"
+          size="sm"
+          (clicked)="onFollowupClick()"
+          ariaLabel="フォローアップを入力"
+        >
+          フォローアップ
+        </app-button>
+        @if (!isInWeeklyFocus) {
+          <app-button
+            variant="secondary"
+            size="sm"
+            [loading]="isAddingToWeeklyFocus"
+            [disabled]="isAddingToWeeklyFocus || isWeeklyFocusLimitReached"
+            (clicked)="onAddToWeeklyFocus()"
+            ariaLabel="フォーカスに追加"
+          >
+            {{ isAddingToWeeklyFocus ? '追加中...' : 'フォーカスに追加' }}
+          </app-button>
+        }
+        <app-button
+          variant="ghost"
+          size="sm"
+          (clicked)="onCardClick()"
+          ariaLabel="日報を見る"
+        >
+          日報を見る
+        </app-button>
+      </div>
     </div>
   </div>
-  <div class="followup-card__footer">
-    <span class="followup-card__date">📅 {{ item.reportDate }}</span>
-    <div class="followup-card__actions">
-      <app-button
-        variant="outline"
-        size="sm"
-        (clicked)="onFollowupClick()"
-        ariaLabel="フォローアップを入力"
-      >
-        フォローアップ
-      </app-button>
-      <app-button
-        *ngIf="!isInWeeklyFocus"
-        variant="secondary"
-        size="sm"
-        [loading]="isAddingToWeeklyFocus"
-        [disabled]="isAddingToWeeklyFocus || isWeeklyFocusLimitReached"
-        (clicked)="onAddToWeeklyFocus()"
-        ariaLabel="フォーカスに追加"
-      >
-        {{ isAddingToWeeklyFocus ? '追加中...' : 'フォーカスに追加' }}
-      </app-button>
-      <app-button
-        variant="ghost"
-        size="sm"
-        (clicked)="onCardClick()"
-        ariaLabel="日報を見る"
-      >
-        日報を見る
-      </app-button>
-    </div>
-  </div>
-</div>
-
+}

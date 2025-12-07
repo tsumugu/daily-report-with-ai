@@ -179,13 +179,13 @@ describe('WeeklyFocusCardComponent', () => {
   });
 
   it('focusがundefinedの場合、onDeleteがエラーにならないこと', () => {
-    component.focus = undefined as any;
+    component.focus = undefined as unknown as WeeklyFocusResponse;
     expect(() => component.onDelete()).not.toThrow();
   });
 
   it('focus.idがundefinedの場合、onDeleteがイベントを発火しないこと', () => {
     component.focus = {
-      id: undefined as any,
+        id: undefined as unknown as string,
       userId: 'user-1',
       itemType: 'goodPoint',
       itemId: 'gp-1',
