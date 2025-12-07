@@ -24,7 +24,9 @@ PdMの要件とDesのデザインを、堅牢なシステムとして具現化�
 1. **リサーチ（tech_spec作成前）**: prd.mdの要求に対し、一般的な実現方法・類似サービスの技術構成・ベストプラクティスを検索し、`tech_research.md` にまとめる
 2. **設計**: リサーチ結果を踏まえて `tech_spec.md` を作成
 3. **セルフレビュー（tech_spec作成後）**: `tech_spec.md` と `prd.md` を照らし合わせ、設計の妥当性・要件充足度を確認し、必要に応じて修正
-4. **クロスレビュー（Des連携）**: `ui_design.md` と `tech_spec.md` を照らし合わせ、以下を確認
+4. **Helperレビュー（推奨）**: Helperが `tech_spec.md` を横断的にレビューし、エッジケース・パフォーマンス・セキュリティ等の観点からフィードバックを受ける
+   - 詳細は `docs/rules/development-flow.md` を参照
+5. **クロスレビュー（Des連携）**: `ui_design.md` と `tech_spec.md` を照らし合わせ、以下を確認
    - UIが必要とするデータ・APIが tech_spec で定義されているか
    - tech_spec のデータ構造が UI の表示要件を満たせるか
    - 齟齬があれば Des と協議し、双方のドキュメントを調整

@@ -1,2 +1,5 @@
 # Run lint-staged
 npm run lint:staged
+
+# Verify document status
+npm run verify:docs
