@@ -4,7 +4,7 @@ import { DailyReport, GoodPoint, Improvement } from '../models/daily-report.mode
  * 日報インメモリデータベース
  */
 export class DailyReportsDatabase {
-  private reports: Map<string, DailyReport> = new Map();
+  private reports = new Map<string, DailyReport>();
 
   save(report: DailyReport): void {
     this.reports.set(report.id, report);
@@ -48,7 +48,7 @@ export class DailyReportsDatabase {
  * よかったことインメモリデータベース
  */
 export class GoodPointsDatabase {
-  private goodPoints: Map<string, GoodPoint> = new Map();
+  private goodPoints = new Map<string, GoodPoint>();
 
   save(goodPoint: GoodPoint): void {
     this.goodPoints.set(goodPoint.id, goodPoint);
@@ -94,7 +94,7 @@ export class GoodPointsDatabase {
  * 改善点インメモリデータベース
  */
 export class ImprovementsDatabase {
-  private improvements: Map<string, Improvement> = new Map();
+  private improvements = new Map<string, Improvement>();
 
   save(improvement: Improvement): void {
     this.improvements.set(improvement.id, improvement);

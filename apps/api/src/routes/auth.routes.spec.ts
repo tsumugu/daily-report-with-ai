@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import express, { Express } from 'express';
 import request from 'supertest';
 import { authRouter } from './auth.routes';

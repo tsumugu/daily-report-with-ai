@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { TextareaFieldComponent } from '../../app/shared/components/textarea-field/textarea-field.component';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 const meta: Meta<TextareaFieldComponent> = {
   title: 'Components/TextareaField',
