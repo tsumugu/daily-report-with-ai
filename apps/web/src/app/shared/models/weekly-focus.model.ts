@@ -1,0 +1,39 @@
+/**
+ * 週次フォーカスモデル
+ */
+export interface WeeklyFocus {
+  id: string;
+  userId: string;
+  itemType: 'goodPoint' | 'improvement';
+  itemId: string;
+  weekStartDate: string; // YYYY-MM-DD（月曜日）
+  createdAt: string;
+}
+
+/**
+ * 週次フォーカス作成リクエスト
+ */
+export interface CreateWeeklyFocusRequest {
+  itemType: 'goodPoint' | 'improvement';
+  itemId: string;
+}
+
+/**
+ * 週次フォーカスレスポンス（よかったこと/改善点の情報を含む）
+ */
+export interface WeeklyFocusResponse extends WeeklyFocus {
+  item: {
+    id: string;
+    content: string;
+    status: string;
+    success_count: number;
+  } | null;
+}
+
+/**
+ * 週次フォーカス一覧レスポンス
+ */
+export interface WeeklyFocusesResponse {
+  data: WeeklyFocusResponse[];
+}
+

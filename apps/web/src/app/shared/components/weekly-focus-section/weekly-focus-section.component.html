@@ -1,0 +1,49 @@
+<div class="weekly-focus-section">
+  <div class="weekly-focus-section__header">
+    <h2 class="weekly-focus-section__title">今週のフォーカス</h2>
+    <app-button
+      *ngIf="showAddButton"
+      variant="add"
+      size="sm"
+      (clicked)="onAddClick()"
+      ariaLabel="フォーカスを追加"
+    >
+      ＋追加
+    </app-button>
+  </div>
+
+  <div class="weekly-focus-section__content">
+    <div *ngIf="loading" class="weekly-focus-section__loading">
+      読み込み中...
+    </div>
+
+    <div *ngIf="error" class="weekly-focus-section__error">
+      {{ error }}
+    </div>
+
+    <div *ngIf="isEmpty" class="weekly-focus-section__empty">
+      <p class="weekly-focus-section__empty-message">
+        今週のフォーカスが<br />
+        設定されていません
+      </p>
+      <app-button
+        *ngIf="showAddButton"
+        variant="primary"
+        size="sm"
+        (clicked)="onAddClick()"
+        ariaLabel="フォーカスを追加"
+      >
+        ＋ フォーカスを追加
+      </app-button>
+    </div>
+
+    <div *ngIf="!loading && !error && !isEmpty" class="weekly-focus-section__list">
+      <app-weekly-focus-card
+        *ngFor="let focus of focuses"
+        [focus]="focus"
+        (deleteClicked)="onDelete($event)"
+      ></app-weekly-focus-card>
+    </div>
+  </div>
+</div>
+

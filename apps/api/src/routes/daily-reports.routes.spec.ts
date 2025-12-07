@@ -144,7 +144,8 @@ describe('dailyReportsRouter', () => {
       expect(response.status).toBe(201);
       expect(response.body.id).toBeDefined();
       expect(response.body.content).toBe('よかったこと');
-      expect(response.body.status).toBe('未対応');
+      expect(response.body.status).toBe('未着手');
+      expect(response.body.success_count).toBe(0);
     });
 
     it('contentが不足している場合、400エラーを返すこと', async () => {

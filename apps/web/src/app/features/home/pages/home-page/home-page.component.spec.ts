@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { HomePageComponent } from './home-page.component';
@@ -24,7 +25,7 @@ describe('HomePageComponent', () => {
     });
 
     await TestBed.configureTestingModule({
-      imports: [HomePageComponent, RouterTestingModule.withRoutes([])],
+      imports: [HomePageComponent, RouterTestingModule.withRoutes([]), HttpClientTestingModule],
       providers: [{ provide: AuthService, useValue: authServiceSpy }],
     }).compileComponents();
 
@@ -93,6 +94,13 @@ describe('HomePageComponent', () => {
     it('日報入力へのリンクが表示されること', () => {
       const dailyReportLink = fixture.nativeElement.querySelector('a[routerLink="/daily-reports/new"]');
       expect(dailyReportLink).toBeTruthy();
+    });
+  });
+
+  describe('onAddWeeklyFocus', () => {
+    it('週次フォーカス追加ボタンクリック時、フォロー項目一覧ページに遷移すること', () => {
+      component.onAddWeeklyFocus();
+      expect(router.navigate).toHaveBeenCalledWith(['/followups']);
     });
   });
 });

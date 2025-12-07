@@ -1,0 +1,37 @@
+<div class="followup-card" *ngIf="item">
+  <div class="followup-card__header">
+    <span class="followup-card__type">
+      {{ itemTypeIcon }} {{ itemTypeLabel }}
+    </span>
+      <app-status-badge [status]="status!" *ngIf="status"></app-status-badge>
+  </div>
+  <div class="followup-card__content">
+    <p class="followup-card__text">{{ item.item.content }}</p>
+    <div class="followup-card__meta">
+      <span class="followup-card__success-count">成功: {{ successCount }}回</span>
+      <span class="followup-card__settled-badge" *ngIf="isSettled">定着</span>
+    </div>
+  </div>
+  <div class="followup-card__footer">
+    <span class="followup-card__date">📅 {{ item.reportDate }}</span>
+    <div class="followup-card__actions">
+      <app-button
+        variant="outline"
+        size="sm"
+        (clicked)="onFollowupClick()"
+        ariaLabel="フォローアップを入力"
+      >
+        フォローアップ
+      </app-button>
+      <app-button
+        variant="ghost"
+        size="sm"
+        (clicked)="onCardClick()"
+        ariaLabel="日報を見る"
+      >
+        日報を見る
+      </app-button>
+    </div>
+  </div>
+</div>
+

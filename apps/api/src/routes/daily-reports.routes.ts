@@ -126,7 +126,8 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
         content: gp.content,
         factors: gp.factors || null,
         tags: gp.tags || [],
-        status: '未対応',
+        status: '未着手',
+        success_count: 0,
         createdAt: now,
         updatedAt: now,
       };
@@ -151,6 +152,7 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
         content: imp.content,
         action: imp.action || null,
         status: '未着手',
+        success_count: 0,
         createdAt: now,
         updatedAt: now,
       };
@@ -274,7 +276,8 @@ dailyReportsRouter.post('/good-points', (req: Request, res: Response) => {
     content: body.content,
     factors: body.factors || null,
     tags: body.tags || [],
-    status: '未対応',
+    status: '未着手',
+    success_count: 0,
     createdAt: now,
     updatedAt: now,
   };
@@ -347,6 +350,7 @@ dailyReportsRouter.post('/improvements', (req: Request, res: Response) => {
     content: body.content,
     action: body.action || null,
     status: '未着手',
+    success_count: 0,
     createdAt: now,
     updatedAt: now,
   };

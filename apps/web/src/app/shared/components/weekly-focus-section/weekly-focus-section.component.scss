@@ -1,0 +1,60 @@
+@use '../../../../styles/tokens/colors' as *;
+
+.weekly-focus-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.weekly-focus-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.weekly-focus-section__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.weekly-focus-section__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.weekly-focus-section__loading,
+.weekly-focus-section__error {
+  padding: 1rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.weekly-focus-section__error {
+  color: var(--color-error-600);
+}
+
+.weekly-focus-section__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.weekly-focus-section__empty-message {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.weekly-focus-section__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+

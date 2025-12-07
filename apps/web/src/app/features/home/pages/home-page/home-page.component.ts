@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
+import { WeeklyFocusSectionComponent } from '../../../../shared/components/weekly-focus-section/weekly-focus-section.component';
 
 /**
  * ホームページコンポーネント
@@ -10,7 +11,7 @@ import { AuthService } from '../../../auth/services/auth.service';
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, WeeklyFocusSectionComponent],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss',
 })
@@ -33,6 +34,13 @@ export class HomePageComponent {
         this.router.navigate(['/login']);
       },
     });
+  }
+
+  /**
+   * 週次フォーカス追加ボタンクリック時
+   */
+  onAddWeeklyFocus(): void {
+    this.router.navigate(['/followups']);
   }
 }
 
