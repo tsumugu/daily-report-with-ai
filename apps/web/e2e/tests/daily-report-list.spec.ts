@@ -165,7 +165,7 @@ test.describe('日報一覧・詳細画面', () => {
 
     // よかったことバッジが表示されていることを確認
     await expect(page.locator('.report-card__badge--good')).toBeVisible();
-    await expect(page.locator('.report-card__badge--good')).toContainText('✨');
+    await expect(page.locator('.report-card__badge--good')).toHaveAttribute('title', 'よかったこと有り');
   });
 
   test('改善点がある日報にはバッジが表示されること', async ({ page }) => {
@@ -185,7 +185,7 @@ test.describe('日報一覧・詳細画面', () => {
 
     // 改善点バッジが表示されていることを確認
     await expect(page.locator('.report-card__badge--improvement')).toBeVisible();
-    await expect(page.locator('.report-card__badge--improvement')).toContainText('📝');
+    await expect(page.locator('.report-card__badge--improvement')).toHaveAttribute('title', '改善点有り');
   });
 });
 
