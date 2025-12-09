@@ -2,7 +2,7 @@
   <div class="followup-card">
     <div class="followup-card__header">
       <span class="followup-card__type">
-        <app-icon [name]="itemTypeIcon" [size]="20" [color]="item.itemType === 'goodPoint' ? 'var(--color-success-500)' : 'var(--color-primary-500)'" [ariaLabel]="itemTypeLabel" />
+        <app-icon [name]="itemTypeIcon" [size]="20" [color]="'var(--color-primary-500)'" [ariaLabel]="itemTypeLabel" />
         {{ itemTypeLabel }}
       </span>
       @if (status) {
@@ -17,10 +17,7 @@
           <span class="followup-card__settled-badge">定着</span>
         }
         @if (isInWeeklyFocus) {
-          <span class="followup-card__weekly-focus-badge">
-            <app-icon name="target" [size]="16" color="var(--color-primary-500)" ariaLabel="今週のフォーカス" />
-            今週のフォーカス
-          </span>
+          <span class="followup-card__weekly-focus-badge">🎯 今週のフォーカス</span>
         }
       </div>
     </div>
@@ -30,6 +27,17 @@
         {{ item.reportDate }}
       </span>
       <div class="followup-card__actions">
+        <app-icon-button
+          iconName="pin"
+          [size]="20"
+          [color]="isInWeeklyFocus ? 'var(--color-primary-600)' : 'var(--color-primary-500)'"
+          [tooltip]="isInWeeklyFocus ? 'フォーカスから削除' : 'フォーカスに追加'"
+          [loading]="isAddingToWeeklyFocus"
+          [disabled]="isAddingToWeeklyFocus || (!isInWeeklyFocus && isWeeklyFocusLimitReached)"
+          [pinned]="isInWeeklyFocus"
+          (clicked)="onToggleWeeklyFocus()"
+          [ariaLabel]="isInWeeklyFocus ? 'フォーカスから削除' : 'フォーカスに追加'"
+        ></app-icon-button>
         <app-button
           variant="outline"
           size="sm"
@@ -38,18 +46,6 @@
         >
           フォローアップ
         </app-button>
-        @if (!isInWeeklyFocus) {
-          <app-button
-            variant="secondary"
-            size="sm"
-            [loading]="isAddingToWeeklyFocus"
-            [disabled]="isAddingToWeeklyFocus || isWeeklyFocusLimitReached"
-            (clicked)="onAddToWeeklyFocus()"
-            ariaLabel="フォーカスに追加"
-          >
-            {{ isAddingToWeeklyFocus ? '追加中...' : 'フォーカスに追加' }}
-          </app-button>
-        }
         <app-button
           variant="ghost"
           size="sm"
