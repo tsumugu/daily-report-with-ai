@@ -3,7 +3,7 @@
 **バージョン**: Phase 2 v2  
 **作成日**: 2025-12-10  
 **作成者**: PdM  
-**ステータス**: Draft  
+**ステータス**: Pending  
 **承認日**: -  
 **承認者**: -
 
@@ -144,11 +144,13 @@ So that 振り返りの優先順位を決められる
 
 ## 9. 関連ドキュメント
 
-| ドキュメント                               | 説明                        |
-| :----------------------------------------- | :-------------------------- |
-| `docs/features/daily-report-list/prd.md`   | 日報一覧機能の既存PRD       |
-| `docs/features/followup-management/prd.md` | フォローアップ管理機能のPRD |
+| ドキュメント                                                | 説明                        |
+| :---------------------------------------------------------- | :-------------------------- |
+| `docs/features/daily-report-list/prd.md`                    | 日報一覧機能の既存PRD       |
+| `docs/features/followup-management/prd.md`                  | フォローアップ管理機能のPRD |
+| `docs/features/daily-report-list-item-details/tech_spec.md` | 技術設計書（作成予定）      |
+| `docs/features/daily-report-list-item-details/ui_design.md` | UI設計書（作成予定）        |
 
 ---
 
-_本PRDは Draft ステータスです。クロスレビュー後に承認予定です。_
+_本PRDは Pending ステータスです。クロスレビュー後に承認予定です。_
