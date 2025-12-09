@@ -1,0 +1,25 @@
+<div class="icon-button__wrapper">
+  <button
+    type="button"
+    [class]="buttonClasses"
+    [disabled]="disabled || loading"
+    [attr.aria-label]="ariaLabel || tooltip"
+    (click)="onClick($event)"
+  >
+    @if (loading) {
+      <span class="icon-button__spinner"></span>
+    }     @else {
+      <app-icon
+        [name]="iconName"
+        [size]="size"
+        [color]="color"
+        [fill]="pinned ? color : 'none'"
+        [ariaLabel]="ariaLabel || tooltip"
+      ></app-icon>
+    }
+  </button>
+  @if (tooltip) {
+    <span class="icon-button__tooltip">{{ tooltip }}</span>
+  }
+</div>
+

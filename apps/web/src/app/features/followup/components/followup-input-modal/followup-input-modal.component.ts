@@ -89,6 +89,16 @@ export class FollowupInputModalComponent implements OnInit {
     return this.item.itemType === 'goodPoint' ? '再現日' : '完了日';
   }
 
+  get memoLabel(): string {
+    return this.item.itemType === 'goodPoint' ? '再現メモ' : '実施内容';
+  }
+
+  get memoPlaceholder(): string {
+    return this.item.itemType === 'goodPoint'
+      ? 'どのように再現したか、できなかった理由などを記録してください'
+      : 'どのようなアクションを実施したか、できなかった理由などを記録してください';
+  }
+
   get dateRequired(): boolean {
     const status = this.form.get('status')?.value as string;
     return status === '再現成功' || status === '完了';

@@ -47,10 +47,10 @@
 
           <div class="form-field">
             <app-textarea-field
-              label="再現メモ"
+              [label]="memoLabel"
               id="memo"
               formControlName="memo"
-              placeholder="どのように再現したか、実施内容などを記録してください"
+              [placeholder]="memoPlaceholder"
               [maxLength]="500"
               [showCharCount]="true"
               [errorMessage]="

@@ -50,7 +50,7 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
   itemTypeFilter = signal<'goodPoint' | 'improvement' | 'すべて'>('すべて');
 
   // 週次フォーカス
-  private weeklyFocusMap = new Map<string, boolean>();
+  private weeklyFocusMap = new Map<string, string>(); // key: "itemType-itemId", value: weeklyFocusId
   weeklyFocusCount = signal(0);
   addingToWeeklyFocusItemId = signal<string | null>(null);
 
@@ -157,7 +157,7 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
     this.weeklyFocusMap.clear();
     weeklyFocuses.forEach((focus) => {
       const key = `${focus.itemType}-${focus.itemId}`;
-      this.weeklyFocusMap.set(key, true);
+      this.weeklyFocusMap.set(key, focus.id);
     });
     // 週次フォーカスの件数を更新
     this.weeklyFocusCount.set(weeklyFocuses.length);
@@ -215,19 +215,39 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
   }
 
   onModalSaved(): void {
-    this.loadItems();
+    // フォローアップ保存後、データを再取得してカードのステータスを更新
+    this.loadItems(true);
     this.onModalClosed();
+  }
+
+  /**
+   * 週次フォーカスのIDを取得
+   */
+  getWeeklyFocusId(item: FollowupItem): string | null {
+    const key = `${item.itemType}-${item.item.id}`;
+    return this.weeklyFocusMap.get(key) || null;
+  }
+
+  /**
+   * 週次フォーカスに追加または削除（トグル）
+   */
+  onToggleWeeklyFocus(item: FollowupItem): void {
+    const key = `${item.itemType}-${item.item.id}`;
+    const weeklyFocusId = this.weeklyFocusMap.get(key);
+
+    if (weeklyFocusId) {
+      // 既にフォーカスに設定されている場合は削除
+      this.onRemoveFromWeeklyFocus(item, weeklyFocusId);
+    } else {
+      // フォーカスに追加
+      this.onAddToWeeklyFocus(item);
+    }
   }
 
   /**
    * 週次フォーカスに追加
    */
   onAddToWeeklyFocus(item: FollowupItem): void {
-    // 既にフォーカスに設定されている場合は何もしない
-    if (this.isInWeeklyFocus(item)) {
-      return;
-    }
-
     // 最大件数に達している場合はエラーを表示
     if (this.isWeeklyFocusLimitReached()) {
       this.showToast('今週のフォーカスは最大5件まで設定できます', 'error');
@@ -251,6 +271,8 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
           // フォロー項目一覧を更新（各カードのisInWeeklyFocusを更新）
           // リセットして再読み込み（週次フォーカス情報も含めて更新）
           this.loadItems(true);
+          // loading状態をリセット
+          this.addingToWeeklyFocusItemId.set(null);
         },
         error: (err: { error?: { message?: string } }) => {
           // エラー時：トースト通知でエラーメッセージ表示
@@ -260,6 +282,36 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
           this.addingToWeeklyFocusItemId.set(null);
         },
       });
+  }
+
+  /**
+   * 週次フォーカスから削除
+   */
+  onRemoveFromWeeklyFocus(item: FollowupItem, weeklyFocusId: string): void {
+    const key = `${item.itemType}-${item.item.id}`;
+    this.addingToWeeklyFocusItemId.set(key);
+    this.toastMessage.set(null);
+
+    this.subscription = this.weeklyFocusService.deleteWeeklyFocus(weeklyFocusId).subscribe({
+      next: () => {
+        // 成功時：トースト通知を表示
+        this.showToast('今週のフォーカスから削除しました', 'success');
+        // 週次フォーカス一覧を再取得
+        this.loadWeeklyFocuses();
+        // フォロー項目一覧を更新
+        this.loadItems(true);
+        // loading状態をリセット
+        this.addingToWeeklyFocusItemId.set(null);
+      },
+      error: (err: { error?: { message?: string } }) => {
+        // エラー時：トースト通知でエラーメッセージ表示
+        const errorMessage =
+          err.error?.message || '週次フォーカスの削除に失敗しました';
+        this.showToast(errorMessage, 'error');
+        // loading状態をリセット
+        this.addingToWeeklyFocusItemId.set(null);
+      },
+    });
   }
 
   /**

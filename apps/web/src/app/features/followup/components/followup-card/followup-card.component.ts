@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { StatusBadgeComponent, StatusBadgeType } from '../../../../shared/components/status-badge/status-badge.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { IconComponent, IconName } from '../../../../shared/components/icon';
+import { IconButtonComponent } from '../../../../shared/components/icon-button';
 import { FollowupItem } from '../../../../shared/models/followup.model';
 
 @Component({
   selector: 'app-followup-card',
   standalone: true,
-  imports: [CommonModule, StatusBadgeComponent, ButtonComponent, IconComponent],
+  imports: [CommonModule, StatusBadgeComponent, ButtonComponent, IconComponent, IconButtonComponent],
   templateUrl: './followup-card.component.html',
   styleUrl: './followup-card.component.scss',
 })
@@ -19,7 +20,7 @@ export class FollowupCardComponent {
   @Input() isWeeklyFocusLimitReached = false;
   @Output() cardClick = new EventEmitter<string>();
   @Output() followupClick = new EventEmitter<FollowupItem>();
-  @Output() addToWeeklyFocus = new EventEmitter<FollowupItem>();
+  @Output() toggleWeeklyFocus = new EventEmitter<FollowupItem>();
 
   onCardClick(): void {
     this.cardClick.emit(this.item.reportId);
@@ -29,8 +30,8 @@ export class FollowupCardComponent {
     this.followupClick.emit(this.item);
   }
 
-  onAddToWeeklyFocus(): void {
-    this.addToWeeklyFocus.emit(this.item);
+  onToggleWeeklyFocus(): void {
+    this.toggleWeeklyFocus.emit(this.item);
   }
 
   get itemTypeLabel(): string {
@@ -38,7 +39,7 @@ export class FollowupCardComponent {
   }
 
   get itemTypeIcon(): IconName {
-    return this.item.itemType === 'goodPoint' ? 'sparkles' : 'file-text';
+    return this.item.itemType === 'goodPoint' ? 'heart' : 'file-text';
   }
 
   get status(): StatusBadgeType | undefined {

@@ -14,4 +14,5 @@ export * from './toast';
 export * from './weekly-focus-section';
 export * from './weekly-focus-card';
 export * from './icon';
+export * from './icon-button';
 
