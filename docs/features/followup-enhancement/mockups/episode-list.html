@@ -19,15 +19,14 @@
         <div class="episode-section__header">
           <h3 class="episode-section__title">再現エピソード</h3>
           <div class="episode-section__status">
-            <span class="status-badge status-badge--progress">進行中</span>
-            <span class="episode-count">2/3件</span>
+            <span class="status-badge status-badge--progress">進行中 2/3件</span>
           </div>
         </div>
 
         <!-- エピソード一覧 -->
-        <div class="episode-list">
+        <div class="episode-list" role="list">
           <!-- エピソード1 -->
-          <div class="episode-item">
+          <div class="episode-item" role="listitem">
             <div class="episode-item__content">
               <div class="episode-item__date">
                 <span class="episode-item__date-label">再現日:</span>
@@ -39,7 +38,7 @@
           </div>
 
           <!-- エピソード2 -->
-          <div class="episode-item">
+          <div class="episode-item" role="listitem">
             <div class="episode-item__content">
               <div class="episode-item__date">
                 <span class="episode-item__date-label">再現日:</span>
@@ -98,6 +97,12 @@
         </form>
       </section>
     </div>
+
+    <!-- モーダルフッター -->
+    <footer class="modal-footer">
+      <button type="button" class="button button--outline">キャンセル</button>
+      <button type="button" class="button button--primary">保存する</button>
+    </footer>
   </div>
 </body>
 </html>
