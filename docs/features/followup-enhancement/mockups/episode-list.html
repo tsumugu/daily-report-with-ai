@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>エピソード一覧モック</title>
+  <link rel="stylesheet" href="episode-list.css">
+</head>
+<body>
+  <div class="modal-content">
+    <header class="modal-header">
+      <h2 class="modal-title">よかったことのフォローアップ</h2>
+      <button class="modal-close" aria-label="閉じる">×</button>
+    </header>
+
+    <div class="modal-body">
+      <!-- エピソード一覧セクション -->
+      <section class="episode-section">
+        <div class="episode-section__header">
+          <h3 class="episode-section__title">再現エピソード</h3>
+          <div class="episode-section__status">
+            <span class="status-badge status-badge--progress">進行中</span>
+            <span class="episode-count">2/3件</span>
+          </div>
+        </div>
+
+        <!-- エピソード一覧 -->
+        <div class="episode-list">
+          <!-- エピソード1 -->
+          <div class="episode-item">
+            <div class="episode-item__content">
+              <div class="episode-item__date">
+                <span class="episode-item__date-label">再現日:</span>
+                <span class="episode-item__date-value">2025-12-08</span>
+              </div>
+              <p class="episode-item__memo">チーム会議で積極的に発言できた。前回よりも自信を持って意見を述べられた。</p>
+            </div>
+            <button class="episode-item__delete" aria-label="削除">×</button>
+          </div>
+
+          <!-- エピソード2 -->
+          <div class="episode-item">
+            <div class="episode-item__content">
+              <div class="episode-item__date">
+                <span class="episode-item__date-label">再現日:</span>
+                <span class="episode-item__date-value">2025-12-10</span>
+              </div>
+              <p class="episode-item__memo">1on1で上司に良いフィードバックをもらえた。同じアプローチで成功した。</p>
+            </div>
+            <button class="episode-item__delete" aria-label="削除">×</button>
+          </div>
+        </div>
+
+        <!-- エピソード追加ボタン -->
+        <button class="episode-add-button">
+          <span class="episode-add-button__icon">＋</span>
+          <span class="episode-add-button__label">エピソードを追加</span>
+        </button>
+      </section>
+
+      <!-- エピソード入力フォーム（追加時のみ表示） -->
+      <section class="episode-form" style="display: none;">
+        <h3 class="episode-form__title">エピソードを追加</h3>
+        <form class="episode-form__form">
+          <div class="form-field">
+            <label class="form-label" for="episode-date">
+              再現日 <span class="form-required">*</span>
+            </label>
+            <input
+              type="date"
+              id="episode-date"
+              class="form-input"
+              required
+            />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="episode-memo">
+              再現メモ
+            </label>
+            <textarea
+              id="episode-memo"
+              class="form-textarea"
+              rows="4"
+              maxlength="500"
+              placeholder="どのように再現したか記録してください"
+            ></textarea>
+            <div class="form-char-count">
+              <span class="form-char-count__current">0</span>
+              <span class="form-char-count__max">/500</span>
+            </div>
+          </div>
+
+          <div class="episode-form__actions">
+            <button type="button" class="button button--outline">キャンセル</button>
+            <button type="submit" class="button button--primary">追加</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
+

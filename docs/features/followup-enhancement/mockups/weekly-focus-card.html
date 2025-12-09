@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>週次フォーカスカードモック</title>
+  <link rel="stylesheet" href="weekly-focus-card.css">
+</head>
+<body>
+  <div class="weekly-focus-section">
+    <h2 class="weekly-focus-section__title">今週のフォーカス</h2>
+    
+    <div class="weekly-focus-section__list">
+      <!-- 週次フォーカスカード（よかったこと） -->
+      <div class="weekly-focus-card">
+        <div class="weekly-focus-card__header">
+          <span class="weekly-focus-card__type">
+            <span class="icon">❤️</span>
+            よかったこと
+          </span>
+          <button class="weekly-focus-card__delete" aria-label="削除">×</button>
+        </div>
+        <div class="weekly-focus-card__content">
+          <p class="weekly-focus-card__text">チーム会議で積極的に発言できた。前回よりも自信を持って意見を述べられた。</p>
+          <div class="weekly-focus-card__meta">
+            <span class="status-badge status-badge--progress">進行中</span>
+            <span class="weekly-focus-card__success-count">成功: 2回</span>
+          </div>
+        </div>
+        <div class="weekly-focus-card__footer">
+          <span class="weekly-focus-card__date">
+            <span class="icon">📅</span>
+            2025-12-05
+          </span>
+          <div class="weekly-focus-card__actions">
+            <button class="button button--outline button--sm">
+              フォローアップ
+            </button>
+            <a href="#" class="weekly-focus-card__link">
+              日報を見る →
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 週次フォーカスカード（改善点） -->
+      <div class="weekly-focus-card">
+        <div class="weekly-focus-card__header">
+          <span class="weekly-focus-card__type">
+            <span class="icon">📄</span>
+            改善点
+          </span>
+          <button class="weekly-focus-card__delete" aria-label="削除">×</button>
+        </div>
+        <div class="weekly-focus-card__content">
+          <p class="weekly-focus-card__text">朝の時間管理を改善する。前日の夜に翌日のタスクを整理する習慣を身につける。</p>
+          <div class="weekly-focus-card__meta">
+            <span class="status-badge status-badge--success">完了</span>
+            <span class="weekly-focus-card__success-count">成功: 3回</span>
+          </div>
+        </div>
+        <div class="weekly-focus-card__footer">
+          <span class="weekly-focus-card__date">
+            <span class="icon">📅</span>
+            2025-12-03
+          </span>
+          <div class="weekly-focus-card__actions">
+            <button class="button button--outline button--sm">
+              フォローアップ
+            </button>
+            <a href="#" class="weekly-focus-card__link">
+              日報を見る →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
