@@ -15,66 +15,114 @@ import { Component } from '@angular/core';
       <hr class="colors-showcase__divider">
       
       <h2 class="colors-showcase__section-title">Primary Colors（メインカラー）</h2>
-      <p class="colors-showcase__section-description">ブランドカラーとして使用する紫〜青系のカラーです。</p>
+      <p class="colors-showcase__section-description">ブランドカラーとして使用するAmber（オレンジ）系のカラーです。</p>
       <div class="colors-showcase__grid">
         <div class="color-swatch">
           <div class="color-swatch__box" style="background: var(--color-primary-50);"></div>
           <span class="color-swatch__name">primary-50</span>
-          <span class="color-swatch__value">#eef2ff</span>
+          <span class="color-swatch__value">#fffbeb</span>
         </div>
         <div class="color-swatch">
           <div class="color-swatch__box" style="background: var(--color-primary-100);"></div>
           <span class="color-swatch__name">primary-100</span>
-          <span class="color-swatch__value">#e0e7ff</span>
+          <span class="color-swatch__value">#fef3c7</span>
         </div>
         <div class="color-swatch">
           <div class="color-swatch__box" style="background: var(--color-primary-200);"></div>
           <span class="color-swatch__name">primary-200</span>
-          <span class="color-swatch__value">#c7d2fe</span>
+          <span class="color-swatch__value">#fde68a</span>
         </div>
         <div class="color-swatch">
           <div class="color-swatch__box" style="background: var(--color-primary-300);"></div>
           <span class="color-swatch__name">primary-300</span>
-          <span class="color-swatch__value">#a5b4fc</span>
+          <span class="color-swatch__value">#fcd34d</span>
         </div>
         <div class="color-swatch">
           <div class="color-swatch__box" style="background: var(--color-primary-400);"></div>
           <span class="color-swatch__name">primary-400</span>
-          <span class="color-swatch__value">#818cf8</span>
+          <span class="color-swatch__value">#fbbf24</span>
         </div>
         <div class="color-swatch">
           <div class="color-swatch__box" style="background: var(--color-primary-500);"></div>
           <span class="color-swatch__name">primary-500</span>
-          <span class="color-swatch__value">#667eea</span>
+          <span class="color-swatch__value">#f59e0b</span>
         </div>
         <div class="color-swatch">
           <div class="color-swatch__box" style="background: var(--color-primary-600);"></div>
           <span class="color-swatch__name">primary-600</span>
-          <span class="color-swatch__value">#5b5bd6</span>
+          <span class="color-swatch__value">#d97706</span>
         </div>
         <div class="color-swatch">
           <div class="color-swatch__box" style="background: var(--color-primary-700);"></div>
           <span class="color-swatch__name">primary-700</span>
-          <span class="color-swatch__value">#4f46e5</span>
+          <span class="color-swatch__value">#b45309</span>
         </div>
         <div class="color-swatch">
           <div class="color-swatch__box" style="background: var(--color-primary-800);"></div>
           <span class="color-swatch__name">primary-800</span>
-          <span class="color-swatch__value">#4338ca</span>
+          <span class="color-swatch__value">#92400e</span>
         </div>
         <div class="color-swatch">
           <div class="color-swatch__box" style="background: var(--color-primary-900);"></div>
           <span class="color-swatch__name">primary-900</span>
-          <span class="color-swatch__value">#3730a3</span>
+          <span class="color-swatch__value">#78350f</span>
         </div>
       </div>
 
       <hr class="colors-showcase__divider">
 
-      <h2 class="colors-showcase__section-title">Gradients（グラデーション）</h2>
-      <div class="gradient-showcase">
-        <div class="gradient-showcase__box" style="background: var(--gradient-primary);">
-          <span class="gradient-showcase__label">gradient-primary</span>
+      <h2 class="colors-showcase__section-title">Secondary Colors（アクセントカラー）</h2>
+      <p class="colors-showcase__section-description">Primaryの補色として使用するTeal（ティール/青緑）系のカラーです。</p>
+      <div class="colors-showcase__grid">
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-secondary-50);"></div>
+          <span class="color-swatch__name">secondary-50</span>
+          <span class="color-swatch__value">#f0fdfa</span>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-secondary-100);"></div>
+          <span class="color-swatch__name">secondary-100</span>
+          <span class="color-swatch__value">#ccfbf1</span>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-secondary-200);"></div>
+          <span class="color-swatch__name">secondary-200</span>
+          <span class="color-swatch__value">#99f6e4</span>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-secondary-300);"></div>
+          <span class="color-swatch__name">secondary-300</span>
+          <span class="color-swatch__value">#5eead4</span>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-secondary-400);"></div>
+          <span class="color-swatch__name">secondary-400</span>
+          <span class="color-swatch__value">#2dd4bf</span>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-secondary-500);"></div>
+          <span class="color-swatch__name">secondary-500</span>
+          <span class="color-swatch__value">#14b8a6</span>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-secondary-600);"></div>
+          <span class="color-swatch__name">secondary-600</span>
+          <span class="color-swatch__value">#0d9488</span>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-secondary-700);"></div>
+          <span class="color-swatch__name">secondary-700</span>
+          <span class="color-swatch__value">#0f766e</span>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-secondary-800);"></div>
+          <span class="color-swatch__name">secondary-800</span>
+          <span class="color-swatch__value">#115e59</span>
+        </div>
+        <div class="color-swatch">
+          <div class="color-swatch__box" style="background: var(--color-secondary-900);"></div>
+          <span class="color-swatch__name">secondary-900</span>
+          <span class="color-swatch__value">#134e4a</span>
         </div>
       </div>
 
@@ -92,9 +140,9 @@ import { Component } from '@angular/core';
   background: var(--color-error-50);
 {{ '}' }}
 
-/* グラデーション */
-.hero {{ '{' }}
-  background: var(--gradient-primary);
+.secondary-button {{ '{' }}
+  background: var(--color-secondary-600);
+  color: var(--color-text-inverse);
 {{ '}' }}</code></pre>
     </div>
   `,
@@ -163,26 +211,6 @@ import { Component } from '@angular/core';
       }
     }
 
-    .gradient-showcase {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
-
-      &__box {
-        width: 200px;
-        height: 100px;
-        border-radius: 8px;
-        display: flex;
-        align-items: flex-end;
-        padding: 0.5rem;
-      }
-
-      &__label {
-        color: var(--color-text-inverse);
-        font-size: 12px;
-        font-weight: 500;
-      }
-    }
 
     .code-example {
       background: var(--color-bg-secondary);

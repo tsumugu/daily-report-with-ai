@@ -26,6 +26,8 @@ export class DateFieldComponent implements ControlValueAccessor {
   @Input() errorMessage = '';
   @Input() disabled = false;
   @Input() required = false;
+  @Input() touched = false;
+  @Input() submitted = false;
 
   value = '';
 
@@ -63,6 +65,11 @@ export class DateFieldComponent implements ControlValueAccessor {
 
   get hasError(): boolean {
     return !!this.errorMessage;
+  }
+
+  get shouldShowError(): boolean {
+    // touched状態または送信済みでエラーがある場合のみ表示
+    return (this.touched || this.submitted) && !!this.errorMessage;
   }
 }
 

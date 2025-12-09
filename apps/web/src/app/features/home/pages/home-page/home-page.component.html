@@ -2,7 +2,10 @@
   <!-- Header -->
   <header class="header">
     <div class="header-content">
-      <h1 class="logo">📝 Daily Report</h1>
+      <h1 class="logo">
+        <app-icon name="file-text" [size]="24" color="var(--color-primary-500)" ariaLabel="Daily Report" />
+        Daily Report
+      </h1>
       <div class="user-menu">
         @if (currentUser()) {
           <span class="user-email">{{ currentUser()?.email }}</span>
@@ -21,17 +24,23 @@
 
     <div class="feature-cards">
       <a routerLink="/daily-reports/new" class="feature-card feature-card--active">
-        <span class="icon">📋</span>
+        <span class="icon">
+          <app-icon name="clipboard" [size]="24" color="var(--color-primary-500)" ariaLabel="日報入力" />
+        </span>
         <h3>日報入力</h3>
         <p>今日の日報を書く</p>
       </a>
       <a routerLink="/daily-reports" class="feature-card feature-card--active">
-        <span class="icon">📊</span>
+        <span class="icon">
+          <app-icon name="bar-chart-3" [size]="24" color="var(--color-primary-500)" ariaLabel="日報一覧" />
+        </span>
         <h3>日報一覧</h3>
         <p>過去の日報を見る</p>
       </a>
       <div class="feature-card feature-card--coming-soon">
-        <span class="icon">🎯</span>
+        <span class="icon">
+          <app-icon name="target" [size]="24" color="var(--color-primary-500)" ariaLabel="目標管理" />
+        </span>
         <h3>目標管理</h3>
         <p>Coming Soon...</p>
       </div>

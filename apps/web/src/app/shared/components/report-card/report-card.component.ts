@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { IconComponent } from '../icon';
 
 export interface ReportCardData {
   id: string;
@@ -12,7 +13,7 @@ export interface ReportCardData {
 @Component({
   selector: 'app-report-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   templateUrl: './report-card.component.html',
   styleUrl: './report-card.component.scss',
 })

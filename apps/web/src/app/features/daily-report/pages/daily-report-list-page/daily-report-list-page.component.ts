@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { DailyReportService } from '../../services/daily-report.service';
 import { AuthService } from '../../../auth/services/auth.service';
-import { ReportCardComponent, ReportCardData, ButtonComponent, AlertBannerComponent } from '../../../../shared/components';
+import { ReportCardComponent, ReportCardData, ButtonComponent, AlertBannerComponent, IconComponent } from '../../../../shared/components';
+import { listItemAnimation } from '../../../../shared/animations/page.animations';
 
 interface DailyReportListResponse {
   data: ReportCardData[];
@@ -19,9 +20,11 @@ interface DailyReportListResponse {
     ReportCardComponent,
     ButtonComponent,
     AlertBannerComponent,
+    IconComponent,
   ],
   templateUrl: './daily-report-list-page.component.html',
   styleUrl: './daily-report-list-page.component.scss',
+  animations: [listItemAnimation],
 })
 export class DailyReportListPageComponent implements OnInit {
   private readonly dailyReportService = inject(DailyReportService);

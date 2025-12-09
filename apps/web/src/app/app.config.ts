@@ -1,6 +1,7 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors, withFetch } from '@angular/common/http';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 import { routes } from './app.routes';
 import {
@@ -8,6 +9,20 @@ import {
   withEventReplay,
 } from '@angular/platform-browser';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import {
+  LucideAngularModule,
+  FileText,
+  Clipboard,
+  ChartBar,
+  Target,
+  Sparkles,
+  Lightbulb,
+  Calendar,
+  TriangleAlert,
+  Eye,
+  EyeOff,
+  Heart,
+} from 'lucide-angular';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,5 +33,21 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([authInterceptor])
     ),
     provideClientHydration(withEventReplay()),
+    provideAnimationsAsync(),
+    importProvidersFrom(
+      LucideAngularModule.pick({
+        FileText,
+        Clipboard,
+        ChartBar,
+        Target,
+        Sparkles,
+        Lightbulb,
+        Calendar,
+        TriangleAlert,
+        Eye,
+        EyeOff,
+        Heart,
+      })
+    ),
   ],
 };

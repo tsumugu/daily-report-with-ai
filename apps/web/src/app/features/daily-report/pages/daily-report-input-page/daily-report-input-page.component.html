@@ -28,36 +28,44 @@
       formControlName="date"
       [required]="true"
       [errorMessage]="getFieldError('date') || ''"
+      [touched]="form.get('date')?.touched || false"
+      [submitted]="isSubmitted()"
     />
 
     <!-- できごと -->
     <app-textarea-field
       label="できごと"
       id="events"
-      labelIcon="📝"
+      [labelIcon]="'file-text'"
       formControlName="events"
       [required]="true"
       [maxLength]="MAX_LENGTH"
       [rows]="4"
       placeholder="今日の主な業務内容、出来事を記入してください"
       [errorMessage]="getFieldError('events') || ''"
+      [touched]="form.get('events')?.touched || false"
+      [submitted]="isSubmitted()"
     />
 
     <!-- 学び -->
     <app-textarea-field
       label="学び"
       id="learnings"
-      labelIcon="💡"
+      [labelIcon]="'lightbulb'"
       formControlName="learnings"
       [maxLength]="MAX_LENGTH"
       [rows]="3"
       placeholder="業務を通じて得た気づき、学びを記入してください"
+      [touched]="form.get('learnings')?.touched || false"
+      [submitted]="isSubmitted()"
     />
 
     <!-- よかったこと -->
-    <fieldset class="form-group">
+    <fieldset class="form-group form-group--no-border" [class.form-group--empty]="goodPoints().length === 0">
       <legend class="label">
-        <span class="label-icon">✨</span>
+        <span class="label-icon">
+          <app-icon name="heart" [size]="20" color="var(--color-primary-500)" ariaLabel="よかったこと" />
+        </span>
         よかったこと
       </legend>
 
@@ -90,13 +98,17 @@
         </app-form-card>
       }
 
+      <div class="form-group__add-button">
       <app-button variant="add" icon="plus" [fullWidth]="true" (clicked)="addGoodPoint()">追加</app-button>
+      </div>
     </fieldset>
 
     <!-- 改善点/アクション -->
-    <fieldset class="form-group">
+    <fieldset class="form-group form-group--no-border" [class.form-group--empty]="improvements().length === 0">
       <legend class="label">
-        <span class="label-icon">📈</span>
+        <span class="label-icon">
+          <app-icon name="file-text" [size]="20" color="var(--color-primary-500)" ariaLabel="改善点" />
+        </span>
         改善点/アクション
       </legend>
 
@@ -129,7 +141,9 @@
         </app-form-card>
       }
 
+      <div class="form-group__add-button">
       <app-button variant="add" icon="plus" [fullWidth]="true" (clicked)="addImprovement()">追加</app-button>
+      </div>
     </fieldset>
 
     <!-- 保存ボタン -->

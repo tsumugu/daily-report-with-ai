@@ -2,12 +2,13 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StatusBadgeComponent, StatusBadgeType } from '../status-badge/status-badge.component';
 import { ButtonComponent } from '../button/button.component';
+import { IconComponent, IconName } from '../icon';
 import { WeeklyFocusResponse } from '../../models/weekly-focus.model';
 
 @Component({
   selector: 'app-weekly-focus-card',
   standalone: true,
-  imports: [CommonModule, StatusBadgeComponent, ButtonComponent],
+  imports: [CommonModule, StatusBadgeComponent, ButtonComponent, IconComponent],
   templateUrl: './weekly-focus-card.component.html',
   styleUrl: './weekly-focus-card.component.scss',
 })
@@ -25,8 +26,8 @@ export class WeeklyFocusCardComponent {
     return this.focus?.itemType === 'goodPoint' ? 'よかったこと' : '改善点';
   }
 
-  get itemTypeIcon(): string {
-    return this.focus?.itemType === 'goodPoint' ? '✨' : '📝';
+  get itemTypeIcon(): IconName {
+    return this.focus?.itemType === 'goodPoint' ? 'sparkles' : 'file-text';
   }
 
   get reportDetailUrl(): string {

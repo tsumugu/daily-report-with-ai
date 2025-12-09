@@ -5,11 +5,12 @@ import {
   NG_VALUE_ACCESSOR,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { IconComponent } from '../icon';
 
 @Component({
   selector: 'app-input-field',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, IconComponent],
   templateUrl: './input-field.component.html',
   styleUrl: './input-field.component.scss',
   providers: [

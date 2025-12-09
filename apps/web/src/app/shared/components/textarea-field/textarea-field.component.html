@@ -2,7 +2,9 @@
   @if (label) {
     <label [for]="id" class="textarea-field__label">
       @if (labelIcon) {
-        <span class="textarea-field__icon">{{ labelIcon }}</span>
+        <span class="textarea-field__icon">
+          <app-icon [name]="labelIcon" [size]="20" color="var(--color-primary-500)" ariaLabel="" />
+        </span>
       }
       {{ label }}
       @if (required) {
@@ -22,17 +24,18 @@
     [class.textarea-field__textarea--disabled]="disabled"
     class="textarea-field__textarea"
     (input)="onInput($event)"
+    (focus)="onFocus()"
     (blur)="onBlur()"
   ></textarea>
+  
+  @if (shouldShowError) {
+    <span class="textarea-field__error">{{ errorMessage }}</span>
+  }
   
   @if (showCharCount) {
     <div class="textarea-field__char-count" [class.textarea-field__char-count--over]="isOverLimit()">
       {{ charCount() }}/{{ maxLength }}
     </div>
-  }
-  
-  @if (errorMessage) {
-    <span class="textarea-field__error">{{ errorMessage }}</span>
   }
 </div>
 

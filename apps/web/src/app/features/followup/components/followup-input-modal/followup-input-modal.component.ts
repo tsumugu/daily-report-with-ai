@@ -6,6 +6,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { TextareaFieldComponent } from '../../../../shared/components/textarea-field/textarea-field.component';
 import { DateFieldComponent } from '../../../../shared/components/date-field/date-field.component';
 import { FormCardComponent } from '../../../../shared/components/form-card/form-card.component';
+import { modalScaleAnimation } from '../../../../shared/animations/page.animations';
 
 @Component({
   selector: 'app-followup-input-modal',
@@ -19,6 +20,7 @@ import { FormCardComponent } from '../../../../shared/components/form-card/form-
   ],
   templateUrl: './followup-input-modal.component.html',
   styleUrl: './followup-input-modal.component.scss',
+  animations: [modalScaleAnimation],
 })
 export class FollowupInputModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

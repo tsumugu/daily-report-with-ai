@@ -7,14 +7,14 @@
   border-radius: 8px;
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   font-family: inherit;
   white-space: nowrap;
   position: relative;
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
   }
 
   // Sizes
@@ -36,15 +36,17 @@
   // Variants
   &--primary {
     color: var(--color-text-inverse);
-    background: var(--gradient-primary);
+    background: var(--color-primary-600);
 
     &:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 20px -10px rgba(102, 126, 234, 0.5);
+      background: var(--color-primary-700);
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     &:active:not(:disabled) {
-      transform: translateY(0);
+      background: var(--color-primary-700);
+      transform: scale(0.98);
     }
   }
 
@@ -54,12 +56,13 @@
 
     &:hover:not(:disabled) {
       background: var(--color-secondary-700);
-      transform: translateY(-1px);
-      box-shadow: 0 10px 20px -10px rgba(168, 85, 247, 0.5);
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     &:active:not(:disabled) {
-      transform: translateY(0);
+      background: var(--color-secondary-700);
+      transform: scale(0.98);
     }
   }
 
@@ -70,10 +73,13 @@
 
     &:hover:not(:disabled) {
       background: var(--color-primary-50);
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     &:active:not(:disabled) {
       background: var(--color-primary-100);
+      transform: scale(0.98);
     }
   }
 
@@ -83,10 +89,12 @@
 
     &:hover:not(:disabled) {
       background: var(--color-primary-50);
+      transform: scale(1.02);
     }
 
     &:active:not(:disabled) {
       background: var(--color-primary-100);
+      transform: scale(0.98);
     }
   }
 
@@ -96,12 +104,12 @@
 
     &:hover:not(:disabled) {
       background: var(--color-error-700);
-      transform: translateY(-1px);
-      box-shadow: 0 10px 20px -10px rgba(239, 68, 68, 0.5);
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     &:active:not(:disabled) {
-      transform: translateY(0);
+      transform: scale(0.98);
     }
   }
 
@@ -133,6 +141,11 @@
 
   &--loading {
     cursor: wait;
+    
+    .button__content {
+      opacity: 0.6;
+      transition: opacity 0.2s ease;
+    }
   }
 
   &--full-width {

@@ -2,12 +2,13 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StatusBadgeComponent, StatusBadgeType } from '../../../../shared/components/status-badge/status-badge.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { IconComponent, IconName } from '../../../../shared/components/icon';
 import { FollowupItem } from '../../../../shared/models/followup.model';
 
 @Component({
   selector: 'app-followup-card',
   standalone: true,
-  imports: [CommonModule, StatusBadgeComponent, ButtonComponent],
+  imports: [CommonModule, StatusBadgeComponent, ButtonComponent, IconComponent],
   templateUrl: './followup-card.component.html',
   styleUrl: './followup-card.component.scss',
 })
@@ -36,8 +37,8 @@ export class FollowupCardComponent {
     return this.item.itemType === 'goodPoint' ? 'よかったこと' : '改善点';
   }
 
-  get itemTypeIcon(): string {
-    return this.item.itemType === 'goodPoint' ? '✨' : '📝';
+  get itemTypeIcon(): IconName {
+    return this.item.itemType === 'goodPoint' ? 'sparkles' : 'file-text';
   }
 
   get status(): StatusBadgeType | undefined {

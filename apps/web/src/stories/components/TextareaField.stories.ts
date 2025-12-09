@@ -14,7 +14,7 @@ export const Default: Story = {
   args: {
     label: 'できごと',
     id: 'events',
-    labelIcon: '📝',
+    labelIcon: 'file-text',
     required: true,
     maxLength: 1000,
     rows: 4,
@@ -26,7 +26,7 @@ export const WithCharCount: Story = {
   args: {
     label: '学び',
     id: 'learnings',
-    labelIcon: '💡',
+    labelIcon: 'lightbulb',
     maxLength: 1000,
     rows: 3,
     placeholder: '業務を通じて得た気づき、学びを記入してください',
@@ -53,4 +53,3 @@ export const OverLimit: Story = {
     showCharCount: true,
   },
 };
-

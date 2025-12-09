@@ -2,7 +2,10 @@
   <!-- Header -->
   <header class="header">
     <div class="header-content">
-      <a routerLink="/" class="logo">📝 Daily Report</a>
+      <a routerLink="/" class="logo">
+        <app-icon name="file-text" [size]="24" color="var(--color-primary-500)" ariaLabel="Daily Report" />
+        Daily Report
+      </a>
       <div class="user-menu">
         @if (currentUser()) {
           <span class="user-email">{{ currentUser()?.email }}</span>
@@ -41,7 +44,9 @@
     <!-- Empty State -->
     @if (!isLoading() && !errorMessage() && reports().length === 0) {
       <div class="empty-container">
-        <span class="empty-icon">📋</span>
+        <span class="empty-icon">
+          <app-icon name="clipboard" [size]="48" color="var(--color-gray-400)" ariaLabel="日報なし" />
+        </span>
         <h2>まだ日報がありません</h2>
         <p>今日の日報を書いてみましょう！</p>
         <a routerLink="/daily-reports/new" class="new-report-button new-report-button--large">
@@ -53,7 +58,7 @@
 
     <!-- Report List -->
     @if (!isLoading() && !errorMessage() && reports().length > 0) {
-      <div class="report-list">
+      <div class="report-list" [@listItem]>
         @for (report of reports(); track report.id) {
           <app-report-card [report]="report" (cardClick)="onReportClick($event)" />
         }

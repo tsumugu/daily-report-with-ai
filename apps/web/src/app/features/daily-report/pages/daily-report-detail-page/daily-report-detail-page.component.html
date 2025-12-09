@@ -2,7 +2,10 @@
   <!-- Header -->
   <header class="header">
     <div class="header-content">
-      <a routerLink="/" class="logo">📝 Daily Report</a>
+      <a routerLink="/" class="logo">
+        <app-icon name="file-text" [size]="24" color="var(--color-primary-500)" ariaLabel="Daily Report" />
+        Daily Report
+      </a>
       <div class="user-menu">
         @if (currentUser()) {
           <span class="user-email">{{ currentUser()?.email }}</span>
@@ -46,7 +49,9 @@
       <article class="report-detail">
         <header class="report-header">
           <h1 class="report-date">
-            <span class="date-icon">📅</span>
+            <span class="date-icon">
+              <app-icon name="calendar" [size]="20" color="var(--color-gray-600)" ariaLabel="日付" />
+            </span>
             {{ formatDate(report()!.date) }}
           </h1>
           <!-- 編集ボタン（Phase 1では非活性） -->
@@ -77,7 +82,9 @@
         @if (report()!.goodPoints && report()!.goodPoints.length > 0) {
           <section class="section">
             <h2 class="section-title">
-              <span class="title-icon">✨</span>
+              <span class="title-icon">
+                <app-icon name="sparkles" [size]="20" color="var(--color-success-500)" ariaLabel="よかったこと" />
+              </span>
               よかったこと
             </h2>
             <div class="items-list">
@@ -103,7 +110,9 @@
         @if (report()!.improvements && report()!.improvements.length > 0) {
           <section class="section">
             <h2 class="section-title">
-              <span class="title-icon">📝</span>
+              <span class="title-icon">
+                <app-icon name="file-text" [size]="20" color="var(--color-primary-500)" ariaLabel="改善点" />
+              </span>
               改善点 / アクション
             </h2>
             <div class="items-list">

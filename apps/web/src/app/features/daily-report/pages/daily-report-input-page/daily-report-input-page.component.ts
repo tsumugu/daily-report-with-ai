@@ -9,6 +9,7 @@ import {
   DateFieldComponent,
   TextareaFieldComponent,
   FormCardComponent,
+  IconComponent,
 } from '../../../../shared/components';
 
 @Component({
@@ -22,6 +23,7 @@ import {
     DateFieldComponent,
     TextareaFieldComponent,
     FormCardComponent,
+    IconComponent,
   ],
   templateUrl: './daily-report-input-page.component.html',
   styleUrl: './daily-report-input-page.component.scss',
@@ -40,6 +42,7 @@ export class DailyReportInputPageComponent {
   // 状態管理
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
+  isSubmitted = signal(false);
 
   // 文字数カウント
   readonly MAX_LENGTH = 1000;
@@ -104,6 +107,8 @@ export class DailyReportInputPageComponent {
    * フォーム送信
    */
   onSubmit(): void {
+    this.isSubmitted.set(true);
+    
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -149,7 +154,12 @@ export class DailyReportInputPageComponent {
    */
   getFieldError(fieldName: string): string | null {
     const control = this.form.get(fieldName);
-    if (!control || !control.touched || !control.errors) {
+    if (!control || !control.errors) {
+      return null;
+    }
+
+    // touched状態または送信済みの場合のみエラーを返す
+    if (!control.touched && !this.isSubmitted()) {
       return null;
     }
 

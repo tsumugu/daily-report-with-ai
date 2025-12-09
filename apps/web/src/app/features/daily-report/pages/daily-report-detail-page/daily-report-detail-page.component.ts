@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DailyReportService } from '../../services/daily-report.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { DailyReport } from '../../models/daily-report.model';
-import { ButtonComponent, AlertBannerComponent } from '../../../../shared/components';
+import { ButtonComponent, AlertBannerComponent, IconComponent } from '../../../../shared/components';
 
 @Component({
   selector: 'app-daily-report-detail-page',
@@ -14,6 +14,7 @@ import { ButtonComponent, AlertBannerComponent } from '../../../../shared/compon
     RouterLink,
     ButtonComponent,
     AlertBannerComponent,
+    IconComponent,
   ],
   templateUrl: './daily-report-detail-page.component.html',
   styleUrl: './daily-report-detail-page.component.scss',

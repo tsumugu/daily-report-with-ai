@@ -20,7 +20,7 @@
     (blur)="onBlur()"
   />
   
-  @if (errorMessage) {
+  @if (shouldShowError) {
     <span class="date-field__error">{{ errorMessage }}</span>
   }
 </div>

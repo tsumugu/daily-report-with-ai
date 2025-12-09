@@ -22,15 +22,15 @@
     font-size: 1rem;
     border: 1px solid var(--color-border-default);
     border-radius: 8px;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
     box-sizing: border-box;
     background: white;
     color: var(--color-text-primary);
 
     &:focus {
       outline: none;
-      border-color: var(--color-border-focus);
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      border-color: var(--color-primary-500);
+      box-shadow: 0 0 0 3px var(--color-primary-100);
     }
 
     &--error {
@@ -83,6 +83,18 @@
   &__error {
     font-size: 0.75rem;
     color: var(--color-error-600);
+    animation: slideIn 0.2s ease-out;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

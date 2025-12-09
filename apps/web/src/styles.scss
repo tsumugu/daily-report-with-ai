@@ -1,5 +1,10 @@
 /* デザイントークン */
 @use './styles/tokens/colors';
+@use './styles/tokens/spacing';
+@use './styles/tokens/grid';
+
+/* ユーティリティ */
+@use './app/shared/styles/skeleton';
 
 /* グローバルリセット */
 *,

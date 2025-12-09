@@ -1,15 +1,21 @@
 <article class="report-card" (click)="onCardClick()" (keydown.enter)="onCardClick()" tabindex="0" role="button" [attr.aria-label]="formattedDate + 'の日報'">
   <header class="report-card__header">
     <time class="report-card__date" [attr.datetime]="report.date">
-      <span class="report-card__date-icon">📅</span>
+      <span class="report-card__date-icon">
+        <app-icon name="calendar" [size]="20" color="var(--color-gray-600)" ariaLabel="日付" />
+      </span>
       {{ formattedDate }}
     </time>
     <div class="report-card__badges">
       @if (hasGoodPoints) {
-        <span class="report-card__badge report-card__badge--good" title="よかったこと有り">✨</span>
+        <span class="report-card__badge report-card__badge--good" title="よかったこと有り">
+          <app-icon name="sparkles" [size]="20" color="var(--color-success-500)" ariaLabel="よかったこと" />
+        </span>
       }
       @if (hasImprovements) {
-        <span class="report-card__badge report-card__badge--improvement" title="改善点有り">📝</span>
+        <span class="report-card__badge report-card__badge--improvement" title="改善点有り">
+          <app-icon name="file-text" [size]="20" color="var(--color-primary-500)" ariaLabel="改善点" />
+        </span>
       }
     </div>
   </header>

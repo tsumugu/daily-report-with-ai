@@ -51,7 +51,9 @@
     @if (isEmpty) {
       <div class="followup-list-page__empty">
         <p class="followup-list-page__empty-message">
-          ⚠️ フォローする項目が<br />
+          <app-icon name="alert-triangle" [size]="48" color="var(--color-error-500)" ariaLabel="警告" />
+          <br />
+          フォローする項目が<br />
           ありません
         </p>
         <p class="followup-list-page__empty-submessage">

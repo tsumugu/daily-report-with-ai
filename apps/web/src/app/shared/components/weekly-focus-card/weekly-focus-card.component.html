@@ -2,7 +2,8 @@
   <div class="weekly-focus-card">
     <div class="weekly-focus-card__header">
       <span class="weekly-focus-card__type">
-        {{ itemTypeIcon }} {{ itemTypeLabel }}
+        <app-icon [name]="itemTypeIcon" [size]="20" [color]="focus?.itemType === 'goodPoint' ? 'var(--color-success-500)' : 'var(--color-primary-500)'" [ariaLabel]="itemTypeLabel" />
+        {{ itemTypeLabel }}
       </span>
       <app-button
         variant="ghost"
