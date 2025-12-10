@@ -10,9 +10,10 @@ npm run lint
 echo "📊 テストカバレッジをチェック中..."
 node scripts/check-coverage.js
 
-# Run all unit tests
+# Run all unit tests (CI mode)
 echo "🧪 すべてのユニットテストを実行中..."
-npm run test
+npm run test:ci -w @daily-report/api
+npm run test:ci -w @daily-report/web
 
 # Run E2E tests before push
 echo "🧪 E2Eテストを実行中..."
