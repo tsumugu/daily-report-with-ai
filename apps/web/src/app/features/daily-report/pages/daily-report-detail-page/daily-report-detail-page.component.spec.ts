@@ -2,6 +2,22 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { RouterTestingModule } from '@angular/router/testing';
 import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { importProvidersFrom } from '@angular/core';
+import {
+  LucideAngularModule,
+  FileText,
+  Clipboard,
+  ChartBar,
+  Target,
+  Sparkles,
+  Lightbulb,
+  Calendar,
+  TriangleAlert,
+  Eye,
+  EyeOff,
+  Heart,
+  Pin,
+} from 'lucide-angular';
 import { DailyReportDetailPageComponent } from './daily-report-detail-page.component';
 import { DailyReportService } from '../../services/daily-report.service';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -70,6 +86,22 @@ describe('DailyReportDetailPageComponent', () => {
             },
           },
         },
+        importProvidersFrom(
+          LucideAngularModule.pick({
+            FileText,
+            Clipboard,
+            ChartBar,
+            Target,
+            Sparkles,
+            Lightbulb,
+            Calendar,
+            TriangleAlert,
+            Eye,
+            EyeOff,
+            Heart,
+            Pin,
+          })
+        ),
       ],
     }).compileComponents();
 
@@ -256,6 +288,22 @@ describe('DailyReportDetailPageComponent (IDなし)', () => {
             },
           },
         },
+        importProvidersFrom(
+          LucideAngularModule.pick({
+            FileText,
+            Clipboard,
+            ChartBar,
+            Target,
+            Sparkles,
+            Lightbulb,
+            Calendar,
+            TriangleAlert,
+            Eye,
+            EyeOff,
+            Heart,
+            Pin,
+          })
+        ),
       ],
     }).compileComponents();
 

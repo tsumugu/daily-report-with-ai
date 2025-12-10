@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>フォローアップ画面モック</title>
+  <link rel="stylesheet" href="followup-page.css">
+</head>
+<body>
+  <div class="followup-page">
+    <!-- ページヘッダー -->
+    <header class="page-header">
+      <button class="page-header__back" aria-label="戻る">←</button>
+      <h1 class="page-header__title">よかったことのフォローアップ</h1>
+    </header>
+
+    <!-- ページコンテンツ -->
+    <main class="page-content">
+      <!-- エピソード一覧セクション -->
+      <section class="episode-section">
+        <div class="episode-section__header">
+          <h2 class="episode-section__title">再現エピソード</h2>
+          <div class="episode-section__status" aria-live="polite">
+            <span class="status-badge status-badge--progress">進行中 2/3件</span>
+          </div>
+        </div>
+
+        <!-- エピソード一覧 -->
+        <div class="episode-list" role="list">
+          <!-- エピソード1 -->
+          <div class="episode-item" role="listitem">
+            <div class="episode-item__content">
+              <div class="episode-item__date">
+                <span class="episode-item__date-label">再現日:</span>
+                <span class="episode-item__date-value">2025-12-08</span>
+              </div>
+              <p class="episode-item__memo">チーム会議で積極的に発言できた。前回よりも自信を持って意見を述べられた。</p>
+            </div>
+            <button class="episode-item__delete" aria-label="削除">×</button>
+          </div>
+
+          <!-- エピソード2 -->
+          <div class="episode-item" role="listitem">
+            <div class="episode-item__content">
+              <div class="episode-item__date">
+                <span class="episode-item__date-label">再現日:</span>
+                <span class="episode-item__date-value">2025-12-10</span>
+              </div>
+              <p class="episode-item__memo">1on1で上司に良いフィードバックをもらえた。同じアプローチで成功した。</p>
+            </div>
+            <button class="episode-item__delete" aria-label="削除">×</button>
+          </div>
+        </div>
+
+        <!-- エピソード追加ボタン -->
+        <button class="episode-add-button" id="episode-add-button">
+          <span class="episode-add-button__icon">＋</span>
+          <span class="episode-add-button__label">エピソードを追加</span>
+        </button>
+      </section>
+    </main>
+  </div>
+
+  <!-- エピソード追加フォームモーダル（オーバーレイ） -->
+  <div class="episode-form-overlay" id="episode-form-overlay" style="display: none;">
+    <div class="episode-form-modal">
+      <header class="episode-form-modal__header">
+        <h3 class="episode-form-modal__title">エピソードを追加</h3>
+        <button class="episode-form-modal__close" aria-label="閉じる" id="episode-form-close">×</button>
+      </header>
+
+      <form class="episode-form-modal__form" id="episode-form-form">
+        <div class="form-field">
+          <label class="form-label" for="episode-date">
+            再現日 <span class="form-required">*</span>
+          </label>
+          <input
+            type="date"
+            id="episode-date"
+            name="episode-date"
+            class="form-input"
+            required
+            aria-required="true"
+            aria-describedby="episode-date-error"
+          />
+          <span class="form-error" id="episode-date-error" role="alert" style="display: none;">
+            再現日は必須です
+          </span>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="episode-memo">
+            再現メモ
+          </label>
+          <textarea
+            id="episode-memo"
+            name="episode-memo"
+            class="form-textarea"
+            rows="4"
+            maxlength="500"
+            placeholder="どのように再現したか記録してください"
+            aria-describedby="episode-memo-char-count episode-memo-error"
+          ></textarea>
+          <div class="form-char-count" id="episode-memo-char-count">
+            <span class="form-char-count__current">0</span>
+            <span class="form-char-count__max">/500</span>
+          </div>
+          <span class="form-error" id="episode-memo-error" role="alert" style="display: none;">
+            メモは500文字以内で入力してください
+          </span>
+        </div>
+
+        <footer class="episode-form-modal__footer">
+          <button type="button" class="button button--outline" id="episode-form-cancel">
+            キャンセル
+          </button>
+          <button type="submit" class="button button--primary" id="episode-form-submit">
+            追加
+          </button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // 簡単なインタラクション（デモ用）
+    const addButton = document.getElementById('episode-add-button');
+    const formOverlay = document.getElementById('episode-form-overlay');
+    const formClose = document.getElementById('episode-form-close');
+    const formCancel = document.getElementById('episode-form-cancel');
+    const textarea = document.getElementById('episode-memo');
+    const charCount = document.querySelector('#episode-memo-char-count .form-char-count__current');
+
+    // エピソード追加ボタンクリック
+    addButton.addEventListener('click', () => {
+      formOverlay.style.display = 'flex';
+    });
+
+    // フォーム閉じる（×ボタン、キャンセルボタン、オーバーレイクリック）
+    const closeForm = () => {
+      formOverlay.style.display = 'none';
+    };
+
+    formClose.addEventListener('click', closeForm);
+    formCancel.addEventListener('click', closeForm);
+    formOverlay.addEventListener('click', (e) => {
+      if (e.target === formOverlay) {
+        closeForm();
+      }
+    });
+
+    // 文字数カウント
+    textarea.addEventListener('input', (e) => {
+      const length = e.target.value.length;
+      charCount.textContent = length;
+      if (length > 500) {
+        charCount.style.color = 'var(--color-error)';
+      } else {
+        charCount.style.color = 'var(--color-text-secondary)';
+      }
+    });
+
+    // Escapeキーでフォームを閉じる
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && formOverlay.style.display === 'flex') {
+        closeForm();
+      }
+    });
+  </script>
+</body>
+</html>
+

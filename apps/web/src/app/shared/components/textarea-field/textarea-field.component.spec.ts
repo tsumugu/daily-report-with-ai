@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TextareaFieldComponent } from './textarea-field.component';
+import { provideLucideIconsForTesting } from '../../test-helpers/lucide-icons.helper';
 
 describe('TextareaFieldComponent', () => {
   let component: TextareaFieldComponent;
@@ -9,6 +10,7 @@ describe('TextareaFieldComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TextareaFieldComponent, ReactiveFormsModule],
+      providers: [provideLucideIconsForTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TextareaFieldComponent);
@@ -129,11 +131,42 @@ describe('TextareaFieldComponent', () => {
   describe('エラー表示', () => {
     it('errorMessageがある場合、エラーメッセージが表示されること', () => {
       component.errorMessage = 'エラーメッセージ';
+      component.touched = true; // touchedをtrueにしてエラーを表示
       fixture.detectChanges();
 
       const errorElement = fixture.nativeElement.querySelector('.textarea-field__error');
       expect(errorElement).toBeTruthy();
       expect(errorElement.textContent).toContain('エラーメッセージ');
+    });
+
+    it('フォーカス中はエラーメッセージが表示されないこと', () => {
+      component.errorMessage = 'エラーメッセージ';
+      component.touched = true;
+      component.onFocus(); // フォーカスを設定
+      fixture.detectChanges();
+
+      expect(component.shouldShowError).toBeFalse();
+    });
+
+    it('フォーカス解除後、エラーメッセージが表示されること', () => {
+      component.errorMessage = 'エラーメッセージ';
+      component.touched = true;
+      component.onFocus();
+      component.onBlur(); // フォーカスを解除
+      fixture.detectChanges();
+
+      expect(component.shouldShowError).toBeTrue();
+    });
+
+    it('onFocusでisFocusedがtrueになること', () => {
+      component.onFocus();
+      expect(component.isFocused()).toBeTrue();
+    });
+
+    it('onBlurでisFocusedがfalseになること', () => {
+      component.onFocus();
+      component.onBlur();
+      expect(component.isFocused()).toBeFalse();
     });
   });
 });

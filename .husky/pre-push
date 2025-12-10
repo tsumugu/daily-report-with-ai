@@ -2,6 +2,10 @@
 echo "🔍 実装開始前の必須チェックを実行中..."
 npm run verify:implementation-ready
 
+# Check test coverage (must be 100%)
+echo "📊 テストカバレッジをチェック中..."
+node scripts/check-coverage.js
+
 # Run E2E tests before push
 echo "🧪 Running E2E tests..."
 npm run e2e -w @daily-report/web

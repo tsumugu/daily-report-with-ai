@@ -357,5 +357,69 @@ describe('FollowupInputModalComponent', () => {
     expect(dateControl?.hasError('required')).toBeFalsy();
     expect(component.dateRequired).toBe(false);
   });
+
+  it('memoLabelがgoodPointの場合、「再現メモ」を返すこと', () => {
+    component.item = {
+      itemType: 'goodPoint',
+      item: {
+        id: 'gp-1',
+        content: 'テスト',
+        status: '進行中',
+        success_count: 0,
+        createdAt: '2025-12-05T12:00:00Z',
+      },
+      reportDate: '2025-12-05',
+      reportId: 'report-1',
+    };
+    expect(component.memoLabel).toBe('再現メモ');
+  });
+
+  it('memoLabelがimprovementの場合、「実施内容」を返すこと', () => {
+    component.item = {
+      itemType: 'improvement',
+      item: {
+        id: 'imp-1',
+        content: 'テスト',
+        status: '未着手',
+        success_count: 0,
+        createdAt: '2025-12-05T12:00:00Z',
+      },
+      reportDate: '2025-12-05',
+      reportId: 'report-1',
+    };
+    expect(component.memoLabel).toBe('実施内容');
+  });
+
+  it('memoPlaceholderがgoodPointの場合、適切なプレースホルダーを返すこと', () => {
+    component.item = {
+      itemType: 'goodPoint',
+      item: {
+        id: 'gp-1',
+        content: 'テスト',
+        status: '進行中',
+        success_count: 0,
+        createdAt: '2025-12-05T12:00:00Z',
+      },
+      reportDate: '2025-12-05',
+      reportId: 'report-1',
+    };
+    expect(component.memoPlaceholder).toBe('どのように再現したか、できなかった理由などを記録してください');
+  });
+
+  it('memoPlaceholderがimprovementの場合、適切なプレースホルダーを返すこと', () => {
+    component.item = {
+      itemType: 'improvement',
+      item: {
+        id: 'imp-1',
+        content: 'テスト',
+        status: '未着手',
+        success_count: 0,
+        createdAt: '2025-12-05T12:00:00Z',
+      },
+      reportDate: '2025-12-05',
+      reportId: 'report-1',
+    };
+    expect(component.memoPlaceholder).toBe('どのようなアクションを実施したか、できなかった理由などを記録してください');
+  });
 });
 

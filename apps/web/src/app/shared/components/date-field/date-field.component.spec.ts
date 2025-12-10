@@ -82,6 +82,7 @@ describe('DateFieldComponent', () => {
   describe('エラー表示', () => {
     it('errorMessageがある場合、エラーメッセージが表示されること', () => {
       component.errorMessage = 'エラーメッセージ';
+      component.touched = true; // touchedをtrueにしてエラーを表示
       fixture.detectChanges();
 
       const errorElement = fixture.nativeElement.querySelector('.date-field__error');

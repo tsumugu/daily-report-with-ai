@@ -1,3 +1,8 @@
+---
+description: "テストルール。TDD手順、カバレッジ100%必須、Angular/E2Eテストの書き方"
+alwaysApply: true
+---
+
 # ✅ テストルール（red-greenテスト駆動開発/TDD）
 
 本プロジェクトでは、t-wada提唱のred-green テスト駆動開発を実践します。

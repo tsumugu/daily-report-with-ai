@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FollowupCardComponent } from './followup-card.component';
 import { FollowupItem } from '../../../../shared/models/followup.model';
+import { provideLucideIconsForTesting } from '../../../../shared/test-helpers/lucide-icons.helper';
 
 describe('FollowupCardComponent', () => {
   let component: FollowupCardComponent;
@@ -9,6 +10,7 @@ describe('FollowupCardComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [FollowupCardComponent],
+      providers: [provideLucideIconsForTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(FollowupCardComponent);
@@ -60,7 +62,7 @@ describe('FollowupCardComponent', () => {
     };
     fixture.detectChanges();
     expect(component.itemTypeLabel).toBe('よかったこと');
-    expect(component.itemTypeIcon).toBe('✨');
+    expect(component.itemTypeIcon).toBe('heart');
   });
 
   it('itemTypeがimprovementの場合、「改善点」と表示されること', () => {
@@ -78,7 +80,7 @@ describe('FollowupCardComponent', () => {
     };
     fixture.detectChanges();
     expect(component.itemTypeLabel).toBe('改善点');
-    expect(component.itemTypeIcon).toBe('📝');
+    expect(component.itemTypeIcon).toBe('file-text');
   });
 
   it('success_count >= 3の場合、定着バッジが表示されること', () => {
@@ -237,12 +239,12 @@ describe('FollowupCardComponent', () => {
     component.isAddingToWeeklyFocus = true;
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
-    const button = element.querySelector('app-button[arialabel="フォーカスに追加"]');
-    expect(button).toBeTruthy();
-    expect(button?.getAttribute('ng-reflect-disabled')).toBe('true');
+    const iconButton = element.querySelector('app-icon-button');
+    expect(iconButton).toBeTruthy();
+    expect(iconButton?.getAttribute('ng-reflect-loading')).toBe('true');
   });
 
-  it('フォーカスに追加ボタンクリック時、addToWeeklyFocusイベントが発火されること', () => {
+  it('フォーカスに追加ボタンクリック時、toggleWeeklyFocusイベントが発火されること', () => {
     const item: FollowupItem = {
       itemType: 'goodPoint',
       item: {
@@ -259,9 +261,9 @@ describe('FollowupCardComponent', () => {
     component.isInWeeklyFocus = false;
     fixture.detectChanges();
 
-    spyOn(component.addToWeeklyFocus, 'emit');
-    component.onAddToWeeklyFocus();
-    expect(component.addToWeeklyFocus.emit).toHaveBeenCalledWith(item);
+    spyOn(component.toggleWeeklyFocus, 'emit');
+    component.onToggleWeeklyFocus();
+    expect(component.toggleWeeklyFocus.emit).toHaveBeenCalledWith(item);
   });
 });
 

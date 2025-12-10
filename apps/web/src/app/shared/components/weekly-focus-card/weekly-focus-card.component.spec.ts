@@ -1,5 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { WeeklyFocusCardComponent } from './weekly-focus-card.component';
+import { WeeklyFocusResponse } from '../../models/weekly-focus.model';
+import { provideLucideIconsForTesting } from '../../test-helpers/lucide-icons.helper';
 
 describe('WeeklyFocusCardComponent', () => {
   let component: WeeklyFocusCardComponent;
@@ -7,7 +10,8 @@ describe('WeeklyFocusCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [WeeklyFocusCardComponent],
+      imports: [WeeklyFocusCardComponent, RouterTestingModule.withRoutes([])],
+      providers: [provideLucideIconsForTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(WeeklyFocusCardComponent);
@@ -58,7 +62,7 @@ describe('WeeklyFocusCardComponent', () => {
     };
     fixture.detectChanges();
     expect(component.itemTypeLabel).toBe('よかったこと');
-    expect(component.itemTypeIcon).toBe('✨');
+    expect(component.itemTypeIcon).toBe('heart');
   });
 
   it('itemTypeがimprovementの場合、「改善点」と表示されること', () => {
@@ -73,7 +77,7 @@ describe('WeeklyFocusCardComponent', () => {
     };
     fixture.detectChanges();
     expect(component.itemTypeLabel).toBe('改善点');
-    expect(component.itemTypeIcon).toBe('📝');
+    expect(component.itemTypeIcon).toBe('file-text');
   });
 
   it('削除ボタンクリック時、deleteClickedイベントが発火されること', () => {

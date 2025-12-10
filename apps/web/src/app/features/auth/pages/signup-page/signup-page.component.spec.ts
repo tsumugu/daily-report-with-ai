@@ -5,6 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { SignupPageComponent } from './signup-page.component';
 import { AuthService } from '../../services/auth.service';
+import { provideLucideIconsForTesting } from '../../../../shared/test-helpers/lucide-icons.helper';
 
 describe('SignupPageComponent', () => {
   let component: SignupPageComponent;
@@ -22,7 +23,10 @@ describe('SignupPageComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [SignupPageComponent, ReactiveFormsModule, RouterTestingModule.withRoutes([])],
-      providers: [{ provide: AuthService, useValue: authServiceSpy }],
+      providers: [
+        { provide: AuthService, useValue: authServiceSpy },
+        provideLucideIconsForTesting(),
+      ],
     }).compileComponents();
 
     router = TestBed.inject(Router);

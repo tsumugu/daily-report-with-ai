@@ -6,6 +6,7 @@ import { signal } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { HomePageComponent } from './home-page.component';
 import { AuthService } from '../../../auth/services/auth.service';
+import { provideLucideIconsForTesting } from '../../../../shared/test-helpers/lucide-icons.helper';
 
 describe('HomePageComponent', () => {
   let component: HomePageComponent;
@@ -26,7 +27,10 @@ describe('HomePageComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [HomePageComponent, RouterTestingModule.withRoutes([]), HttpClientTestingModule],
-      providers: [{ provide: AuthService, useValue: authServiceSpy }],
+      providers: [
+        { provide: AuthService, useValue: authServiceSpy },
+        provideLucideIconsForTesting(),
+      ],
     }).compileComponents();
 
     router = TestBed.inject(Router);

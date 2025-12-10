@@ -6,6 +6,7 @@ import { of, throwError, Subject } from 'rxjs';
 import { DailyReportInputPageComponent } from './daily-report-input-page.component';
 import { DailyReportService } from '../../services/daily-report.service';
 import { DailyReport } from '../../models/daily-report.model';
+import { provideLucideIconsForTesting } from '../../../../shared/test-helpers/lucide-icons.helper';
 
 describe('DailyReportInputPageComponent', () => {
   let component: DailyReportInputPageComponent;
@@ -30,7 +31,10 @@ describe('DailyReportInputPageComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [DailyReportInputPageComponent, ReactiveFormsModule, RouterTestingModule.withRoutes([])],
-      providers: [{ provide: DailyReportService, useValue: dailyReportServiceSpy }],
+      providers: [
+        { provide: DailyReportService, useValue: dailyReportServiceSpy },
+        provideLucideIconsForTesting(),
+      ],
     }).compileComponents();
 
     router = TestBed.inject(Router);

@@ -1,3 +1,8 @@
+---
+description: "ESLint設定ガイド。共通ルール、API/Web固有ルール、Git Hooks連携を説明"
+alwaysApply: true
+---
+
 # ESLint設定ガイド
 
 ## 設定構造

@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { InputFieldComponent } from './input-field.component';
+import { provideLucideIconsForTesting } from '../../test-helpers/lucide-icons.helper';
 
 // テスト用ホストコンポーネント
 @Component({
@@ -20,6 +21,7 @@ describe('InputFieldComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [InputFieldComponent],
+      providers: [provideLucideIconsForTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(InputFieldComponent);
@@ -165,6 +167,7 @@ describe('InputFieldComponent with ReactiveForm', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
+      providers: [provideLucideIconsForTesting()],
     }).compileComponents();
 
     hostFixture = TestBed.createComponent(TestHostComponent);

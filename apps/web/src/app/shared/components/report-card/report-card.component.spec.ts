@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReportCardComponent, ReportCardData } from './report-card.component';
+import { provideLucideIconsForTesting } from '../../test-helpers/lucide-icons.helper';
 
 describe('ReportCardComponent', () => {
   let component: ReportCardComponent;
@@ -16,6 +17,7 @@ describe('ReportCardComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ReportCardComponent],
+      providers: [provideLucideIconsForTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ReportCardComponent);
@@ -115,13 +117,17 @@ describe('ReportCardComponent', () => {
     it('よかったことバッジが表示される', () => {
       const badge = fixture.nativeElement.querySelector('.report-card__badge--good');
       expect(badge).toBeTruthy();
-      expect(badge.textContent.trim()).toBe('✨');
+      const icon = badge.querySelector('app-icon');
+      expect(icon).toBeTruthy();
+      expect(icon?.getAttribute('name')).toBe('heart');
     });
 
     it('改善点バッジが表示される', () => {
       const badge = fixture.nativeElement.querySelector('.report-card__badge--improvement');
       expect(badge).toBeTruthy();
-      expect(badge.textContent.trim()).toBe('📝');
+      const icon = badge.querySelector('app-icon');
+      expect(icon).toBeTruthy();
+      expect(icon?.getAttribute('name')).toBe('file-text');
     });
 
     it('goodPointsがない場合はバッジが表示されない', () => {

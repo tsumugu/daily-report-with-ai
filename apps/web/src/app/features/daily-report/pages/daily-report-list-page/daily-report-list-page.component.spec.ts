@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import { DailyReportListPageComponent } from './daily-report-list-page.component';
 import { DailyReportService } from '../../services/daily-report.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { signal } from '@angular/core';
+import { provideLucideIconsForTesting } from '../../../../shared/test-helpers/lucide-icons.helper';
 
 describe('DailyReportListPageComponent', () => {
   let component: DailyReportListPageComponent;
@@ -48,6 +50,8 @@ describe('DailyReportListPageComponent', () => {
       providers: [
         { provide: DailyReportService, useValue: mockDailyReportService },
         { provide: AuthService, useValue: mockAuthService },
+        provideLucideIconsForTesting(),
+        provideNoopAnimations(),
       ],
     }).compileComponents();
 
