@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-env node */
 
 /**
  * 開発フロー遵守の検証スクリプト
@@ -34,7 +35,7 @@ function getChangedFiles() {
       cwd: rootDir
     });
     return output.trim().split('\n').filter(Boolean);
-  } catch (error) {
+  } catch {
     // ステージングされていない場合、変更されたファイルを取得
     try {
       const output = execSync('git diff --name-only --diff-filter=ACM', {
@@ -78,7 +79,7 @@ function getDocumentStatus(filePath) {
     const content = readFileSync(filePath, 'utf-8');
     const statusMatch = content.match(/\*\*ステータス\*\*:\s*(Pending|Approved)/i);
     return statusMatch ? statusMatch[1] : null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

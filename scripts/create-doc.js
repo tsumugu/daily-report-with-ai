@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-env node */
 
 /**
  * ドキュメントテンプレートから新規ドキュメントを作成するスクリプト

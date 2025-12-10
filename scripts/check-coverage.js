@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-env node */
 
 /**
  * テストカバレッジが100%であることを確認するスクリプト
