@@ -33,13 +33,15 @@ import {
       </p>
 
       <div class="icons-grid">
-        <div class="icon-card" *ngFor="let icon of icons">
-          <div class="icon-card__preview">
-            <app-icon [name]="icon.name" [size]="28"></app-icon>
+        @for (icon of icons; track icon.name) {
+          <div class="icon-card">
+            <div class="icon-card__preview">
+              <app-icon [name]="icon.name" [size]="28"></app-icon>
+            </div>
+            <div class="icon-card__label">{{ icon.name }}</div>
+            <div class="icon-card__hint">{{ icon.label }}</div>
           </div>
-          <div class="icon-card__label">{{ icon.name }}</div>
-          <div class="icon-card__hint">{{ icon.label }}</div>
-        </div>
+        }
       </div>
     </div>
   `,
