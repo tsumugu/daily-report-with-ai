@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /* eslint-env node */
+/* global console, process */
 
 /**
  * ドキュメントテンプレートから新規ドキュメントを作成するスクリプト

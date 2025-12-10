@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /* eslint-env node */
+/* global console, process */
 
 /**
  * 開発フロー遵守の検証スクリプト
