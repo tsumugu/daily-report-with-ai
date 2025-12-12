@@ -48,6 +48,7 @@ npm install
 ```
 
 **インストールされるもの:**
+
 - `@daily-report/web` の依存関係（Angular等）
 - `@daily-report/api` の依存関係（Express等）
 - `@daily-report/shared` の依存関係
@@ -64,6 +65,7 @@ npm run dev
 ```
 
 **起動内容:**
+
 - フロントエンド: http://localhost:4200
 - バックエンド: http://localhost:3000
 
@@ -105,6 +107,7 @@ npm run build:api  # バックエンドのみ
 ```
 
 **出力先:**
+
 - Web: `apps/web/dist/`
 - API: `apps/api/dist/`
 
@@ -127,12 +130,19 @@ cd apps/api && npm run lint
 ### ユニットテスト
 
 ```bash
-# 全ワークスペースのテスト実行
+# 全ワークスペースのテスト実行（watchモード）
 npm run test
+
+# 全ワークスペースのテスト実行（CIモード、watchなし）
+npm run test:ci
 
 # 個別実行
 cd apps/web && npm run test
 cd apps/api && npm run test
+
+# CIモード（watchなし）
+cd apps/web && npm run test:ci
+cd apps/api && npm run test:ci
 
 # カバレッジ付き
 cd apps/web && npm run test:coverage
@@ -165,6 +175,7 @@ npm run storybook
 **起動後:** http://localhost:6006
 
 **内容:**
+
 - デザインシステムのドキュメント
 - コンポーネントカタログ
 
@@ -172,11 +183,11 @@ npm run storybook
 
 ## ワークスペース構成
 
-| パッケージ | 説明 | ポート | 開発コマンド |
-|:-----------|:-----|:-------|:-------------|
-| `@daily-report/web` | Angular フロントエンド | 4200 | `npm run dev:web` |
-| `@daily-report/api` | Express バックエンド | 3000 | `npm run dev:api` |
-| `@daily-report/shared` | 共通型定義・ユーティリティ | - | - |
+| パッケージ             | 説明                       | ポート | 開発コマンド      |
+| :--------------------- | :------------------------- | :----- | :---------------- |
+| `@daily-report/web`    | Angular フロントエンド     | 4200   | `npm run dev:web` |
+| `@daily-report/api`    | Express バックエンド       | 3000   | `npm run dev:api` |
+| `@daily-report/shared` | 共通型定義・ユーティリティ | -      | -                 |
 
 ---
 
@@ -247,18 +258,20 @@ JWT_SECRET=your-secret-key-change-this-in-production
 ### Web（`apps/web/src/environments/`）
 
 **開発環境:** `environment.ts`
+
 ```typescript
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000',
+  apiUrl: "http://localhost:3000",
 };
 ```
 
 **本番環境:** `environment.prod.ts`
+
 ```typescript
 export const environment = {
   production: true,
-  apiUrl: 'https://your-api-domain.com',
+  apiUrl: "https://your-api-domain.com",
 };
 ```
 
@@ -279,4 +292,3 @@ export const environment = {
 - [Angular公式ドキュメント](https://angular.io/docs)
 - [Express公式ドキュメント](https://expressjs.com/)
 - [Storybook公式ドキュメント](https://storybook.js.org/)
-

@@ -19,6 +19,7 @@
     "lint:root": "eslint .",
     "lint:staged": "lint-staged",
     "test": "npm run test --workspaces --if-present",
+    "test:ci": "npm run test:ci --workspaces --if-present",
     "e2e": "npm run e2e -w @daily-report/web",
     "e2e:ui": "npm run e2e:ui -w @daily-report/web",
     "storybook": "npm run storybook -w @daily-report/web",
