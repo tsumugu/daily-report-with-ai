@@ -176,5 +176,53 @@ describe('日報一覧・詳細画面', () => {
     cy.get('.report-card__badge--improvement').should('be.visible');
     cy.get('.report-card__badge--improvement').should('have.attr', 'title', '改善点有り');
   });
+
+  it('よかったこと・改善点のサマリーが表示されること', () => {
+    // よかったこと・改善点付きの日報を作成
+    cy.visit('http://localhost:4200/daily-reports/new');
+    cy.get('textarea#events').should('be.visible');
+    cy.get('textarea#events').type('サマリーテスト用日報');
+
+    // よかったことを2件追加
+    cy.contains('.form-group', 'よかったこと').find('button:contains("追加")').click();
+    cy.contains('.form-group', 'よかったこと').find('.form-card').should('be.visible');
+    cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('よかったこと1');
+
+    cy.contains('.form-group', 'よかったこと').find('button:contains("追加")').click();
+    cy.contains('.form-group', 'よかったこと').find('.form-card').should('have.length', 2);
+    cy.contains('.form-group', 'よかったこと').find('.form-card').last().find('textarea').first().type('よかったこと2');
+
+    // 改善点を1件追加
+    cy.contains('.form-group', '改善点').find('button:contains("追加")').click();
+    cy.contains('.form-group', '改善点').find('.form-card').should('be.visible');
+    cy.contains('.form-group', '改善点').find('.form-card').first().find('textarea').first().type('改善点1');
+
+    cy.get('button[type="submit"]').click();
+    cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+
+    // サマリーセクションが表示されていることを確認
+    cy.get('.report-card__summary').should('be.visible');
+
+    // よかったことサマリーが表示されていることを確認
+    cy.get('.report-card__summary').should('contain.text', 'よかったこと');
+    cy.get('.report-card__summary').should('contain.text', '2件');
+
+    // 改善点サマリーが表示されていることを確認
+    cy.get('.report-card__summary').should('contain.text', '改善点');
+    cy.get('.report-card__summary').should('contain.text', '1件');
+  });
+
+  it('よかったこと・改善点が0件の場合、サマリーセクションが表示されないこと', () => {
+    // よかったこと・改善点なしの日報を作成
+    cy.visit('http://localhost:4200/daily-reports/new');
+    cy.get('textarea#events').should('be.visible');
+    cy.get('textarea#events').type('サマリーなしテスト');
+
+    cy.get('button[type="submit"]').click();
+    cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+
+    // サマリーセクションが表示されないことを確認
+    cy.get('.report-card__summary').should('not.exist');
+  });
 });
 

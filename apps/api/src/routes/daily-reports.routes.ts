@@ -12,6 +12,9 @@ import {
   UpdateGoodPointRequest,
   UpdateImprovementRequest,
   DailyReportResponse,
+  DailyReportListItem,
+  GoodPointSummary,
+  ImprovementSummary,
 } from '../models/daily-report.model.js';
 
 export const dailyReportsRouter = Router();
@@ -179,15 +182,85 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
 });
 
 /**
+ * よかったことサマリーを計算
+ */
+function calculateGoodPointSummary(goodPoints: GoodPoint[]): GoodPointSummary {
+  const count = goodPoints.length;
+  const statusSummary = {
+    再現成功: 0,
+    定着: 0,
+  };
+
+  goodPoints.forEach((gp) => {
+    if (gp.status === '定着' || (gp.status === '再現成功' && gp.success_count >= 3)) {
+      statusSummary.定着++;
+    } else if (gp.status === '再現成功') {
+      statusSummary.再現成功++;
+    }
+  });
+
+  return {
+    count,
+    statusSummary,
+  };
+}
+
+/**
+ * 改善点サマリーを計算
+ */
+function calculateImprovementSummary(improvements: Improvement[]): ImprovementSummary {
+  const count = improvements.length;
+  const statusSummary = {
+    完了: 0,
+    習慣化: 0,
+  };
+
+  improvements.forEach((imp) => {
+    if (imp.status === '習慣化' || (imp.status === '完了' && imp.success_count >= 3)) {
+      statusSummary.習慣化++;
+    } else if (imp.status === '完了') {
+      statusSummary.完了++;
+    }
+  });
+
+  return {
+    count,
+    statusSummary,
+  };
+}
+
+/**
  * 一覧用のレスポンス形式に変換（軽量版）
  */
-function toDailyReportListItem(report: DailyReport) {
+function toDailyReportListItem(
+  report: DailyReport,
+  goodPointsMap: Map<string, GoodPoint>,
+  improvementsMap: Map<string, Improvement>
+): DailyReportListItem {
+  // よかったことの詳細情報を取得
+  const goodPoints = report.goodPointIds
+    .map((id) => goodPointsMap.get(id))
+    .filter((gp): gp is GoodPoint => gp !== undefined);
+
+  // 改善点の詳細情報を取得
+  const improvements = report.improvementIds
+    .map((id) => improvementsMap.get(id))
+    .filter((imp): imp is Improvement => imp !== undefined);
+
+  // よかったことのサマリーを計算
+  const goodPointSummary = calculateGoodPointSummary(goodPoints);
+
+  // 改善点のサマリーを計算
+  const improvementSummary = calculateImprovementSummary(improvements);
+
   return {
     id: report.id,
     date: report.date,
     events: report.events,
     goodPointIds: report.goodPointIds,
     improvementIds: report.improvementIds,
+    goodPointSummary,
+    improvementSummary,
   };
 }
 
@@ -218,8 +291,37 @@ dailyReportsRouter.get('/daily-reports', (req: Request, res: Response) => {
   // ページング適用
   const paginatedReports = sortedReports.slice(offset, offset + limit);
 
+  // N+1問題を回避するため、すべての日報のgoodPointIdsとimprovementIdsを収集
+  const allGoodPointIds = new Set<string>();
+  const allImprovementIds = new Set<string>();
+
+  paginatedReports.forEach((report) => {
+    report.goodPointIds.forEach((id) => allGoodPointIds.add(id));
+    report.improvementIds.forEach((id) => allImprovementIds.add(id));
+  });
+
+  // 一括取得
+  const goodPointsMap = new Map<string, GoodPoint>();
+  const improvementsMap = new Map<string, Improvement>();
+
+  allGoodPointIds.forEach((id) => {
+    const gp = goodPointsDb.findById(id);
+    if (gp) {
+      goodPointsMap.set(id, gp);
+    }
+  });
+
+  allImprovementIds.forEach((id) => {
+    const imp = improvementsDb.findById(id);
+    if (imp) {
+      improvementsMap.set(id, imp);
+    }
+  });
+
   // レスポンス作成（一覧用の軽量版）
-  const data = paginatedReports.map(toDailyReportListItem);
+  const data = paginatedReports.map((report) =>
+    toDailyReportListItem(report, goodPointsMap, improvementsMap)
+  );
 
   res.status(200).json({ data, total });
 });

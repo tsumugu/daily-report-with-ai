@@ -9,6 +9,7 @@ import {
   GoodPointStatus,
   ImprovementStatus,
 } from '../models/daily-report.model';
+import { ReportCardData } from '../../../shared/components/report-card/report-card.component';
 
 @Injectable({
   providedIn: 'root',
@@ -27,15 +28,15 @@ export class DailyReportService {
   /**
    * 日報一覧を取得
    */
-  getAll(): Observable<DailyReport[]> {
-    return this.http.get<DailyReport[]>(`${this.baseUrl}/daily-reports`);
+  getAll(): Observable<{ data: ReportCardData[]; total: number }> {
+    return this.http.get<{ data: ReportCardData[]; total: number }>(`${this.baseUrl}/daily-reports`);
   }
 
   /**
    * 日報一覧を取得（ページング対応）
    */
-  getAllWithPaging(limit: number, offset: number): Observable<DailyReport[]> {
-    return this.http.get<DailyReport[]>(
+  getAllWithPaging(limit: number, offset: number): Observable<{ data: ReportCardData[]; total: number }> {
+    return this.http.get<{ data: ReportCardData[]; total: number }>(
       `${this.baseUrl}/daily-reports?limit=${limit}&offset=${offset}`
     );
   }

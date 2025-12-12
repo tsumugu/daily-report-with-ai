@@ -81,29 +81,79 @@ describe('DailyReportService', () => {
 
   describe('getAll', () => {
     it('日報一覧を取得できること', () => {
-      const mockReports = [mockDailyReport];
+      const mockResponse = {
+        data: [
+          {
+            id: 'report-1',
+            date: '2025-12-05',
+            events: 'テストイベント',
+            goodPointIds: ['gp-1'],
+            improvementIds: ['imp-1'],
+            goodPointSummary: {
+              count: 1,
+              statusSummary: {
+                再現成功: 0,
+                定着: 0,
+              },
+            },
+            improvementSummary: {
+              count: 1,
+              statusSummary: {
+                完了: 0,
+                習慣化: 0,
+              },
+            },
+          },
+        ],
+        total: 1,
+      };
 
       service.getAll().subscribe((result) => {
-        expect(result).toEqual(mockReports);
+        expect(result).toEqual(mockResponse);
       });
 
       const req = httpMock.expectOne('/api/daily-reports');
       expect(req.request.method).toBe('GET');
-      req.flush(mockReports);
+      req.flush(mockResponse);
     });
   });
 
   describe('getAllWithPaging', () => {
     it('ページング付きで日報一覧を取得できること', () => {
-      const mockReports = [mockDailyReport];
+      const mockResponse = {
+        data: [
+          {
+            id: 'report-1',
+            date: '2025-12-05',
+            events: 'テストイベント',
+            goodPointIds: ['gp-1'],
+            improvementIds: ['imp-1'],
+            goodPointSummary: {
+              count: 1,
+              statusSummary: {
+                再現成功: 0,
+                定着: 0,
+              },
+            },
+            improvementSummary: {
+              count: 1,
+              statusSummary: {
+                完了: 0,
+                習慣化: 0,
+              },
+            },
+          },
+        ],
+        total: 1,
+      };
 
       service.getAllWithPaging(10, 5).subscribe((result) => {
-        expect(result).toEqual(mockReports);
+        expect(result).toEqual(mockResponse);
       });
 
       const req = httpMock.expectOne('/api/daily-reports?limit=10&offset=5');
       expect(req.request.method).toBe('GET');
-      req.flush(mockReports);
+      req.flush(mockResponse);
     });
   });
 

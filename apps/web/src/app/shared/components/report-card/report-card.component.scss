@@ -72,11 +72,96 @@
   background: var(--color-warning-50);
 }
 
+/* サマリーセクション */
+.report-card__summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: var(--color-bg-secondary);
+  border-radius: 0.5rem;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.summary-item__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-gray-700);
+}
+
+.summary-item__label {
+  font-weight: 500;
+}
+
+.summary-item__count {
+  font-weight: 600;
+  color: var(--color-gray-900);
+}
+
+.summary-item__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1.5rem;
+  font-size: 0.75rem;
+  color: var(--color-gray-600);
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.status-item__label {
+  font-weight: 400;
+}
+
+.status-item__count {
+  font-weight: 500;
+}
+
+/* 区切り線 */
+.report-card__divider {
+  height: 1px;
+  background-color: var(--color-gray-300);
+  margin: 1rem 0;
+}
+
 .report-card__content {
   margin: 0;
   font-size: 14px;
   line-height: 1.6;
   color: var(--color-gray-600);
   word-break: break-word;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .report-card__summary {
+    padding: 0.5rem;
+  }
+
+  .summary-item__status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin-left: 1.5rem;
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
 }
 

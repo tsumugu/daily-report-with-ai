@@ -5,6 +5,7 @@ import { dailyReportsRouter } from './daily-reports.routes.js';
 import { dailyReportsDb, goodPointsDb, improvementsDb } from '../db/daily-reports.db.js';
 import { usersDb } from '../db/users.db.js';
 import { generateToken } from '../middleware/auth.middleware.js';
+import { DailyReportListItem } from '../models/daily-report.model.js';
 
 describe('dailyReportsRouter', () => {
   let app: express.Application;
@@ -284,6 +285,13 @@ describe('dailyReportsRouter', () => {
       expect(response.status).toBe(200);
       expect(response.body.data).toHaveLength(2);
       expect(response.body.total).toBe(2);
+      // 新しいフィールドが含まれていることを確認
+      expect(response.body.data[0]).toHaveProperty('goodPointSummary');
+      expect(response.body.data[0]).toHaveProperty('improvementSummary');
+      expect(response.body.data[0].goodPointSummary).toHaveProperty('count');
+      expect(response.body.data[0].goodPointSummary).toHaveProperty('statusSummary');
+      expect(response.body.data[0].improvementSummary).toHaveProperty('count');
+      expect(response.body.data[0].improvementSummary).toHaveProperty('statusSummary');
     });
 
     it('日報一覧が日付降順でソートされること', async () => {
@@ -354,6 +362,87 @@ describe('dailyReportsRouter', () => {
       expect(response.status).toBe(200);
       // 実際にはデータ件数が少ないのでデフォルトのlimit=30は影響しない
       expect(response.body.data).toBeDefined();
+    });
+
+    it('よかったこと・改善点のサマリーが正しく計算されること', async () => {
+      // 日報を作成
+      const reportResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-10',
+          events: 'テストイベント',
+          goodPoints: [
+            { content: 'よかったこと1', factors: '要因1' },
+            { content: 'よかったこと2', factors: '要因2' },
+          ],
+          improvements: [
+            { content: '改善点1', action: 'アクション1' },
+          ],
+        });
+
+      expect(reportResponse.status).toBe(201);
+      const reportId = reportResponse.body.id;
+
+      // よかったことのステータスを更新（再現成功、定着）
+      const goodPoints = reportResponse.body.goodPoints;
+      await request(app)
+        .put(`/api/good-points/${goodPoints[0].id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ status: '再現成功' });
+
+      await request(app)
+        .put(`/api/good-points/${goodPoints[1].id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ status: '定着' });
+
+      // 改善点のステータスを更新（完了）
+      const improvements = reportResponse.body.improvements;
+      await request(app)
+        .put(`/api/improvements/${improvements[0].id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ status: '完了' });
+
+      // 日報一覧を取得
+      const response = await request(app)
+        .get('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      const report = response.body.data.find((r: DailyReportListItem) => r.id === reportId);
+      expect(report).toBeDefined();
+
+      // よかったことサマリーの確認
+      expect(report.goodPointSummary.count).toBe(2);
+      expect(report.goodPointSummary.statusSummary).toHaveProperty('再現成功');
+      expect(report.goodPointSummary.statusSummary).toHaveProperty('定着');
+
+      // 改善点サマリーの確認
+      expect(report.improvementSummary.count).toBe(1);
+      expect(report.improvementSummary.statusSummary).toHaveProperty('完了');
+      expect(report.improvementSummary.statusSummary).toHaveProperty('習慣化');
+    });
+
+    it('よかったこと・改善点が0件の場合、サマリーが空で返されること', async () => {
+      // よかったこと・改善点なしの日報を作成
+      await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ date: '2025-12-11', events: 'イベントのみ' });
+
+      const response = await request(app)
+        .get('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      const report = response.body.data.find((r: DailyReportListItem) => r.date === '2025-12-11');
+      expect(report).toBeDefined();
+      expect(report.goodPointSummary.count).toBe(0);
+      expect(report.goodPointSummary.statusSummary.再現成功).toBe(0);
+      expect(report.goodPointSummary.statusSummary.定着).toBe(0);
+      expect(report.improvementSummary.count).toBe(0);
+      expect(report.improvementSummary.statusSummary.完了).toBe(0);
+      expect(report.improvementSummary.statusSummary.習慣化).toBe(0);
     });
   });
 

@@ -2,12 +2,30 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IconComponent } from '../icon';
 
+export interface GoodPointSummary {
+  count: number;
+  statusSummary: {
+    再現成功: number;
+    定着: number;
+  };
+}
+
+export interface ImprovementSummary {
+  count: number;
+  statusSummary: {
+    完了: number;
+    習慣化: number;
+  };
+}
+
 export interface ReportCardData {
   id: string;
   date: string;
   events: string;
   goodPointIds: string[];
   improvementIds: string[];
+  goodPointSummary: GoodPointSummary;
+  improvementSummary: ImprovementSummary;
 }
 
 @Component({
@@ -44,6 +62,43 @@ export class ReportCardComponent {
    */
   get hasImprovements(): boolean {
     return this.report.improvementIds.length > 0;
+  }
+
+  /**
+   * よかったことのサマリーを表示するか
+   */
+  get shouldShowGoodPointSummary(): boolean {
+    return this.report.goodPointSummary.count > 0;
+  }
+
+  /**
+   * 改善点のサマリーを表示するか
+   */
+  get shouldShowImprovementSummary(): boolean {
+    return this.report.improvementSummary.count > 0;
+  }
+
+  /**
+   * よかったことのステータス概要を表示するか
+   */
+  get shouldShowGoodPointStatusSummary(): boolean {
+    const summary = this.report.goodPointSummary.statusSummary;
+    return summary['再現成功'] > 0 || summary['定着'] > 0;
+  }
+
+  /**
+   * 改善点のステータス概要を表示するか
+   */
+  get shouldShowImprovementStatusSummary(): boolean {
+    const summary = this.report.improvementSummary.statusSummary;
+    return summary['完了'] > 0 || summary['習慣化'] > 0;
+  }
+
+  /**
+   * サマリーセクションを表示するか
+   */
+  get shouldShowSummarySection(): boolean {
+    return this.shouldShowGoodPointSummary || this.shouldShowImprovementSummary;
   }
 
   /**

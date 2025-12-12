@@ -22,6 +22,20 @@ describe('DailyReportListPageComponent', () => {
         events: '今日のできごと1',
         goodPointIds: ['gp1'],
         improvementIds: [],
+        goodPointSummary: {
+          count: 1,
+          statusSummary: {
+            再現成功: 0,
+            定着: 0,
+          },
+        },
+        improvementSummary: {
+          count: 0,
+          statusSummary: {
+            完了: 0,
+            習慣化: 0,
+          },
+        },
       },
       {
         id: '2',
@@ -29,6 +43,20 @@ describe('DailyReportListPageComponent', () => {
         events: '今日のできごと2',
         goodPointIds: [],
         improvementIds: ['imp1'],
+        goodPointSummary: {
+          count: 0,
+          statusSummary: {
+            再現成功: 0,
+            定着: 0,
+          },
+        },
+        improvementSummary: {
+          count: 1,
+          statusSummary: {
+            完了: 0,
+            習慣化: 0,
+          },
+        },
       },
     ],
     total: 2,
@@ -43,7 +71,7 @@ describe('DailyReportListPageComponent', () => {
       currentUser: signal({ id: 'user1', email: 'test@example.com' }),
     });
 
-    mockDailyReportService.getAll.and.returnValue(of(mockReportData as unknown as never[]));
+    mockDailyReportService.getAll.and.returnValue(of(mockReportData));
 
     await TestBed.configureTestingModule({
       imports: [DailyReportListPageComponent, RouterTestingModule.withRoutes([])],
@@ -95,7 +123,7 @@ describe('DailyReportListPageComponent', () => {
     }));
 
     it('retry()でリロードできる', fakeAsync(() => {
-      mockDailyReportService.getAll.and.returnValue(of(mockReportData as unknown as never[]));
+      mockDailyReportService.getAll.and.returnValue(of(mockReportData));
 
       component.retry();
       tick();
@@ -120,6 +148,20 @@ describe('DailyReportListPageComponent', () => {
             events: '追加のできごと',
             goodPointIds: [],
             improvementIds: [],
+            goodPointSummary: {
+              count: 0,
+              statusSummary: {
+                再現成功: 0,
+                定着: 0,
+              },
+            },
+            improvementSummary: {
+              count: 0,
+              statusSummary: {
+                完了: 0,
+                習慣化: 0,
+              },
+            },
           },
         ],
         total: 3,
@@ -129,9 +171,7 @@ describe('DailyReportListPageComponent', () => {
       component['total'].set(5);
       component['offset'] = 2;
 
-      mockDailyReportService.getAllWithPaging.and.returnValue(
-        of(moreData as unknown as never[])
-      );
+      mockDailyReportService.getAllWithPaging.and.returnValue(of(moreData));
 
       component.loadMore();
       tick();
@@ -193,9 +233,7 @@ describe('DailyReportListPageComponent', () => {
     }));
 
     it('日報がない場合は空状態が表示される', fakeAsync(() => {
-      mockDailyReportService.getAll.and.returnValue(
-        of({ data: [], total: 0 } as unknown as never[])
-      );
+      mockDailyReportService.getAll.and.returnValue(of({ data: [], total: 0 }));
       component.loadReports();
       tick();
       fixture.detectChanges();

@@ -13,6 +13,7 @@ import {
   EyeOff,
   Heart,
   Pin,
+  Check,
 } from 'lucide-angular';
 
 /**
@@ -34,6 +35,7 @@ export function provideLucideIconsForTesting() {
       EyeOff,
       Heart,
       Pin,
+      Check,
     })
   );
 }

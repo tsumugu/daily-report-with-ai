@@ -6,11 +6,6 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { ReportCardComponent, ReportCardData, ButtonComponent, AlertBannerComponent, IconComponent } from '../../../../shared/components';
 import { listItemAnimation } from '../../../../shared/animations/page.animations';
 
-interface DailyReportListResponse {
-  data: ReportCardData[];
-  total: number;
-}
-
 @Component({
   selector: 'app-daily-report-list-page',
   standalone: true,
@@ -58,11 +53,9 @@ export class DailyReportListPageComponent implements OnInit {
 
     this.dailyReportService.getAll().subscribe({
       next: (response) => {
-        // 型安全にレスポンスを処理（APIが { data, total } 形式で返す）
-        const typedResponse = response as unknown as DailyReportListResponse;
-        this.reports.set(typedResponse.data);
-        this.total.set(typedResponse.total);
-        this.offset = typedResponse.data.length;
+        this.reports.set(response.data);
+        this.total.set(response.total);
+        this.offset = response.data.length;
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -86,9 +79,8 @@ export class DailyReportListPageComponent implements OnInit {
 
     this.dailyReportService.getAllWithPaging(this.limit, this.offset).subscribe({
       next: (response) => {
-        const typedResponse = response as unknown as DailyReportListResponse;
-        this.reports.update((current) => [...current, ...typedResponse.data]);
-        this.offset += typedResponse.data.length;
+        this.reports.update((current) => [...current, ...response.data]);
+        this.offset += response.data.length;
         this.isLoadingMore.set(false);
       },
       error: () => {

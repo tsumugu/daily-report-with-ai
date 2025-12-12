@@ -197,3 +197,38 @@ export interface FollowupItemsResponse {
   total: number;
 }
 
+/**
+ * よかったことサマリー
+ */
+export interface GoodPointSummary {
+  count: number;
+  statusSummary: {
+    再現成功: number;
+    定着: number;
+  };
+}
+
+/**
+ * 改善点サマリー
+ */
+export interface ImprovementSummary {
+  count: number;
+  statusSummary: {
+    完了: number;
+    習慣化: number;
+  };
+}
+
+/**
+ * 日報一覧アイテム（拡張）
+ */
+export interface DailyReportListItem {
+  id: string;
+  date: string;
+  events: string;
+  goodPointIds: string[];
+  improvementIds: string[];
+  goodPointSummary: GoodPointSummary;
+  improvementSummary: ImprovementSummary;
+}
+

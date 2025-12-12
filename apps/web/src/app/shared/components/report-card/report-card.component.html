@@ -19,6 +19,72 @@
       }
     </div>
   </header>
+
+  <!-- サマリーセクション -->
+  @if (shouldShowSummarySection) {
+    <section class="report-card__summary" aria-label="よかったことと改善点のサマリー">
+      <!-- よかったことサマリー -->
+      @if (shouldShowGoodPointSummary) {
+        <div class="summary-item">
+          <div class="summary-item__header">
+            <app-icon name="heart" [size]="16" color="var(--color-primary-500)" ariaLabel="よかったこと" />
+            <span class="summary-item__label">よかったこと:</span>
+            <span class="summary-item__count">{{ report.goodPointSummary.count }}件</span>
+          </div>
+          @if (shouldShowGoodPointStatusSummary) {
+            <div class="summary-item__status">
+              @if (report.goodPointSummary.statusSummary['再現成功'] > 0) {
+                <span class="status-item">
+                  <app-icon name="check" [size]="12" color="var(--color-success)" ariaLabel="再現成功" />
+                  <span class="status-item__label">再現成功:</span>
+                  <span class="status-item__count">{{ report.goodPointSummary.statusSummary['再現成功'] }}件</span>
+                </span>
+              }
+              @if (report.goodPointSummary.statusSummary['定着'] > 0) {
+                <span class="status-item">
+                  <app-icon name="check" [size]="12" color="var(--color-success)" ariaLabel="定着" />
+                  <span class="status-item__label">定着:</span>
+                  <span class="status-item__count">{{ report.goodPointSummary.statusSummary['定着'] }}件</span>
+                </span>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- 改善点サマリー -->
+      @if (shouldShowImprovementSummary) {
+        <div class="summary-item">
+          <div class="summary-item__header">
+            <app-icon name="file-text" [size]="16" color="var(--color-primary-500)" ariaLabel="改善点" />
+            <span class="summary-item__label">改善点:</span>
+            <span class="summary-item__count">{{ report.improvementSummary.count }}件</span>
+          </div>
+          @if (shouldShowImprovementStatusSummary) {
+            <div class="summary-item__status">
+              @if (report.improvementSummary.statusSummary['完了'] > 0) {
+                <span class="status-item">
+                  <app-icon name="check" [size]="12" color="var(--color-success)" ariaLabel="完了" />
+                  <span class="status-item__label">完了:</span>
+                  <span class="status-item__count">{{ report.improvementSummary.statusSummary['完了'] }}件</span>
+                </span>
+              }
+              @if (report.improvementSummary.statusSummary['習慣化'] > 0) {
+                <span class="status-item">
+                  <app-icon name="check" [size]="12" color="var(--color-success)" ariaLabel="習慣化" />
+                  <span class="status-item__label">習慣化:</span>
+                  <span class="status-item__count">{{ report.improvementSummary.statusSummary['習慣化'] }}件</span>
+                </span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <div class="report-card__divider"></div>
+  }
+
   <p class="report-card__content">{{ truncatedEvents }}</p>
 </article>
 

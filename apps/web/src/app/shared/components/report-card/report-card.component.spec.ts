@@ -12,6 +12,20 @@ describe('ReportCardComponent', () => {
     events: '今日はミーティングが3件ありました。午後はコードレビューを行いました。',
     goodPointIds: ['gp1', 'gp2'],
     improvementIds: ['imp1'],
+    goodPointSummary: {
+      count: 2,
+      statusSummary: {
+        再現成功: 1,
+        定着: 1,
+      },
+    },
+    improvementSummary: {
+      count: 1,
+      statusSummary: {
+        完了: 1,
+        習慣化: 0,
+      },
+    },
   };
 
   beforeEach(async () => {
@@ -134,10 +148,181 @@ describe('ReportCardComponent', () => {
       component.report = {
         ...mockReport,
         goodPointIds: [],
+        goodPointSummary: {
+          count: 0,
+          statusSummary: {
+            再現成功: 0,
+            定着: 0,
+          },
+        },
       };
       fixture.detectChanges();
       const badge = fixture.nativeElement.querySelector('.report-card__badge--good');
       expect(badge).toBeFalsy();
+    });
+  });
+
+  describe('サマリー表示', () => {
+    it('よかったことサマリーが表示される', () => {
+      const summarySection = fixture.nativeElement.querySelector('.report-card__summary');
+      expect(summarySection).toBeTruthy();
+      const goodPointSummary = summarySection.querySelector('.summary-item');
+      expect(goodPointSummary).toBeTruthy();
+      expect(goodPointSummary.textContent).toContain('よかったこと');
+      expect(goodPointSummary.textContent).toContain('2件');
+    });
+
+    it('改善点サマリーが表示される', () => {
+      const summarySection = fixture.nativeElement.querySelector('.report-card__summary');
+      expect(summarySection).toBeTruthy();
+      const improvementSummary = summarySection.querySelectorAll('.summary-item')[1];
+      expect(improvementSummary).toBeTruthy();
+      expect(improvementSummary.textContent).toContain('改善点');
+      expect(improvementSummary.textContent).toContain('1件');
+    });
+
+    it('ステータス概要が表示される', () => {
+      const summarySection = fixture.nativeElement.querySelector('.report-card__summary');
+      expect(summarySection).toBeTruthy();
+      const statusSummary = summarySection.querySelector('.summary-item__status');
+      expect(statusSummary).toBeTruthy();
+      expect(statusSummary.textContent).toContain('再現成功');
+      expect(statusSummary.textContent).toContain('定着');
+    });
+
+    it('よかったことが0件の場合、サマリーセクションが表示されない', () => {
+      component.report = {
+        ...mockReport,
+        goodPointIds: [],
+        goodPointSummary: {
+          count: 0,
+          statusSummary: {
+            再現成功: 0,
+            定着: 0,
+          },
+        },
+        improvementIds: [],
+        improvementSummary: {
+          count: 0,
+          statusSummary: {
+            完了: 0,
+            習慣化: 0,
+          },
+        },
+      };
+      fixture.detectChanges();
+      const summarySection = fixture.nativeElement.querySelector('.report-card__summary');
+      expect(summarySection).toBeFalsy();
+    });
+
+    it('ステータス概要が0件の場合、ステータス概要が表示されない', () => {
+      component.report = {
+        ...mockReport,
+        goodPointSummary: {
+          count: 2,
+          statusSummary: {
+            再現成功: 0,
+            定着: 0,
+          },
+        },
+        improvementSummary: {
+          count: 1,
+          statusSummary: {
+            完了: 0,
+            習慣化: 0,
+          },
+        },
+      };
+      fixture.detectChanges();
+      const statusSummary = fixture.nativeElement.querySelector('.summary-item__status');
+      expect(statusSummary).toBeFalsy();
+    });
+
+    it('shouldShowGoodPointSummaryが正しく動作する', () => {
+      expect(component.shouldShowGoodPointSummary).toBe(true);
+      component.report = {
+        ...mockReport,
+        goodPointSummary: {
+          count: 0,
+          statusSummary: {
+            再現成功: 0,
+            定着: 0,
+          },
+        },
+      };
+      fixture.detectChanges();
+      expect(component.shouldShowGoodPointSummary).toBe(false);
+    });
+
+    it('shouldShowImprovementSummaryが正しく動作する', () => {
+      expect(component.shouldShowImprovementSummary).toBe(true);
+      component.report = {
+        ...mockReport,
+        improvementSummary: {
+          count: 0,
+          statusSummary: {
+            完了: 0,
+            習慣化: 0,
+          },
+        },
+      };
+      fixture.detectChanges();
+      expect(component.shouldShowImprovementSummary).toBe(false);
+    });
+
+    it('shouldShowGoodPointStatusSummaryが正しく動作する', () => {
+      expect(component.shouldShowGoodPointStatusSummary).toBe(true);
+      component.report = {
+        ...mockReport,
+        goodPointSummary: {
+          count: 2,
+          statusSummary: {
+            再現成功: 0,
+            定着: 0,
+          },
+        },
+      };
+      fixture.detectChanges();
+      expect(component.shouldShowGoodPointStatusSummary).toBe(false);
+    });
+
+    it('shouldShowImprovementStatusSummaryが正しく動作する', () => {
+      expect(component.shouldShowImprovementStatusSummary).toBe(true);
+      component.report = {
+        ...mockReport,
+        improvementSummary: {
+          count: 1,
+          statusSummary: {
+            完了: 0,
+            習慣化: 0,
+          },
+        },
+      };
+      fixture.detectChanges();
+      expect(component.shouldShowImprovementStatusSummary).toBe(false);
+    });
+
+    it('shouldShowSummarySectionが正しく動作する', () => {
+      expect(component.shouldShowSummarySection).toBe(true);
+      component.report = {
+        ...mockReport,
+        goodPointSummary: {
+          count: 0,
+          statusSummary: {
+            再現成功: 0,
+            定着: 0,
+          },
+        },
+        improvementSummary: {
+          count: 0,
+          statusSummary: {
+            完了: 0,
+            習慣化: 0,
+          },
+        },
+      };
+      fixture.detectChanges();
+      expect(component.shouldShowSummarySection).toBe(false);
     });
   });
 });

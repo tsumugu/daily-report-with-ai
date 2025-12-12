@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日報一覧リストアイテム情報拡張 プロトタイプ</title>
+  <link rel="stylesheet" href="report-card-enhanced.css">
+</head>
+<body>
+  <div class="prototype-container">
+    <h1 class="prototype-title">日報一覧リストアイテム情報拡張 プロトタイプ</h1>
+
+    <!-- 状態1: 正常系（よかったこと・改善点あり、ステータス概要あり） -->
+    <section class="prototype-section">
+      <h2 class="prototype-section__title">状態1: 正常系（よかったこと・改善点あり、ステータス概要あり）</h2>
+      <div class="report-list">
+        <article class="report-card" tabindex="0" role="button" aria-label="2025年12月10日（火）の日報">
+          <header class="report-card__header">
+            <time class="report-card__date" datetime="2025-12-10">
+              <span class="report-card__date-icon">📅</span>
+              2025/12/10（火）
+            </time>
+            <div class="report-card__badges">
+              <span class="report-card__badge report-card__badge--good" title="よかったこと有り">
+                <span class="report-card__badge-icon">💚</span>
+              </span>
+              <span class="report-card__badge report-card__badge--improvement" title="改善点有り">
+                <span class="report-card__badge-icon">📄</span>
+              </span>
+            </div>
+          </header>
+
+          <!-- サマリーセクション -->
+          <section class="report-card__summary" aria-label="よかったことと改善点のサマリー">
+            <!-- よかったことサマリー -->
+            <div class="summary-item">
+              <div class="summary-item__header">
+                <span class="summary-item__icon">💚</span>
+                <span class="summary-item__label">よかったこと:</span>
+                <span class="summary-item__count">2件</span>
+              </div>
+              <div class="summary-item__status">
+                <span class="status-item">
+                  <span class="status-item__icon">✓</span>
+                  <span class="status-item__label">再現成功:</span>
+                  <span class="status-item__count">1件</span>
+                </span>
+                <span class="status-item">
+                  <span class="status-item__icon">✓</span>
+                  <span class="status-item__label">定着:</span>
+                  <span class="status-item__count">1件</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- 改善点サマリー -->
+            <div class="summary-item">
+              <div class="summary-item__header">
+                <span class="summary-item__icon">📄</span>
+                <span class="summary-item__label">改善点:</span>
+                <span class="summary-item__count">1件</span>
+              </div>
+              <div class="summary-item__status">
+                <span class="status-item">
+                  <span class="status-item__icon">✓</span>
+                  <span class="status-item__label">完了:</span>
+                  <span class="status-item__count">1件</span>
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <div class="report-card__divider"></div>
+
+          <p class="report-card__content">チーム会議で積極的に発言できた。前回よりも自信を持って意見を述べられた。</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 状態2: ステータス概要が0件の場合 -->
+    <section class="prototype-section">
+      <h2 class="prototype-section__title">状態2: ステータス概要が0件の場合</h2>
+      <div class="report-list">
+        <article class="report-card" tabindex="0" role="button" aria-label="2025年12月9日（月）の日報">
+          <header class="report-card__header">
+            <time class="report-card__date" datetime="2025-12-09">
+              <span class="report-card__date-icon">📅</span>
+              2025/12/9（月）
+            </time>
+            <div class="report-card__badges">
+              <span class="report-card__badge report-card__badge--good" title="よかったこと有り">
+                <span class="report-card__badge-icon">💚</span>
+              </span>
+              <span class="report-card__badge report-card__badge--improvement" title="改善点有り">
+                <span class="report-card__badge-icon">📄</span>
+              </span>
+            </div>
+          </header>
+
+          <!-- サマリーセクション（ステータス概要なし） -->
+          <section class="report-card__summary" aria-label="よかったことと改善点のサマリー">
+            <div class="summary-item">
+              <div class="summary-item__header">
+                <span class="summary-item__icon">💚</span>
+                <span class="summary-item__label">よかったこと:</span>
+                <span class="summary-item__count">2件</span>
+              </div>
+            </div>
+
+            <div class="summary-item">
+              <div class="summary-item__header">
+                <span class="summary-item__icon">📄</span>
+                <span class="summary-item__label">改善点:</span>
+                <span class="summary-item__count">1件</span>
+              </div>
+            </div>
+          </section>
+
+          <div class="report-card__divider"></div>
+
+          <p class="report-card__content">午前中にコードレビューを行い、フィードバックをいただいた。</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 状態3: よかったこと・改善点が0件の場合（既存の動作） -->
+    <section class="prototype-section">
+      <h2 class="prototype-section__title">状態3: よかったこと・改善点が0件の場合（サマリーセクション非表示）</h2>
+      <div class="report-list">
+        <article class="report-card" tabindex="0" role="button" aria-label="2025年12月8日（日）の日報">
+          <header class="report-card__header">
+            <time class="report-card__date" datetime="2025-12-08">
+              <span class="report-card__date-icon">📅</span>
+              2025/12/8（日）
+            </time>
+            <div class="report-card__badges">
+              <!-- アイコンなし -->
+            </div>
+          </header>
+
+          <!-- サマリーセクションは非表示 -->
+
+          <p class="report-card__content">週末は休息を取って、来週に備えた。</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 状態4: モバイル表示 -->
+    <section class="prototype-section">
+      <h2 class="prototype-section__title">状態4: モバイル表示（縦方向）</h2>
+      <div class="report-list report-list--mobile">
+        <article class="report-card" tabindex="0" role="button" aria-label="2025年12月10日（火）の日報">
+          <header class="report-card__header">
+            <time class="report-card__date" datetime="2025-12-10">
+              <span class="report-card__date-icon">📅</span>
+              2025/12/10（火）
+            </time>
+            <div class="report-card__badges">
+              <span class="report-card__badge report-card__badge--good" title="よかったこと有り">
+                <span class="report-card__badge-icon">💚</span>
+              </span>
+              <span class="report-card__badge report-card__badge--improvement" title="改善点有り">
+                <span class="report-card__badge-icon">📄</span>
+              </span>
+            </div>
+          </header>
+
+          <!-- サマリーセクション（モバイル表示） -->
+          <section class="report-card__summary" aria-label="よかったことと改善点のサマリー">
+            <div class="summary-item">
+              <div class="summary-item__header">
+                <span class="summary-item__icon">💚</span>
+                <span class="summary-item__label">よかったこと:</span>
+                <span class="summary-item__count">2件</span>
+              </div>
+              <div class="summary-item__status summary-item__status--mobile">
+                <span class="status-item status-item--mobile">
+                  <span class="status-item__icon">✓</span>
+                  <span class="status-item__label">再現成功:</span>
+                  <span class="status-item__count">1件</span>
+                </span>
+                <span class="status-item status-item--mobile">
+                  <span class="status-item__icon">✓</span>
+                  <span class="status-item__label">定着:</span>
+                  <span class="status-item__count">1件</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="summary-item">
+              <div class="summary-item__header">
+                <span class="summary-item__icon">📄</span>
+                <span class="summary-item__label">改善点:</span>
+                <span class="summary-item__count">1件</span>
+              </div>
+              <div class="summary-item__status summary-item__status--mobile">
+                <span class="status-item status-item--mobile">
+                  <span class="status-item__icon">✓</span>
+                  <span class="status-item__label">完了:</span>
+                  <span class="status-item__count">1件</span>
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <div class="report-card__divider"></div>
+
+          <p class="report-card__content">チーム会議で積極的に発言できた。前回よりも自信を持って意見を述べられた。</p>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // カードクリック時の動作（デモ用）
+    document.querySelectorAll('.report-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        console.log('カードがクリックされました:', card.querySelector('.report-card__date').textContent);
+        alert('日報詳細画面に遷移します（デモ）');
+      });
+
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          card.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+

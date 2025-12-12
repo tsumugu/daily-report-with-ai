@@ -35,11 +35,11 @@ alwaysApply: true
 
 ### 3.1. ツール
 
-**Storybook** を使用してプロトタイプを作成する。
+**HTML/CSS/JavaScript** を使用してプロトタイプを作成する。
 
-- 既存のStorybook環境を活用
-- 画面全体のフローをストーリーとして表現
-- インタラクションは `play` 関数や `args` で制御
+- シンプルなHTML/CSS/JSで実装
+- 画面全体のフローを表現
+- インタラクションはJavaScriptで制御
 
 ### 3.2. 作成タイミング
 
@@ -58,48 +58,57 @@ alwaysApply: true
 
 プロトタイプは以下の場所に配置する：
 
-- **Storybookストーリー**: `apps/web/src/stories/prototypes/{feature_name}/`
+- **プロトタイプファイル**: `docs/features/{feature_name}/mockups/`
+  - `{feature_name}.html` - HTMLファイル
+  - `{feature_name}.css` - CSSファイル
+  - `{feature_name}.js` - JavaScriptファイル（必要に応じて）
 - **プロトタイプドキュメント**: `docs/features/{feature_name}/prototype.md`（任意、必要に応じて）
 
 ## 4. プロトタイプの構成
 
-### 4.1. 画面単位のストーリー
+### 4.1. HTML構造
 
-各画面（ページ）ごとにストーリーを作成する：
+各画面（ページ）ごとにHTMLセクションを作成する：
 
-```typescript
-// apps/web/src/stories/prototypes/daily-report-input/daily-report-input.stories.ts
-export default {
-  title: "Prototypes/DailyReportInput",
-  component: DailyReportInputPage,
-} as Meta;
+```html
+<!-- docs/features/{feature_name}/mockups/{feature_name}.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{機能名} プロトタイプ</title>
+  <link rel="stylesheet" href="{feature_name}.css">
+</head>
+<body>
+  <!-- 状態1: 正常系 -->
+  <section class="prototype-section">
+    <h2>状態1: 正常系</h2>
+    <!-- コンテンツ -->
+  </section>
 
-export const Default: Story = {
-  // 初期状態
-};
-
-export const WithValidationError: Story = {
-  // バリデーションエラー状態
-};
-
-export const Success: Story = {
-  // 送信成功状態
-};
+  <!-- 状態2: エラー系 -->
+  <section class="prototype-section">
+    <h2>状態2: エラー系</h2>
+    <!-- コンテンツ -->
+  </section>
+</body>
+</html>
 ```
 
 ### 4.2. フロー表現
 
 画面遷移は、以下のいずれかの方法で表現する：
 
-1. **複数のストーリーで表現**: 各画面を別ストーリーとして作成し、遷移先をコメントで明記
-2. **インタラクティブな遷移**: `play` 関数を使用してクリックで次の状態に遷移
-3. **状態管理**: コンポーネント内で状態を管理し、ボタンクリックで状態遷移
+1. **複数のセクションで表現**: 各画面を別セクションとして作成し、遷移先をコメントで明記
+2. **インタラクティブな遷移**: JavaScriptを使用してクリックで次の状態に遷移
+3. **状態管理**: JavaScriptで状態を管理し、ボタンクリックで状態遷移
 
 ### 4.3. モックデータ
 
 実際のAPIは使用せず、モックデータを使用する：
 
-```typescript
+```javascript
 // モックデータの例
 const mockDailyReports = [
   { id: 1, date: "2025-01-15", content: "サンプル日報1" },
@@ -139,7 +148,7 @@ PdMは `ui_design.md` をレビューし、以下をチェックする：
 
 人間（human）からのフィードバックは、以下に反映する：
 
-1. **プロトタイプの修正**: Storybookストーリーを更新
+1. **プロトタイプの修正**: HTML/CSS/JSファイルを更新
 2. **ui_design.md の更新**: 必要に応じて設計ドキュメントも更新
 3. **prd.md の更新**: 要件の見直しが必要な場合は更新（人間（human）の判断に基づく）
 
