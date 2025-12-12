@@ -51,6 +51,14 @@ export const routes: Routes = [
         (m) => m.FollowupListPageComponent
       ),
   },
+  {
+    path: 'followups/:itemType/:itemId',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/followup/pages/followup-page/followup-page.component').then(
+        (m) => m.FollowupPageComponent
+      ),
+  },
 
   // Fallback
   {

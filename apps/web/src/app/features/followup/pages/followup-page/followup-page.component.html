@@ -1,0 +1,170 @@
+<div class="followup-page" tabindex="0" (keydown)="onKeyDown($event)">
+  <!-- ページヘッダー -->
+  <header class="followup-page__header">
+    <button class="followup-page__back" routerLink="/followups" aria-label="戻る">
+      ←
+    </button>
+    <h1 class="followup-page__title">{{ pageTitle }}</h1>
+  </header>
+
+  <!-- ページコンテンツ -->
+  <main class="followup-page__content">
+    <!-- エピソード/アクション一覧セクション -->
+    <section class="followup-page__section">
+      <div class="followup-page__section-header">
+        <h2 class="followup-page__section-title">{{ sectionTitle }}</h2>
+        <div class="followup-page__status" [attr.aria-live]="'polite'">
+          @if (statusBadgeType) {
+            <app-status-badge [status]="statusBadgeType!"></app-status-badge>
+          }
+          <span class="followup-page__status-text">{{ statusText }}</span>
+        </div>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="followup-page__error">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- エピソード/アクション一覧 -->
+      <div class="followup-page__list" role="list">
+        @if (itemType() === 'goodPoint') {
+          @for (episode of episodes(); track episode.id) {
+            <div class="followup-page__item" role="listitem">
+              <div class="followup-page__item-content">
+                <div class="followup-page__item-date">
+                  <span class="followup-page__item-date-label">再現日:</span>
+                  <span class="followup-page__item-date-value">{{ episode.date }}</span>
+                </div>
+                @if (episode.memo) {
+                  <p class="followup-page__item-memo">{{ episode.memo }}</p>
+                }
+              </div>
+              <button
+                class="followup-page__item-delete"
+                (click)="onDelete(episode.id)"
+                [attr.aria-label]="'削除'"
+              >
+                ×
+              </button>
+            </div>
+          }
+        } @else {
+          @for (action of actions(); track action.id) {
+            <div class="followup-page__item" role="listitem">
+              <div class="followup-page__item-content">
+                <div class="followup-page__item-date">
+                  <span class="followup-page__item-date-label">アクションをした日:</span>
+                  <span class="followup-page__item-date-value">{{ action.date }}</span>
+                </div>
+                @if (action.memo) {
+                  <p class="followup-page__item-memo">{{ action.memo }}</p>
+                }
+              </div>
+              <button
+                class="followup-page__item-delete"
+                (click)="onDelete(action.id)"
+                [attr.aria-label]="'削除'"
+              >
+                ×
+              </button>
+            </div>
+          }
+        }
+      </div>
+
+      <!-- エピソード/アクション追加ボタン -->
+      <button class="followup-page__add-button" (click)="onAddClick()">
+        <span class="followup-page__add-button-icon">＋</span>
+        <span class="followup-page__add-button-label">
+          {{ itemType() === 'goodPoint' ? 'エピソードを追加' : 'アクションを追加' }}
+        </span>
+      </button>
+    </section>
+  </main>
+
+  <!-- エピソード/アクション追加フォームモーダル（オーバーレイ） -->
+  @if (isModalOpen()) {
+    <div
+      class="followup-page__overlay"
+      tabindex="0"
+      (click)="onOverlayClick($event)"
+      (keydown)="onOverlayKeyDown($event)"
+      [attr.aria-label]="'モーダルオーバーレイ'"
+    >
+      <div class="followup-page__modal">
+        <header class="followup-page__modal-header">
+          <h3 class="followup-page__modal-title">{{ modalTitle }}</h3>
+          <button
+            class="followup-page__modal-close"
+            (click)="onCloseModal()"
+            [attr.aria-label]="'閉じる'"
+          >
+            ×
+          </button>
+        </header>
+
+        <form class="followup-page__modal-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+          @if (errorMessage()) {
+            <div class="followup-page__modal-error">
+              {{ errorMessage() }}
+            </div>
+          }
+
+          <div class="followup-page__form-field">
+            <app-date-field
+              formControlName="date"
+              [label]="dateLabel"
+              [required]="true"
+              [errorMessage]="dateErrorMessage"
+              [touched]="dateTouched"
+            ></app-date-field>
+          </div>
+
+          <div class="followup-page__form-field">
+            <app-textarea-field
+              formControlName="memo"
+              [label]="memoLabel"
+              [placeholder]="memoPlaceholder"
+              [maxLength]="500"
+              [errorMessage]="memoErrorMessage"
+              [touched]="memoTouched"
+            ></app-textarea-field>
+          </div>
+
+          <footer class="followup-page__modal-footer">
+            <app-button
+              variant="outline"
+              size="sm"
+              type="button"
+              (clicked)="onCloseModal()"
+              [disabled]="isSubmitting()"
+            >
+              キャンセル
+            </app-button>
+            <app-button
+              variant="primary"
+              size="sm"
+              type="submit"
+              [loading]="isSubmitting()"
+              [disabled]="isSubmitting() || form.invalid"
+            >
+              追加
+            </app-button>
+          </footer>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- トースト通知 -->
+  @if (toastMessage()) {
+    <app-toast
+      [message]="toastMessage()!"
+      [variant]="toastVariant()"
+      (dismissed)="onToastDismiss()"
+    ></app-toast>
+  }
+</div>
+

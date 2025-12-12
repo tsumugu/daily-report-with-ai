@@ -5,6 +5,10 @@ import {
   Followup,
   CreateFollowupRequest,
   FollowupItemsResponse,
+  AddEpisodeRequest,
+  AddActionRequest,
+  EpisodesResponse,
+  ActionsResponse,
 } from '../models/followup.model';
 
 @Injectable({
@@ -42,7 +46,7 @@ export class FollowupService {
   }
 
   /**
-   * よかったことのフォローアップ履歴を取得
+   * よかったことのフォローアップ履歴を取得（後方互換性のため維持）
    */
   getGoodPointFollowups(goodPointId: string): Observable<Followup[]> {
     return this.http
@@ -63,7 +67,16 @@ export class FollowupService {
   }
 
   /**
-   * 改善点のフォローアップ履歴を取得
+   * よかったことのエピソード一覧を取得
+   */
+  getEpisodes(goodPointId: string): Observable<EpisodesResponse> {
+    return this.http.get<EpisodesResponse>(
+      `${this.baseUrl}/good-points/${goodPointId}/followups`
+    );
+  }
+
+  /**
+   * 改善点のフォローアップ履歴を取得（後方互換性のため維持）
    */
   getImprovementFollowups(improvementId: string): Observable<Followup[]> {
     return this.http
@@ -84,6 +97,15 @@ export class FollowupService {
   }
 
   /**
+   * 改善点のアクション一覧を取得
+   */
+  getActions(improvementId: string): Observable<ActionsResponse> {
+    return this.http.get<ActionsResponse>(
+      `${this.baseUrl}/improvements/${improvementId}/followups`
+      );
+  }
+
+  /**
    * よかったことにフォローアップを追加
    */
   addGoodPointFollowup(
@@ -97,7 +119,7 @@ export class FollowupService {
   }
 
   /**
-   * 改善点にフォローアップを追加
+   * 改善点にフォローアップを追加（後方互換性のため維持）
    */
   addImprovementFollowup(
     improvementId: string,
@@ -106,6 +128,44 @@ export class FollowupService {
     return this.http.post<Followup>(
       `${this.baseUrl}/improvements/${improvementId}/followups`,
       data
+    );
+  }
+
+  /**
+   * よかったことにエピソードを追加（status不要）
+   */
+  addEpisode(goodPointId: string, data: AddEpisodeRequest): Observable<Followup> {
+    return this.http.post<Followup>(
+      `${this.baseUrl}/good-points/${goodPointId}/followups`,
+      data
+    );
+  }
+
+  /**
+   * 改善点にアクションを追加（status不要）
+   */
+  addAction(improvementId: string, data: AddActionRequest): Observable<Followup> {
+    return this.http.post<Followup>(
+      `${this.baseUrl}/improvements/${improvementId}/followups`,
+      data
+    );
+  }
+
+  /**
+   * エピソードを削除
+   */
+  deleteEpisode(goodPointId: string, followupId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.baseUrl}/good-points/${goodPointId}/followups/${followupId}`
+    );
+  }
+
+  /**
+   * アクションを削除
+   */
+  deleteAction(improvementId: string, followupId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.baseUrl}/improvements/${improvementId}/followups/${followupId}`
     );
   }
 }

@@ -176,8 +176,7 @@ describe('FollowupListPageComponent', () => {
 
     component.onFollowupClick(item);
 
-    expect(component.selectedItem()).toEqual(item);
-    expect(component.isModalOpen()).toBe(true);
+    expect(router.navigate).toHaveBeenCalledWith(['/followups', 'goodPoint', 'gp-1']);
   });
 
   it('onModalClosed()が呼ばれた場合、モーダルが閉じること', () => {
@@ -363,6 +362,7 @@ describe('FollowupListPageComponent', () => {
           status: '進行中',
           success_count: 0,
         },
+        reportId: 'report-1',
       },
     ];
 
@@ -399,6 +399,7 @@ describe('FollowupListPageComponent', () => {
         status: '進行中',
         success_count: 0,
       },
+      reportId: 'report-1',
     };
 
     followupService.getFollowupItems.and.returnValue(of({ data: [], total: 0 }));
@@ -542,6 +543,7 @@ describe('FollowupListPageComponent', () => {
           status: '進行中',
           success_count: 0,
         },
+        reportId: 'report-1',
       },
     ];
 
@@ -585,6 +587,7 @@ describe('FollowupListPageComponent', () => {
           status: '進行中',
           success_count: 0,
         },
+        reportId: 'report-1',
       })
     );
     fixture.detectChanges();
@@ -707,6 +710,7 @@ describe('FollowupListPageComponent', () => {
           status: '進行中',
           success_count: 0,
         },
+        reportId: 'report-1',
       },
     ];
 

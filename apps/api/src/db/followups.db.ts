@@ -34,6 +34,10 @@ export class FollowupsDatabase {
     return results;
   }
 
+  delete(id: string): void {
+    this.followups.delete(id);
+  }
+
   clear(): void {
     this.followups.clear();
   }

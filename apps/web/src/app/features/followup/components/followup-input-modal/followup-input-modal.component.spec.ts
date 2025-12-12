@@ -301,7 +301,7 @@ describe('FollowupInputModalComponent', () => {
     expect(component.dateLabel).toBe('再現日');
   });
 
-  it('dateLabelがimprovementの場合、「完了日」を返すこと', () => {
+  it('dateLabelがimprovementの場合、「アクションをした日」を返すこと', () => {
     component.item = {
       itemType: 'improvement',
       item: {
@@ -315,7 +315,7 @@ describe('FollowupInputModalComponent', () => {
       reportId: 'report-1',
     };
     component.ngOnInit();
-    expect(component.dateLabel).toBe('完了日');
+    expect(component.dateLabel).toBe('アクションをした日');
   });
 
   it('ステータスが「完了」の場合、日付が必須になること', () => {

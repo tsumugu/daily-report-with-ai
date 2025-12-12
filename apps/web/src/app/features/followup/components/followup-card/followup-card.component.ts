@@ -50,8 +50,8 @@ export class FollowupCardComponent {
     return this.item?.item?.success_count ?? 0;
   }
 
-  get isSettled(): boolean {
-    return this.successCount >= 3;
+  get countLabel(): string {
+    return this.item?.itemType === 'goodPoint' ? 'エピソード' : 'アクション';
   }
 }
 

@@ -44,6 +44,7 @@ describe('WeeklyFocusService', () => {
               status: '進行中',
               success_count: 0,
             },
+            reportId: 'report-1',
           },
         ],
       };
@@ -78,6 +79,7 @@ describe('WeeklyFocusService', () => {
           status: '進行中',
           success_count: 0,
         },
+        reportId: 'report-1',
       };
 
       service.addWeeklyFocus(request).subscribe((response) => {

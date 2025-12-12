@@ -17,5 +17,5 @@ npm run test:ci -w @daily-report/web
 
 # Run E2E tests before push
 echo "🧪 E2Eテストを実行中..."
-npm run e2e -w @daily-report/web
+cd apps/web && npm run e2e
 

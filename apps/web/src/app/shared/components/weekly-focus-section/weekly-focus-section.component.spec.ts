@@ -59,6 +59,7 @@ describe('WeeklyFocusSectionComponent', () => {
           status: '進行中',
           success_count: 0,
         },
+        reportId: 'report-1',
       },
     ];
 
@@ -126,6 +127,7 @@ describe('WeeklyFocusSectionComponent', () => {
         weekStartDate: '2025-12-09',
         createdAt: '2025-12-09T12:00:00Z',
         item: null,
+        reportId: null,
       },
     ];
 
@@ -205,6 +207,7 @@ describe('WeeklyFocusSectionComponent', () => {
             status: '進行中',
             success_count: 0,
           },
+          reportId: 'report-1',
         },
       ];
       weeklyFocusService.getCurrentWeekFocuses.and.returnValue(of(mockFocuses));

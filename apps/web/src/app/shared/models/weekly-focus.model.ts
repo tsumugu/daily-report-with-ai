@@ -28,6 +28,7 @@ export interface WeeklyFocusResponse extends WeeklyFocus {
     status: string;
     success_count: number;
   } | null;
+  reportId: string | null; // 日報ID
 }
 
 /**

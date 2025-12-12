@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { weeklyFocusesDb } from '../db/weekly-focuses.db.js';
-import { goodPointsDb, improvementsDb } from '../db/daily-reports.db.js';
+import { goodPointsDb, improvementsDb, dailyReportsDb } from '../db/daily-reports.db.js';
 import {
   WeeklyFocus,
   CreateWeeklyFocusRequest,
@@ -41,6 +41,9 @@ weeklyFocusesRouter.get('/weekly-focuses', (req: Request, res: Response) => {
   const weekStartDate = getWeekStartDate();
   const weeklyFocuses = weeklyFocusesDb.findByUserIdAndWeek(userId, weekStartDate);
 
+  // ユーザーのすべての日報を取得（日報IDを取得するため）
+  const reports = dailyReportsDb.findAllByUserId(userId);
+
   // よかったこと/改善点の情報を取得
   const data = weeklyFocuses.map((focus) => {
     let item;
@@ -50,13 +53,28 @@ weeklyFocusesRouter.get('/weekly-focuses', (req: Request, res: Response) => {
       item = improvementsDb.findById(focus.itemId);
     }
 
+    // よかったこと/改善点を含む日報を見つける
+    let reportId: string | null = null;
+    if (item) {
+      const report = reports.find((r) => {
+        if (focus.itemType === 'goodPoint') {
+          return r.goodPointIds.includes(focus.itemId);
+        } else {
+          return r.improvementIds.includes(focus.itemId);
+        }
+      });
+      reportId = report?.id || null;
+    }
+
     return {
       id: focus.id,
+      userId: focus.userId,
       itemType: focus.itemType,
       itemId: focus.itemId,
-      item: item || null,
       weekStartDate: focus.weekStartDate,
       createdAt: focus.createdAt,
+      item: item || null,
+      reportId,
     };
   });
 
@@ -129,10 +147,22 @@ weeklyFocusesRouter.post('/weekly-focuses', (req: Request, res: Response) => {
 
   weeklyFocusesDb.save(weeklyFocus);
 
+  // よかったこと/改善点を含む日報を見つける
+  const reports = dailyReportsDb.findAllByUserId(userId);
+  const report = reports.find((r) => {
+    if (body.itemType === 'goodPoint') {
+      return r.goodPointIds.includes(body.itemId);
+    } else {
+      return r.improvementIds.includes(body.itemId);
+    }
+  });
+  const reportId = report?.id || null;
+
   // よかったこと/改善点の情報を含めて返す
   res.status(201).json({
     ...weeklyFocus,
     item,
+    reportId,
   });
 });
 

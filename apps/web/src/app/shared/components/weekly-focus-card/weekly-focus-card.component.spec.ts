@@ -43,6 +43,7 @@ describe('WeeklyFocusCardComponent', () => {
         status: '進行中',
         success_count: 1,
       },
+      reportId: 'report-1',
     };
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
@@ -59,6 +60,7 @@ describe('WeeklyFocusCardComponent', () => {
       weekStartDate: '2025-12-09',
       createdAt: '2025-12-09T12:00:00Z',
       item: null,
+      reportId: null,
     };
     fixture.detectChanges();
     expect(component.itemTypeLabel).toBe('よかったこと');
@@ -74,6 +76,7 @@ describe('WeeklyFocusCardComponent', () => {
       weekStartDate: '2025-12-09',
       createdAt: '2025-12-09T12:00:00Z',
       item: null,
+      reportId: null,
     };
     fixture.detectChanges();
     expect(component.itemTypeLabel).toBe('改善点');
@@ -89,6 +92,7 @@ describe('WeeklyFocusCardComponent', () => {
       weekStartDate: '2025-12-09',
       createdAt: '2025-12-09T12:00:00Z',
       item: null,
+      reportId: null,
     };
     fixture.detectChanges();
 
@@ -106,6 +110,7 @@ describe('WeeklyFocusCardComponent', () => {
       weekStartDate: '2025-12-09',
       createdAt: '2025-12-09T12:00:00Z',
       item: null,
+      reportId: null,
     };
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
@@ -127,6 +132,7 @@ describe('WeeklyFocusCardComponent', () => {
         status: '進行中',
         success_count: 3,
       },
+      reportId: 'report-1',
     };
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
@@ -148,11 +154,12 @@ describe('WeeklyFocusCardComponent', () => {
         status: '進行中',
         success_count: 0,
       },
+      reportId: 'report-1',
     };
-    expect(component.reportDetailUrl).toBe('/daily-reports/gp-1');
+    expect(component.reportDetailUrl).toBe('/daily-reports/report-1');
   });
 
-  it('itemがnullの場合、reportDetailUrlが#を返すこと', () => {
+  it('reportIdがnullの場合、reportDetailUrlが#を返すこと', () => {
     component.focus = {
       id: 'focus-1',
       userId: 'user-1',
@@ -160,7 +167,13 @@ describe('WeeklyFocusCardComponent', () => {
       itemId: 'gp-1',
       weekStartDate: '2025-12-09',
       createdAt: '2025-12-09T12:00:00Z',
-      item: null,
+      item: {
+        id: 'gp-1',
+        content: 'テストよかったこと',
+        status: '進行中',
+        success_count: 0,
+      },
+      reportId: null,
     };
     expect(component.reportDetailUrl).toBe('#');
   });
@@ -174,6 +187,7 @@ describe('WeeklyFocusCardComponent', () => {
       weekStartDate: '2025-12-09',
       createdAt: '2025-12-09T12:00:00Z',
       item: null,
+      reportId: null,
     };
     fixture.detectChanges();
     expect(component.status).toBeUndefined();
@@ -196,6 +210,7 @@ describe('WeeklyFocusCardComponent', () => {
       weekStartDate: '2025-12-09',
       createdAt: '2025-12-09T12:00:00Z',
       item: null,
+      reportId: null,
     };
     spyOn(component.deleteClicked, 'emit');
     component.onDelete();
@@ -216,6 +231,7 @@ describe('WeeklyFocusCardComponent', () => {
         status: '進行中',
         success_count: 0,
       },
+      reportId: 'report-1',
     };
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;

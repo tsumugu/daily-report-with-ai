@@ -21,11 +21,12 @@ followupsRouter.use(authMiddleware);
  * バリデーションヘルパー
  */
 const MAX_MEMO_LENGTH = 500;
+const EPISODE_THRESHOLD = 3; // エピソード数の閾値
+const ACTION_THRESHOLD = 3; // アクション数の閾値
 
 function validateFollowup(body: CreateFollowupRequest, status: string): string | null {
-  if (!body.status) {
-    return 'status は必須です';
-  }
+  // statusは任意（後方互換性のため）
+  // 指定されない場合は自動的に「再現成功」または「完了」を設定
 
   if (body.memo && body.memo.length > MAX_MEMO_LENGTH) {
     return `memo は${MAX_MEMO_LENGTH}文字以内で入力してください`;
@@ -36,7 +37,68 @@ function validateFollowup(body: CreateFollowupRequest, status: string): string |
     return 'date は必須です';
   }
 
+  // 日付の妥当性チェック（未来日付は許可しない）
+  if (body.date) {
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(body.date)) {
+      return 'date はYYYY-MM-DD形式で入力してください';
+    }
+    // 日付文字列をローカル時間としてパース（タイムゾーン問題を回避）
+    const [year, month, day] = body.date.split('-').map(Number);
+    const inputDate = new Date(year, month - 1, day);
+    inputDate.setHours(0, 0, 0, 0);
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (inputDate > today) {
+      return '未来の日付は入力できません';
+    }
+  }
+
   return null;
+}
+
+/**
+ * エピソード数をカウント
+ */
+function countEpisodes(itemId: string): number {
+  const followups = followupsDb.findByItemId('goodPoint', itemId);
+  return followups.filter((f) => f.status === '再現成功').length;
+}
+
+/**
+ * アクション数をカウント
+ */
+function countActions(itemId: string): number {
+  const followups = followupsDb.findByItemId('improvement', itemId);
+  return followups.filter((f) => f.status === '完了').length;
+}
+
+/**
+ * よかったことのステータスを自動判定
+ */
+function calculateGoodPointStatus(episodeCount: number): GoodPoint['status'] {
+  if (episodeCount === 0) {
+    return '未着手';
+  } else if (episodeCount >= EPISODE_THRESHOLD) {
+    return '定着';
+  } else {
+    return '進行中';
+  }
+}
+
+/**
+ * 改善点のステータスを自動判定
+ */
+function calculateImprovementStatus(actionCount: number): Improvement['status'] {
+  if (actionCount === 0) {
+    return '未着手';
+  } else if (actionCount >= ACTION_THRESHOLD) {
+    return '習慣化';
+  } else {
+    return '進行中';
+  }
 }
 
 /**
@@ -129,9 +191,19 @@ followupsRouter.post('/good-points/:id/followups', (req: Request, res: Response)
   }
 
   const body: CreateFollowupRequest = req.body;
-  const validationError = validateFollowup(body, body.status);
+  
+  // statusが指定されていない場合、自動的に「再現成功」を設定（後方互換性）
+  const status = body.status || '再現成功';
+  
+  const validationError = validateFollowup(body, status);
   if (validationError) {
     res.status(400).json({ message: validationError });
+    return;
+  }
+
+  // dateは必須（エピソード追加時）
+  if (!body.date) {
+    res.status(400).json({ message: 'date は必須です' });
     return;
   }
 
@@ -141,31 +213,27 @@ followupsRouter.post('/good-points/:id/followups', (req: Request, res: Response)
     userId,
     itemType: 'goodPoint',
     itemId: goodPointId,
-    status: body.status,
+    status: '再現成功', // エピソードは常に「再現成功」
     memo: body.memo || null,
-    date: body.date || null,
+    date: body.date,
     createdAt: now,
     updatedAt: now,
   };
 
   followupsDb.save(followup);
 
-  // 成功カウント更新とステータス自動更新
-  if (body.status === '再現成功') {
+  // エピソード数をカウント
+  const episodeCount = countEpisodes(goodPointId);
+  
+  // ステータスを自動判定して更新
+  const newStatus = calculateGoodPointStatus(episodeCount);
     const updated: GoodPoint = {
       ...goodPoint,
-      success_count: goodPoint.success_count + 1,
+    status: newStatus,
+    success_count: episodeCount,
     };
 
-    // success_count >= 3 の場合、statusを「定着」に更新
-    if (updated.success_count >= 3) {
-      updated.status = '定着';
-    } else {
-      updated.status = '再現成功';
-    }
-
     goodPointsDb.update(updated);
-  }
 
   res.status(201).json(followup);
 });
@@ -195,9 +263,19 @@ followupsRouter.post('/improvements/:id/followups', (req: Request, res: Response
   }
 
   const body: CreateFollowupRequest = req.body;
-  const validationError = validateFollowup(body, body.status);
+  
+  // statusが指定されていない場合、自動的に「完了」を設定（後方互換性）
+  const status = body.status || '完了';
+  
+  const validationError = validateFollowup(body, status);
   if (validationError) {
     res.status(400).json({ message: validationError });
+    return;
+  }
+
+  // dateは必須（アクション追加時）
+  if (!body.date) {
+    res.status(400).json({ message: 'date は必須です' });
     return;
   }
 
@@ -207,31 +285,27 @@ followupsRouter.post('/improvements/:id/followups', (req: Request, res: Response
     userId,
     itemType: 'improvement',
     itemId: improvementId,
-    status: body.status,
+    status: '完了', // アクションは常に「完了」
     memo: body.memo || null,
-    date: body.date || null,
+    date: body.date,
     createdAt: now,
     updatedAt: now,
   };
 
   followupsDb.save(followup);
 
-  // 成功カウント更新とステータス自動更新
-  if (body.status === '完了') {
+  // アクション数をカウント
+  const actionCount = countActions(improvementId);
+  
+  // ステータスを自動判定して更新
+  const newStatus = calculateImprovementStatus(actionCount);
     const updated: Improvement = {
       ...improvement,
-      success_count: improvement.success_count + 1,
+    status: newStatus,
+    success_count: actionCount,
     };
 
-    // success_count >= 3 の場合、statusを「習慣化」に更新
-    if (updated.success_count >= 3) {
-      updated.status = '習慣化';
-    } else {
-      updated.status = '完了';
-    }
-
     improvementsDb.update(updated);
-  }
 
   res.status(201).json(followup);
 });
@@ -261,15 +335,25 @@ followupsRouter.get('/good-points/:id/followups', (req: Request, res: Response) 
   }
 
   const followups = followupsDb.findByItemId('goodPoint', goodPointId);
-  const data = followups.map((f) => ({
+  // エピソードのみをフィルタ（status === '再現成功'）
+  const episodes = followups.filter((f) => f.status === '再現成功');
+  const episodeCount = episodes.length;
+  const currentStatus = calculateGoodPointStatus(episodeCount);
+  
+  const data = episodes
+    .sort((a, b) => (b.date || '').localeCompare(a.date || '')) // 日付の降順
+    .map((f) => ({
     id: f.id,
-    status: f.status,
+      date: f.date,
     memo: f.memo,
-    date: f.date,
     createdAt: f.createdAt,
   }));
 
-  res.status(200).json({ data });
+  res.status(200).json({
+    data,
+    count: episodeCount,
+    status: currentStatus,
+  });
 });
 
 /**
@@ -297,15 +381,133 @@ followupsRouter.get('/improvements/:id/followups', (req: Request, res: Response)
   }
 
   const followups = followupsDb.findByItemId('improvement', improvementId);
-  const data = followups.map((f) => ({
+  // アクションのみをフィルタ（status === '完了'）
+  const actions = followups.filter((f) => f.status === '完了');
+  const actionCount = actions.length;
+  const currentStatus = calculateImprovementStatus(actionCount);
+  
+  const data = actions
+    .sort((a, b) => (b.date || '').localeCompare(a.date || '')) // 日付の降順
+    .map((f) => ({
     id: f.id,
-    status: f.status,
+      date: f.date,
     memo: f.memo,
-    date: f.date,
     createdAt: f.createdAt,
   }));
 
-  res.status(200).json({ data });
+  res.status(200).json({
+    data,
+    count: actionCount,
+    status: currentStatus,
+  });
+});
+
+/**
+ * DELETE /api/good-points/:id/followups/:followupId
+ * よかったことのエピソードを削除
+ */
+followupsRouter.delete('/good-points/:id/followups/:followupId', (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ message: '認証が必要です' });
+    return;
+  }
+
+  const goodPointId = req.params.id;
+  const followupId = req.params.followupId;
+  const goodPoint = goodPointsDb.findById(goodPointId);
+
+  if (!goodPoint) {
+    res.status(404).json({ message: 'よかったことが見つかりません' });
+    return;
+  }
+
+  if (goodPoint.userId !== userId) {
+    res.status(403).json({ message: 'アクセス権限がありません' });
+    return;
+  }
+
+  const followup = followupsDb.findById(followupId);
+  if (!followup) {
+    res.status(404).json({ message: 'エピソードが見つかりません' });
+    return;
+  }
+
+  if (followup.userId !== userId || followup.itemId !== goodPointId) {
+    res.status(403).json({ message: 'アクセス権限がありません' });
+    return;
+  }
+
+  followupsDb.delete(followupId);
+
+  // エピソード数を再カウント
+  const episodeCount = countEpisodes(goodPointId);
+  
+  // ステータスを自動判定して更新
+  const newStatus = calculateGoodPointStatus(episodeCount);
+  const updated: GoodPoint = {
+    ...goodPoint,
+    status: newStatus,
+    success_count: episodeCount,
+  };
+
+  goodPointsDb.update(updated);
+
+  res.status(200).json({ message: 'エピソードを削除しました' });
+});
+
+/**
+ * DELETE /api/improvements/:id/followups/:followupId
+ * 改善点のアクションを削除
+ */
+followupsRouter.delete('/improvements/:id/followups/:followupId', (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ message: '認証が必要です' });
+    return;
+  }
+
+  const improvementId = req.params.id;
+  const followupId = req.params.followupId;
+  const improvement = improvementsDb.findById(improvementId);
+
+  if (!improvement) {
+    res.status(404).json({ message: '改善点が見つかりません' });
+    return;
+  }
+
+  if (improvement.userId !== userId) {
+    res.status(403).json({ message: 'アクセス権限がありません' });
+    return;
+  }
+
+  const followup = followupsDb.findById(followupId);
+  if (!followup) {
+    res.status(404).json({ message: 'アクションが見つかりません' });
+    return;
+  }
+
+  if (followup.userId !== userId || followup.itemId !== improvementId) {
+    res.status(403).json({ message: 'アクセス権限がありません' });
+    return;
+  }
+
+  followupsDb.delete(followupId);
+
+  // アクション数を再カウント
+  const actionCount = countActions(improvementId);
+  
+  // ステータスを自動判定して更新
+  const newStatus = calculateImprovementStatus(actionCount);
+  const updated: Improvement = {
+    ...improvement,
+    status: newStatus,
+    success_count: actionCount,
+  };
+
+  improvementsDb.update(updated);
+
+  res.status(200).json({ message: 'アクションを削除しました' });
 });
 
 /**

@@ -157,7 +157,7 @@ export interface Followup {
  * フォローアップ作成リクエスト
  */
 export interface CreateFollowupRequest {
-  status: FollowupStatus;
+  status?: FollowupStatus; // 任意（後方互換性のため）
   memo?: string;
   date?: string; // YYYY-MM-DD
 }

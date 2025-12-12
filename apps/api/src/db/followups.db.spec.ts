@@ -167,6 +167,32 @@ describe('FollowupsDatabase', () => {
     });
   });
 
+  describe('delete', () => {
+    it('指定したIDのフォローアップを削除すること', () => {
+      const followup: Followup = {
+        id: 'followup-1',
+        userId: 'user-1',
+        itemType: 'goodPoint',
+        itemId: 'gp-1',
+        status: '再現成功',
+        memo: 'テストメモ',
+        date: '2025-12-10',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      db.save(followup);
+      db.delete('followup-1');
+
+      const found = db.findById('followup-1');
+      expect(found).toBeUndefined();
+    });
+
+    it('存在しないIDを削除してもエラーにならないこと', () => {
+      expect(() => db.delete('not-exist')).not.toThrow();
+    });
+  });
+
   describe('clear', () => {
     it('すべてのフォローアップを削除すること', () => {
       const followup: Followup = {

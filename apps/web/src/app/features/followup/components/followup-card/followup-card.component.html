@@ -12,13 +12,7 @@
     <div class="followup-card__content">
       <p class="followup-card__text">{{ item.item.content }}</p>
       <div class="followup-card__meta">
-        <span class="followup-card__success-count">成功: {{ successCount }}回</span>
-        @if (isSettled) {
-          <span class="followup-card__settled-badge">定着</span>
-        }
-        @if (isInWeeklyFocus) {
-          <span class="followup-card__weekly-focus-badge">🎯 今週のフォーカス</span>
-        }
+        <span class="followup-card__success-count">{{ countLabel }}: {{ successCount }}回</span>
       </div>
     </div>
     <div class="followup-card__footer">

@@ -205,8 +205,8 @@ export class FollowupListPageComponent implements OnInit, OnDestroy {
   }
 
   onFollowupClick(item: FollowupItem): void {
-    this.selectedItem.set(item);
-    this.isModalOpen.set(true);
+    // フォローアップページに遷移
+    this.router.navigate(['/followups', item.itemType, item.item.id]);
   }
 
   onModalClosed(): void {

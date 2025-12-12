@@ -28,9 +28,57 @@ export interface Followup {
  * フォローアップ作成リクエスト
  */
 export interface CreateFollowupRequest {
-  status: FollowupStatus;
+  status?: FollowupStatus; // 任意（後方互換性のため）
   memo?: string;
   date?: string; // YYYY-MM-DD
+}
+
+/**
+ * エピソード/アクション追加リクエスト（status不要）
+ */
+export interface AddEpisodeRequest {
+  date: string; // YYYY-MM-DD（必須）
+  memo?: string;
+}
+
+export interface AddActionRequest {
+  date: string; // YYYY-MM-DD（必須）
+  memo?: string;
+}
+
+/**
+ * エピソード/アクション情報（レスポンス用）
+ */
+export interface Episode {
+  id: string;
+  date: string;
+  memo: string | null;
+  createdAt: string;
+}
+
+export interface Action {
+  id: string;
+  date: string;
+  memo: string | null;
+  createdAt: string;
+}
+
+/**
+ * エピソード一覧レスポンス
+ */
+export interface EpisodesResponse {
+  data: Episode[];
+  count: number;
+  status: string;
+}
+
+/**
+ * アクション一覧レスポンス
+ */
+export interface ActionsResponse {
+  data: Action[];
+  count: number;
+  status: string;
 }
 
 /**

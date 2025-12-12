@@ -16,9 +16,9 @@
     "build-storybook": "ng run @daily-report/web:build-storybook",
     "lint": "ng lint --format stylish",
     "format": "prettier --write \"src/**/*.{ts,js,scss,html,css,md}\"",
-    "e2e": "playwright test --config=e2e/playwright.config.ts",
-    "e2e:ui": "playwright test --config=e2e/playwright.config.ts --ui",
-    "e2e:coverage": "playwright test --config=e2e/playwright.config.ts && echo 'Coverage saved to coverage/e2e/'"
+    "e2e": "cypress run",
+    "e2e:ui": "cypress open",
+    "e2e:coverage": "cypress run --env coverage=true"
   },
   "private": true,
   "dependencies": {
@@ -45,7 +45,6 @@
     "@angular/cli": "^19.2.19",
     "@angular/compiler-cli": "^19.2.0",
     "@compodoc/compodoc": "^1.1.32",
-    "@playwright/test": "^1.49.0",
     "@storybook/addon-a11y": "^10.1.4",
     "@storybook/addon-docs": "^10.1.4",
     "@storybook/addon-onboarding": "^10.1.4",
@@ -54,6 +53,7 @@
     "@types/jasmine": "~5.1.0",
     "@types/node": "^18.18.0",
     "angular-eslint": "21.0.1",
+    "cypress": "^14.5.4",
     "eslint": "^9.39.1",
     "husky": "^9.1.7",
     "jasmine-core": "~5.6.0",

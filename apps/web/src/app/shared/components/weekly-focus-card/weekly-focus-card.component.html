@@ -5,21 +5,13 @@
         <app-icon [name]="itemTypeIcon" [size]="20" [color]="'var(--color-primary-500)'" [ariaLabel]="itemTypeLabel" />
         {{ itemTypeLabel }}
       </span>
-      <app-button
-        variant="ghost"
-        size="sm"
-        (clicked)="onDelete()"
-        ariaLabel="削除"
-      >
-        ×
-      </app-button>
+      @if (status) {
+        <app-status-badge [status]="status!"></app-status-badge>
+      }
     </div>
     <div class="weekly-focus-card__content">
       <p class="weekly-focus-card__text">{{ focus.item?.content || '内容がありません' }}</p>
       <div class="weekly-focus-card__meta">
-        @if (status) {
-          <app-status-badge [status]="status!"></app-status-badge>
-        }
         @if (focus.item && focus.item.success_count !== undefined) {
           <span class="weekly-focus-card__success-count">
             成功: {{ focus.item.success_count }}回
@@ -28,9 +20,35 @@
       </div>
     </div>
     <div class="weekly-focus-card__footer">
-      <a [routerLink]="reportDetailUrl" class="weekly-focus-card__link">
-        日報を見る →
-      </a>
+      <span class="weekly-focus-card__date">
+        <app-icon name="calendar" [size]="16" color="var(--color-gray-600)" ariaLabel="日付" />
+        {{ focus.weekStartDate }}
+      </span>
+      <div class="weekly-focus-card__actions">
+        <app-icon-button
+          iconName="pin"
+          [size]="20"
+          [color]="'var(--color-primary-600)'"
+          [tooltip]="'フォーカスから削除'"
+          [pinned]="true"
+          (clicked)="onDelete()"
+          [ariaLabel]="'フォーカスから削除'"
+        ></app-icon-button>
+        <a
+          [routerLink]="followupUrl"
+          class="weekly-focus-card__action-link weekly-focus-card__action-link--outline"
+          aria-label="フォローアップ"
+        >
+          フォローアップ
+        </a>
+        <a
+          [routerLink]="reportDetailUrl"
+          class="weekly-focus-card__action-link weekly-focus-card__action-link--ghost"
+          aria-label="日報を見る"
+        >
+          日報を見る
+        </a>
+      </div>
     </div>
   </div>
 }

@@ -8,6 +8,10 @@ import {
   Followup,
   CreateFollowupRequest,
   FollowupItemsResponse,
+  AddEpisodeRequest,
+  AddActionRequest,
+  EpisodesResponse,
+  ActionsResponse,
 } from '../models/followup.model';
 
 describe('FollowupService', () => {
@@ -222,6 +226,198 @@ describe('FollowupService', () => {
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(request);
       req.flush(mockResponse);
+    });
+  });
+
+  describe('getEpisodes', () => {
+    it('よかったことのエピソード一覧を取得できること', () => {
+      const mockResponse: EpisodesResponse = {
+        data: [
+          {
+            id: 'episode-1',
+            date: '2025-12-10',
+            memo: 'テストメモ',
+            createdAt: '2025-12-10T12:00:00Z',
+          },
+        ],
+        count: 1,
+        status: '進行中',
+      };
+
+      service.getEpisodes('gp-1').subscribe((response) => {
+        expect(response).toEqual(mockResponse);
+        expect(response.count).toBe(1);
+        expect(response.status).toBe('進行中');
+      });
+
+      const req = httpMock.expectOne('/api/good-points/gp-1/followups');
+      expect(req.request.method).toBe('GET');
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('getActions', () => {
+    it('改善点のアクション一覧を取得できること', () => {
+      const mockResponse: ActionsResponse = {
+        data: [
+          {
+            id: 'action-1',
+            date: '2025-12-10',
+            memo: 'テストメモ',
+            createdAt: '2025-12-10T12:00:00Z',
+          },
+        ],
+        count: 1,
+        status: '進行中',
+      };
+
+      service.getActions('imp-1').subscribe((response) => {
+        expect(response).toEqual(mockResponse);
+        expect(response.count).toBe(1);
+        expect(response.status).toBe('進行中');
+      });
+
+      const req = httpMock.expectOne('/api/improvements/imp-1/followups');
+      expect(req.request.method).toBe('GET');
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('addEpisode', () => {
+    it('よかったことにエピソードを追加できること', () => {
+      const request: AddEpisodeRequest = {
+        date: '2025-12-10',
+        memo: 'テストメモ',
+      };
+
+      const mockResponse: Followup = {
+        id: 'episode-1',
+        userId: 'user-1',
+        itemType: 'goodPoint',
+        itemId: 'gp-1',
+        status: '再現成功',
+        memo: 'テストメモ',
+        date: '2025-12-10',
+        createdAt: '2025-12-10T12:00:00Z',
+        updatedAt: '2025-12-10T12:00:00Z',
+      };
+
+      service.addEpisode('gp-1', request).subscribe((response) => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne('/api/good-points/gp-1/followups');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(request);
+      req.flush(mockResponse);
+    });
+
+    it('memoが未指定の場合も動作すること', () => {
+      const request: AddEpisodeRequest = {
+        date: '2025-12-10',
+      };
+
+      const mockResponse: Followup = {
+        id: 'episode-1',
+        userId: 'user-1',
+        itemType: 'goodPoint',
+        itemId: 'gp-1',
+        status: '再現成功',
+        memo: null,
+        date: '2025-12-10',
+        createdAt: '2025-12-10T12:00:00Z',
+        updatedAt: '2025-12-10T12:00:00Z',
+      };
+
+      service.addEpisode('gp-1', request).subscribe((response) => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne('/api/good-points/gp-1/followups');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(request);
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('addAction', () => {
+    it('改善点にアクションを追加できること', () => {
+      const request: AddActionRequest = {
+        date: '2025-12-10',
+        memo: 'テストメモ',
+      };
+
+      const mockResponse: Followup = {
+        id: 'action-1',
+        userId: 'user-1',
+        itemType: 'improvement',
+        itemId: 'imp-1',
+        status: '完了',
+        memo: 'テストメモ',
+        date: '2025-12-10',
+        createdAt: '2025-12-10T12:00:00Z',
+        updatedAt: '2025-12-10T12:00:00Z',
+      };
+
+      service.addAction('imp-1', request).subscribe((response) => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne('/api/improvements/imp-1/followups');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(request);
+      req.flush(mockResponse);
+    });
+
+    it('memoが未指定の場合も動作すること', () => {
+      const request: AddActionRequest = {
+        date: '2025-12-10',
+      };
+
+      const mockResponse: Followup = {
+        id: 'action-1',
+        userId: 'user-1',
+        itemType: 'improvement',
+        itemId: 'imp-1',
+        status: '完了',
+        memo: null,
+        date: '2025-12-10',
+        createdAt: '2025-12-10T12:00:00Z',
+        updatedAt: '2025-12-10T12:00:00Z',
+      };
+
+      service.addAction('imp-1', request).subscribe((response) => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne('/api/improvements/imp-1/followups');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(request);
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('deleteEpisode', () => {
+    it('エピソードを削除できること', () => {
+      service.deleteEpisode('gp-1', 'episode-1').subscribe((response) => {
+        expect(response).toBeNull();
+      });
+
+      const req = httpMock.expectOne('/api/good-points/gp-1/followups/episode-1');
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null);
+    });
+  });
+
+  describe('deleteAction', () => {
+    it('アクションを削除できること', () => {
+      service.deleteAction('imp-1', 'action-1').subscribe((response) => {
+        expect(response).toBeNull();
+      });
+
+      const req = httpMock.expectOne('/api/improvements/imp-1/followups/action-1');
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null);
     });
   });
 });

@@ -86,7 +86,7 @@ export class FollowupInputModalComponent implements OnInit {
   }
 
   get dateLabel(): string {
-    return this.item.itemType === 'goodPoint' ? '再現日' : '完了日';
+    return this.item.itemType === 'goodPoint' ? '再現日' : 'アクションをした日';
   }
 
   get memoLabel(): string {
