@@ -15,6 +15,7 @@ import {
   EyeOff,
   Heart,
   Pin,
+  Check,
 } from 'lucide-angular';
 
 const meta: Meta<IconButtonComponent> = {
@@ -37,6 +38,7 @@ const meta: Meta<IconButtonComponent> = {
           EyeOff,
           Heart,
           Pin,
+          Check,
         }),
       ],
     }),
@@ -58,6 +60,7 @@ const meta: Meta<IconButtonComponent> = {
         'eye-off',
         'heart',
         'pin',
+        'check',
       ] as IconName[],
     },
     size: {

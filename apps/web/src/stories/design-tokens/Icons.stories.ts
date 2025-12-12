@@ -16,6 +16,7 @@ import {
   EyeOff,
   Heart,
   Pin,
+  Check,
 } from 'lucide-angular';
 
 @Component({
@@ -118,6 +119,7 @@ class IconsShowcaseComponent {
     { name: 'eye-off', label: '非表示' },
     { name: 'heart', label: 'お気に入り' },
     { name: 'pin', label: 'ピン留め' },
+    { name: 'check', label: 'チェック' },
   ];
 }
 
@@ -140,6 +142,7 @@ const meta: Meta<IconsShowcaseComponent> = {
           EyeOff,
           Heart,
           Pin,
+          Check,
         }),
       ],
     }),

@@ -23,6 +23,7 @@ import {
   EyeOff,
   Heart,
   Pin,
+  Check,
 } from 'lucide-angular';
 
 export const appConfig: ApplicationConfig = {
@@ -49,6 +50,7 @@ export const appConfig: ApplicationConfig = {
         EyeOff,
         Heart,
         Pin,
+        Check,
       })
     ),
   ],

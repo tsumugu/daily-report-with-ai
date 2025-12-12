@@ -233,6 +233,33 @@ describe('DailyReportDetailPageComponent', () => {
       const goodPointSection = fixture.nativeElement.querySelector('.item-card');
       expect(goodPointSection).toBeTruthy();
     }));
+
+    it('StatusBadgeComponentが使用されている', fakeAsync(() => {
+      tick();
+      fixture.detectChanges();
+
+      const statusBadge = fixture.nativeElement.querySelector('app-status-badge');
+      expect(statusBadge).toBeTruthy();
+    }));
+
+    it('getGoodPointStatusBadgeTypeが正しくマッピングされる', () => {
+      expect(component.getGoodPointStatusBadgeType('未対応' as GoodPointStatus)).toBe('未着手');
+      expect(component.getGoodPointStatusBadgeType('未達' as GoodPointStatus)).toBe('未達成');
+      expect(component.getGoodPointStatusBadgeType('再現成功' as GoodPointStatus)).toBe('再現成功');
+      // defaultケースをテスト（新しいステータス型が追加された場合）
+      expect(component.getGoodPointStatusBadgeType('未着手' as GoodPointStatus)).toBe('未着手');
+    });
+
+    it('getImprovementStatusBadgeTypeが正しくマッピングされる', () => {
+      expect(component.getImprovementStatusBadgeType('未着手')).toBe('未着手');
+      expect(component.getImprovementStatusBadgeType('進行中')).toBe('進行中');
+      expect(component.getImprovementStatusBadgeType('完了')).toBe('完了');
+      // すべてのImprovementStatusをテスト
+      const allStatuses: ImprovementStatus[] = ['未着手', '進行中', '完了'];
+      allStatuses.forEach((status) => {
+        expect(component.getImprovementStatusBadgeType(status)).toBe(status);
+      });
+    });
   });
 
   describe('logout()エラーケース', () => {

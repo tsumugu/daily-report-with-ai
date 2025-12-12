@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DailyReportService } from '../../services/daily-report.service';
 import { AuthService } from '../../../auth/services/auth.service';
-import { DailyReport } from '../../models/daily-report.model';
-import { ButtonComponent, AlertBannerComponent, IconComponent } from '../../../../shared/components';
+import { DailyReport, GoodPointStatus, ImprovementStatus } from '../../models/daily-report.model';
+import { ButtonComponent, AlertBannerComponent, IconComponent, StatusBadgeComponent, StatusBadgeType } from '../../../../shared/components';
 
 @Component({
   selector: 'app-daily-report-detail-page',
@@ -15,6 +15,7 @@ import { ButtonComponent, AlertBannerComponent, IconComponent } from '../../../.
     ButtonComponent,
     AlertBannerComponent,
     IconComponent,
+    StatusBadgeComponent,
   ],
   templateUrl: './daily-report-detail-page.component.html',
   styleUrl: './daily-report-detail-page.component.scss',
@@ -110,6 +111,31 @@ export class DailyReportDetailPageComponent implements OnInit {
     if (id) {
       this.loadReport(id);
     }
+  }
+
+  /**
+   * よかったことのステータスをStatusBadgeTypeに変換
+   */
+  getGoodPointStatusBadgeType(status: GoodPointStatus): StatusBadgeType {
+    // 後方互換性のため、古いステータスを新しいステータスにマッピング
+    switch (status) {
+      case '未対応':
+        return '未着手';
+      case '未達':
+        return '未達成';
+      case '再現成功':
+        return '再現成功';
+      default:
+        // 新しいステータス型の場合はそのまま返す
+        return status as StatusBadgeType;
+    }
+  }
+
+  /**
+   * 改善点のステータスをStatusBadgeTypeに変換
+   */
+  getImprovementStatusBadgeType(status: ImprovementStatus): StatusBadgeType {
+    return status as StatusBadgeType;
   }
 }
 
