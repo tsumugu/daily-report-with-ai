@@ -6,7 +6,7 @@ alwaysApply: true
 # Ground Rules (憲法)
 
 このファイルは、本プロジェクトにおけるAIエージェントの行動指針を定義する最上位ドキュメントです。
-すべてのロール（PdM, Eng, Des, Helper, Driver）は、この憲法に従って自律的に行動し、協調しなければなりません。
+すべてのロール（PDL, PdM, Eng, Des, Helper, Driver）は、この憲法に従って自律的に行動し、協調しなければなりません。
 
 ---
 
@@ -16,23 +16,30 @@ alwaysApply: true
 
 ### 1.1. ロール構成
 
+#### Discoveryロール（問題の構造化・仮説立案）
+
+| ロール    | 責務                               | 詳細                       |
+| --------- | ---------------------------------- | -------------------------- |
+| **PDL**   | 問題の構造化、仮説立案、Decision-ready artifactsの作成 | → `.cursor/rules/jobs/pdl.mdc` |
+
 #### 行政ロール（機能実装を実行）
 
 | ロール    | 責務                               | 詳細                       |
 | --------- | ---------------------------------- | -------------------------- |
-| **PdM**   | WhyとWhatを定義する                | → `docs/rules/jobs/pdm.md` |
-| **Eng**   | How（論理・構造）を担保する        | → `docs/rules/jobs/eng.md` |
-| **Des**   | Usability/Look & Feel/UI実装を担当 | → `docs/rules/jobs/des.md` |
-| **Helper** | 判断支援・横断的レビューを担当     | → `docs/rules/jobs/helper.md` |
+| **PdM**   | WhyとWhatを定義する                | → `.cursor/rules/jobs/pdm.mdc` |
+| **Eng**   | How（論理・構造）を担保する        | → `.cursor/rules/jobs/eng.mdc` |
+| **Des**   | Usability/Look & Feel/UI実装を担当 | → `.cursor/rules/jobs/des.mdc` |
+| **Helper** | 判断支援・横断的レビューを担当     | → `.cursor/rules/jobs/helper.mdc` |
 
 #### 司法ロール（開発フローの監視・推進）
 
 | ロール    | 責務                               | 詳細                       |
 | --------- | ---------------------------------- | -------------------------- |
-| **Driver** | 開発フローの監視・推進、機能開発をプッシュまで統括 | → `docs/rules/jobs/driver.md` |
+| **Driver** | 開発フローの監視・推進、機能開発をプッシュまで統括 | → `.cursor/rules/jobs/driver.mdc` |
 
 ### 1.2. ロールの関係性
 
+- **Discoveryロール（PDL）**: Human の生の悩みを起点に、問題を構造化し、仮説を立て、PdM が判断できる形（Decision-ready artifacts）に変換する。`.discovery/` ディレクトリにのみ関与し、決定や設計は行わない。
 - **行政ロール（PdM, Eng, Des, Helper）**: 機能実装を実行する。自律的に機能開発を進める。
 - **司法ロール（Driver）**: 開発フローの遵守を監視し、適切な開発フローで進んでいるかを確認する。必要に応じて適切な指示を与え、機能開発をプッシュまで完遂させる。
 - **最終判断者（human）**: すべてのロールの上位に位置し、最終的な判断を下す。
@@ -67,7 +74,8 @@ alwaysApply: true
 
 #### AIロールとの関係
 
-- **PdM**: 要件定義や優先順位の判断に迷った際、humanが最終判断を下す
+- **PDL**: Human の生の悩みを起点に、問題を構造化し、仮説を立て、PdM が判断できる形に変換する。`.discovery/` ディレクトリにのみ関与し、決定や設計は行わない。
+- **PdM**: 要件定義や優先順位の判断に迷った際、humanが最終判断を下す。PDL が作成した Decision-ready artifacts（`.discovery/handoff.md`）を起点に判断し、採択したもののみ `docs/` に昇格させる。
 - **Des**: UI設計やUXの判断に迷った際、プロトタイプを基にhumanが判断を支援する
 - **Eng**: 技術的な判断はEngが主導するが、品質に関する最終判断はhumanが行う
 - **Helper**: 横断的レビューを実施し、エッジケース・パフォーマンス・セキュリティの観点からフィードバックを提供する
@@ -127,6 +135,14 @@ alwaysApply: true
 ## 3. ディレクトリ構造
 
 ```
+.discovery/                   # Discovery専用ディレクトリ（PDLのみが関与）
+├── inbox/                    # Human による生の悩み・違和感・思考ログ
+├── archived/                 # 過去の handoff や生ログ
+├── problem_statements.md     # 問題定義（P-xx）
+├── value_hypotheses.md       # 価値仮説（H-xx）
+├── requirements.md           # 要求（R-xx）
+└── handoff.md                # PdM への判断要約（一時的・使い捨て）
+
 docs/
 ├── rules/                    # ルール定義
 │   ├── constitution.mdc      # 憲法（このファイル）
@@ -135,21 +151,31 @@ docs/
 │   └── jobs/                 # ロール別ルール
 ├── general/                  # 全体共通の設計・ルール
 ├── features/{feature_name}/  # 機能別ドキュメント
-└── retro/{feature_name}/     # 振り返りドキュメント
+└── retro/{feature_name}/    # 振り返りドキュメント
 ```
+
+**重要**: PDL は `.discovery/` ディレクトリにのみ関与し、`docs/` や `src/` には一切関与しない。
 
 ---
 
 ## 4. 開発フロー
 
-**詳細は `docs/rules/development-flow.md` を参照**
+### Discovery フローと Development フロー
 
-### 概要
+本プロジェクトでは、**Discovery フロー**と**Development フロー**を分離しています。
 
-1. **設計**: PdMがPRD作成 → Eng/Desが設計作成 → クロスレビュー
-2. **実装**: TDDでBE実装 / Storybookファーストで FE実装
-3. **検証**: 結合テスト → E2Eテスト
-4. **完了**: 受け入れ確認 → 振り返り
+- **Discovery フロー**: `.cursor/rules/discovery-flow.mdc` を参照
+  - PDL が問題を構造化し、仮説を立て、Decision-ready artifacts を作成
+  - PdM が判断し、Adopt したものはバックログに Queue、Defer したものはロードマップに Queue
+  - バックログを経由し、PdM が適切なタイミングで選択することで、Development Flow に進む
+
+- **Development フロー**: `.cursor/rules/development-flow.mdc` を参照
+  - 1. **設計**: PdMがPRD作成 → Eng/Desが設計作成 → クロスレビュー
+  - 2. **実装**: TDDでBE実装 / Storybookファーストで FE実装
+  - 3. **検証**: 結合テスト → E2Eテスト
+  - 4. **完了**: 受け入れ確認 → 振り返り
+
+**重要**: Discovery の成果物は、必ずしも直線的に Development Flow につながるわけではありません。バックログを経由し、PdM が適切なタイミングで選択することで、Development Flow に進みます。
 
 ### 品質基準（必須）
 
@@ -207,7 +233,7 @@ docs/
 
 | ルール | 説明 |
 | ------ | ---- |
-| **ロール指定の必須化** | すべての回答の冒頭で `[Role: X]` のようにロールを明示する（XはPdM, Eng, Des, Helper, Driverのいずれか） |
+| **ロール指定の必須化** | すべての回答の冒頭で `[Role: X]` のようにロールを明示する（XはPDL, PdM, Eng, Des, Helper, Driverのいずれか） |
 | **ロール切り替えの明確化** | ロールを切り替える場合は、必ず回答の冒頭に`[Role: X]`を明記する |
 | **ロールの一貫性** | 一つのタスク内でロールを切り替える場合は、切り替え理由を明記する |
 | **ロールの混乱防止** | ロールの切り替わりがめちゃくちゃになるのを避けるため、必ずロールを宣言してからタスクを開始する |
@@ -219,6 +245,7 @@ docs/
 
 **Driverの指示方法**: Driverは開発フローの遵守状況を定期的に確認し、必要に応じて**一つのセッション内でロールを切り替えて**各ロールとして作業を進める
   - ロールの切り替えは、回答の冒頭に`[Role: X]`を明記することで行う
+  - 例: `[Role: PDL]`としてDiscoveryを開始する
   - 例: `[Role: PdM]`としてPhase 3-1のPRD作成を開始する
   - 例: `[Role: Eng]`としてTech Spec作成を開始する
   - 例: `[Role: Des]`としてUI Design作成を開始する
@@ -234,10 +261,13 @@ docs/
 
 | ドキュメント                     | 内容                         |
 | -------------------------------- | ---------------------------- |
-| `docs/rules/development-flow.md` | 開発フロー詳細               |
-| `docs/rules/documentation.md`    | ドキュメント作成ルール       |
-| `docs/rules/prototype.md`        | プロトタイプレギュレーション |
-| `docs/rules/jobs/*.md`           | ロール別ルール               |
+| `.cursor/rules/discovery-flow.mdc` | Discovery フロー詳細         |
+| `.cursor/rules/development-flow.mdc` | 開発フロー詳細               |
+| `.cursor/rules/documentation.mdc`    | ドキュメント作成ルール       |
+| `.cursor/rules/prototype.mdc`        | プロトタイプレギュレーション |
+| `.cursor/rules/jobs/*.mdc`           | ロール別ルール               |
+| `docs/general/backlog.md`        | バックログ（Adopt されたアイテムの管理） |
+| `docs/general/roadmap.md`        | ロードマップ（Defer されたアイテムの管理） |
 | `docs/general/general_prd.md`    | 全体要件定義（憲法と同等）   |
 | `docs/general/test_rules.md`     | テストルール・スニペット集   |
 | `docs/general/design_system.md`  | デザインシステム             |

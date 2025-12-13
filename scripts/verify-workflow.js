@@ -9,6 +9,11 @@
  *   node scripts/verify-workflow.js --check-docs
  *   node scripts/verify-workflow.js --check-implementation
  *   node scripts/verify-workflow.js --all
+ * 
+ * チェック内容:
+ *   - ドキュメントステータスの検証
+ *   - 実装開始前の必須チェック（設計ドキュメント、human_check.md）
+ *   - 実装完了後の必須チェック（human_final_review.md）
  */
 
 import { readFileSync, existsSync, readdirSync } from 'fs';
@@ -230,6 +235,7 @@ function verifyImplementationReady() {
     const prdPath = join(rootDir, 'docs/features', featureName, 'prd.md');
     const techSpecPath = join(rootDir, 'docs/features', featureName, 'tech_spec.md');
     const uiDesignPath = join(rootDir, 'docs/features', featureName, 'ui_design.md');
+    const humanCheckPath = join(rootDir, 'docs/features', featureName, 'human_check.md');
 
     const requiredDocs = [
       { name: 'prd.md', path: prdPath },
@@ -259,6 +265,27 @@ function verifyImplementationReady() {
       }
     }
 
+    // human_check.mdの確認（実装開始前の承認）
+    if (existsSync(humanCheckPath)) {
+      const humanCheckStatus = getDocumentStatus(humanCheckPath);
+      if (!humanCheckStatus) {
+        console.error(`❌ ${featureName}/human_check.md: ステータスが記載されていません`);
+        hasErrors = true;
+      } else if (humanCheckStatus !== 'Approved') {
+        console.error(`❌ ${featureName}/human_check.md: ステータスが「${humanCheckStatus}」です（Approvedである必要があります）`);
+        console.error(`   実装を開始するには、人間（human）による承認が必要です`);
+        console.error(`   テンプレート: docs/templates/human_check.template.md を参照`);
+        hasErrors = true;
+      } else {
+        console.log(`✅ ${featureName}/human_check.md: Approved（実装開始承認済み）`);
+      }
+    } else {
+      console.error(`❌ ${featureName}/human_check.md が存在しません`);
+      console.error(`   実装を開始するには、人間（human）による承認が必要です`);
+      console.error(`   テンプレート: docs/templates/human_check.template.md を参照`);
+      hasErrors = true;
+    }
+
     // プロトタイプの存在確認（オプション）
     const prototypePath = join(rootDir, 'apps/web/src/stories/prototypes', featureName);
     if (existsSync(prototypePath)) {
@@ -273,11 +300,90 @@ function verifyImplementationReady() {
   if (hasErrors) {
     console.error('\n❌ 実装開始前の必須チェックに失敗しました');
     console.error('   すべての設計ドキュメントを「Approved」ステータスに更新してください');
-    console.error('   詳細は docs/rules/development-flow.md を参照してください\n');
+    console.error('   人間（human）による承認（human_check.md）が必要です');
+    console.error('   詳細は .cursor/rules/development-flow.mdc を参照してください\n');
     return false;
   }
 
   console.log('✅ 実装開始前の必須チェックに合格しました\n');
+  return true;
+}
+
+/**
+ * 実装完了後の必須チェック
+ */
+function verifyCompletionReady() {
+  console.log('🔍 実装完了後の必須チェックを実行中...\n');
+
+  const changedFiles = getChangedFiles();
+  const hasImplChanges = hasImplementationChanges(changedFiles);
+
+  if (!hasImplChanges) {
+    console.log('✅ 実装コードの変更はありません');
+    return true;
+  }
+
+  console.log('⚠️  実装コードの変更が検出されました（実装完了後のチェック）\n');
+
+  // 変更されたファイルから機能名を抽出
+  const featureNames = new Set();
+  changedFiles.forEach(file => {
+    const featureName = extractFeatureName(file);
+    if (featureName) {
+      featureNames.add(featureName);
+    }
+  });
+
+  // 機能名が特定できない場合、すべての機能をチェック
+  if (featureNames.size === 0) {
+    const featuresDir = join(rootDir, 'docs/features');
+    if (existsSync(featuresDir)) {
+      const features = readdirSync(featuresDir, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name);
+      features.forEach(f => featureNames.add(f));
+    }
+  }
+
+  let hasErrors = false;
+
+  for (const featureName of featureNames) {
+    const humanFinalReviewPath = join(rootDir, 'docs/features', featureName, 'human_final_review.md');
+
+    console.log(`📋 ${featureName} の実装完了後の確認中...`);
+
+    // human_final_review.mdの確認（実装完了後の承認）
+    if (existsSync(humanFinalReviewPath)) {
+      const humanFinalReviewStatus = getDocumentStatus(humanFinalReviewPath);
+      if (!humanFinalReviewStatus) {
+        console.error(`❌ ${featureName}/human_final_review.md: ステータスが記載されていません`);
+        hasErrors = true;
+      } else if (humanFinalReviewStatus !== 'Approved') {
+        console.error(`❌ ${featureName}/human_final_review.md: ステータスが「${humanFinalReviewStatus}」です（Approvedである必要があります）`);
+        console.error(`   振り返りに進むには、人間（human）による最終レビュー承認が必要です`);
+        console.error(`   テンプレート: docs/templates/human_final_review.template.md を参照`);
+        hasErrors = true;
+      } else {
+        console.log(`✅ ${featureName}/human_final_review.md: Approved（最終レビュー承認済み）`);
+      }
+    } else {
+      console.warn(`⚠️  ${featureName}/human_final_review.md が存在しません`);
+      console.warn(`   実装完了後は、人間（human）による最終レビューが必要です`);
+      console.warn(`   テンプレート: docs/templates/human_final_review.template.md を参照`);
+      // 警告のみ（必須ではない場合もあるため）
+    }
+
+    console.log('');
+  }
+
+  if (hasErrors) {
+    console.error('\n❌ 実装完了後の必須チェックに失敗しました');
+    console.error('   人間（human）による最終レビュー承認（human_final_review.md）が必要です');
+    console.error('   詳細は .cursor/rules/development-flow.mdc を参照してください\n');
+    return false;
+  }
+
+  console.log('✅ 実装完了後の必須チェックに合格しました\n');
   return true;
 }
 
@@ -293,6 +399,7 @@ function main() {
 
   if (checkAll || checkImplementation) {
     allPassed = verifyImplementationReady() && allPassed;
+    allPassed = verifyCompletionReady() && allPassed;
   }
 
   if (!allPassed) {
