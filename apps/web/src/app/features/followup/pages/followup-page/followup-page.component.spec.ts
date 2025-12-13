@@ -56,6 +56,8 @@ describe('FollowupPageComponent', () => {
       'addAction',
       'deleteEpisode',
       'deleteAction',
+      'updateEpisode',
+      'updateAction',
     ]);
 
     const paramMapSpy = jasmine.createSpy('get').and.callFake((key: string) => {
@@ -146,6 +148,8 @@ describe('FollowupPageComponent', () => {
         if (key === 'itemId') return 'imp-1';
         return null;
       });
+      component.itemType.set('improvement');
+      component.itemId.set('imp-1');
 
       component.itemType.set('improvement');
       component.itemId.set('imp-1');
@@ -918,6 +922,251 @@ describe('FollowupPageComponent', () => {
       component.onOverlayKeyDown(event);
 
       expect(component.isModalOpen()).toBe(true);
+    });
+  });
+
+  describe('編集機能', () => {
+    beforeEach(() => {
+      followupService.getEpisodes.and.returnValue(of(mockEpisodesResponse));
+      fixture.detectChanges();
+    });
+
+    describe('onEditClick', () => {
+      it('エピソードの編集ボタンをクリックした場合、モーダルが開き既存データが設定されること', () => {
+        component.onEditClick('episode-1');
+
+        expect(component.isModalOpen()).toBeTrue();
+        expect(component.editingFollowupId()).toBe('episode-1');
+        expect(component.form.get('date')?.value).toBe('2025-12-10');
+        expect(component.form.get('memo')?.value).toBe('テストメモ1');
+      });
+
+      it('アクションの編集ボタンをクリックした場合、モーダルが開き既存データが設定されること', () => {
+        // ルートパラメータをモック
+        (activatedRoute.snapshot.paramMap.get as jasmine.Spy).and.callFake((key: string) => {
+          if (key === 'itemType') return 'improvement';
+          if (key === 'itemId') return 'imp-1';
+          return null;
+        });
+        
+        component.itemType.set('improvement');
+        component.itemId.set('imp-1');
+        followupService.getActions.and.returnValue(of(mockActionsResponse));
+        
+        // loadData()を直接呼び出してデータを読み込む
+        component['loadData']();
+        fixture.detectChanges();
+
+        // actions()が正しく設定されていることを確認
+        expect(component.actions().length).toBeGreaterThan(0);
+
+        component.onEditClick('action-1');
+
+        expect(component.isModalOpen()).toBeTrue();
+        expect(component.editingFollowupId()).toBe('action-1');
+        expect(component.form.get('date')?.value).toBe('2025-12-10');
+        expect(component.form.get('memo')?.value).toBe('テストメモ1');
+      });
+
+      it('memoがnullの場合は空文字列が設定されること', () => {
+        const responseWithoutMemo: EpisodesResponse = {
+          data: [
+            {
+              id: 'episode-1',
+              date: '2025-12-10',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              memo: null as any,
+              createdAt: '2025-12-10T12:00:00Z',
+            },
+          ],
+          count: 1,
+          status: '未対応',
+        };
+        // beforeEachで設定されたmockEpisodesResponseを上書き
+        followupService.getEpisodes.and.returnValue(of(responseWithoutMemo));
+        // コンポーネントを再初期化してloadData()を実行
+        fixture = TestBed.createComponent(FollowupPageComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+
+        // データが正しく読み込まれていることを確認
+        expect(component.episodes().length).toBe(1);
+        expect(component.episodes()[0].memo).toBeNull();
+
+        component.onEditClick('episode-1');
+
+        expect(component.form.get('memo')?.value).toBe('');
+      });
+
+      it('存在しないIDの場合は何も起こらないこと', () => {
+        component.onEditClick('non-existent-id');
+
+        expect(component.isModalOpen()).toBeFalse();
+      });
+    });
+
+    describe('編集モードでの保存', () => {
+      beforeEach(() => {
+        followupService.getEpisodes.and.returnValue(of(mockEpisodesResponse));
+        fixture.detectChanges();
+        component.onEditClick('episode-1');
+      });
+
+      it('エピソードの編集が成功した場合、updateEpisodeが呼ばれること', fakeAsync(() => {
+        const updatedFollowup = {
+          id: 'episode-1',
+          userId: 'user-1',
+          itemType: 'goodPoint' as const,
+          itemId: 'gp-1',
+          status: '再現成功' as const,
+          memo: '更新後のメモ',
+          date: '2025-12-11',
+          createdAt: '2025-12-10T12:00:00Z',
+          updatedAt: '2025-12-11T12:00:00Z',
+        };
+
+        followupService.updateEpisode.and.returnValue(of(updatedFollowup));
+        followupService.getEpisodes.and.returnValue(
+          of({
+            ...mockEpisodesResponse,
+            data: [updatedFollowup, mockEpisodesResponse.data[1]],
+          })
+        );
+
+        component.form.patchValue({
+          date: '2025-12-11',
+          memo: '更新後のメモ',
+        });
+
+        component.onSubmit();
+        tick(100); // 非同期処理を待つ
+
+        expect(followupService.updateEpisode).toHaveBeenCalledWith('gp-1', 'episode-1', {
+          date: '2025-12-11',
+          memo: '更新後のメモ',
+        });
+        expect(component.isModalOpen()).toBeFalse();
+        expect(component.editingFollowupId()).toBeNull();
+      }));
+
+      it('アクションの編集が成功した場合、updateActionが呼ばれること', fakeAsync(() => {
+        // ルートパラメータをモック
+        (activatedRoute.snapshot.paramMap.get as jasmine.Spy).and.callFake((key: string) => {
+          if (key === 'itemType') return 'improvement';
+          if (key === 'itemId') return 'imp-1';
+          return null;
+        });
+        
+        component.itemType.set('improvement');
+        component.itemId.set('imp-1');
+        followupService.getActions.and.returnValue(of(mockActionsResponse));
+        
+        // loadData()を直接呼び出してデータを読み込む
+        component['loadData']();
+        fixture.detectChanges();
+
+        component.onEditClick('action-1');
+
+        const updatedFollowup = {
+          id: 'action-1',
+          userId: 'user-1',
+          itemType: 'improvement' as const,
+          itemId: 'imp-1',
+          status: '完了' as const,
+          memo: '更新後のメモ',
+          date: '2025-12-11',
+          createdAt: '2025-12-10T12:00:00Z',
+          updatedAt: '2025-12-11T12:00:00Z',
+        };
+
+        followupService.updateAction.and.returnValue(of(updatedFollowup));
+        followupService.getActions.and.returnValue(
+          of({
+            ...mockActionsResponse,
+            data: [updatedFollowup],
+          })
+        );
+
+        component.form.patchValue({
+          date: '2025-12-11',
+          memo: '更新後のメモ',
+        });
+
+        component.onSubmit();
+        tick(100); // 非同期処理を待つ
+
+        expect(followupService.updateAction).toHaveBeenCalledWith('imp-1', 'action-1', {
+          date: '2025-12-11',
+          memo: '更新後のメモ',
+        });
+        expect(component.isModalOpen()).toBeFalse();
+        expect(component.editingFollowupId()).toBeNull();
+      }));
+
+      it('編集モードでのモーダルタイトルが正しいこと', () => {
+        expect(component.modalTitle).toBe('エピソードを編集');
+
+        component.itemType.set('improvement');
+        expect(component.modalTitle).toBe('アクションを編集');
+      });
+
+      it('編集モードでのトーストメッセージが正しいこと', fakeAsync(() => {
+        const updatedFollowup = {
+          id: 'episode-1',
+          userId: 'user-1',
+          itemType: 'goodPoint' as const,
+          itemId: 'gp-1',
+          status: '再現成功' as const,
+          memo: '更新後のメモ',
+          date: '2025-12-11',
+          createdAt: '2025-12-10T12:00:00Z',
+          updatedAt: '2025-12-11T12:00:00Z',
+        };
+
+        followupService.updateEpisode.and.returnValue(of(updatedFollowup));
+        followupService.getEpisodes.and.returnValue(
+          of({
+            ...mockEpisodesResponse,
+            data: [updatedFollowup, mockEpisodesResponse.data[1]],
+          })
+        );
+
+        component.form.patchValue({
+          date: '2025-12-11',
+          memo: '更新後のメモ',
+        });
+
+        component.onSubmit();
+        tick();
+
+        expect(component.toastMessage()).toBe('エピソードを更新しました');
+        expect(component.toastVariant()).toBe('success');
+      }));
+    });
+
+    describe('onCloseModal', () => {
+      it('編集モードでモーダルを閉じた場合、editingFollowupIdがリセットされること', () => {
+        followupService.getEpisodes.and.returnValue(of(mockEpisodesResponse));
+        fixture.detectChanges();
+        
+        // エピソードデータが読み込まれていることを確認
+        expect(component.episodes().length).toBeGreaterThan(0);
+        
+        component.onEditClick('episode-1');
+        expect(component.editingFollowupId()).toBe('episode-1');
+        expect(component.form.get('date')?.value).toBe('2025-12-10');
+        expect(component.form.get('memo')?.value).toBe('テストメモ1');
+
+        component.onCloseModal();
+
+        expect(component.isModalOpen()).toBeFalse();
+        expect(component.editingFollowupId()).toBeNull();
+        // フォームがリセットされていることを確認（dateとmemoは空文字列またはnull）
+        const dateValue = component.form.get('date')?.value;
+        const memoValue = component.form.get('memo')?.value;
+        expect(dateValue === '' || dateValue === null).toBeTrue();
+        expect(memoValue === '' || memoValue === null).toBeTrue();
+      });
     });
   });
 });

@@ -9,6 +9,7 @@ import { DateFieldComponent } from '../../../../shared/components/date-field/dat
 import { TextareaFieldComponent } from '../../../../shared/components/textarea-field/textarea-field.component';
 import { StatusBadgeComponent, StatusBadgeType } from '../../../../shared/components/status-badge/status-badge.component';
 import { ToastComponent } from '../../../../shared/components/toast/toast.component';
+import { IconComponent } from '../../../../shared/components/icon/icon.component';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -23,6 +24,7 @@ import { Subscription } from 'rxjs';
     TextareaFieldComponent,
     StatusBadgeComponent,
     ToastComponent,
+    IconComponent,
   ],
   templateUrl: './followup-page.component.html',
   styleUrl: './followup-page.component.scss',
@@ -48,6 +50,7 @@ export class FollowupPageComponent implements OnInit, OnDestroy {
   isModalOpen = signal(false);
   isSubmitting = signal(false);
   errorMessage = signal<string | null>(null);
+  editingFollowupId = signal<string | null>(null);
 
   // トースト通知
   toastMessage = signal<string | null>(null);
@@ -165,7 +168,12 @@ export class FollowupPageComponent implements OnInit, OnDestroy {
    * モーダルタイトルを取得
    */
   get modalTitle(): string {
-    return this.itemType() === 'goodPoint' ? 'エピソードを追加' : 'アクションを追加';
+    const isEditing = this.editingFollowupId() !== null;
+    if (this.itemType() === 'goodPoint') {
+      return isEditing ? 'エピソードを編集' : 'エピソードを追加';
+    } else {
+      return isEditing ? 'アクションを編集' : 'アクションを追加';
+    }
   }
 
   /**
@@ -231,9 +239,34 @@ export class FollowupPageComponent implements OnInit, OnDestroy {
    * エピソード/アクション追加ボタンクリック
    */
   onAddClick(): void {
+    this.editingFollowupId.set(null);
     this.form.reset();
     this.errorMessage.set(null);
     this.isModalOpen.set(true);
+  }
+
+  /**
+   * エピソード/アクション編集ボタンクリック
+   */
+  onEditClick(followupId: string): void {
+    const itemType = this.itemType();
+    let followup: Episode | Action | undefined;
+
+    if (itemType === 'goodPoint') {
+      followup = this.episodes().find((ep) => ep.id === followupId);
+    } else {
+      followup = this.actions().find((act) => act.id === followupId);
+    }
+
+    if (followup) {
+      this.editingFollowupId.set(followupId);
+      this.form.patchValue({
+        date: followup.date,
+        memo: followup.memo || '',
+      });
+      this.errorMessage.set(null);
+      this.isModalOpen.set(true);
+    }
   }
 
   /**
@@ -243,6 +276,7 @@ export class FollowupPageComponent implements OnInit, OnDestroy {
     this.isModalOpen.set(false);
     this.form.reset();
     this.errorMessage.set(null);
+    this.editingFollowupId.set(null);
   }
 
   /**
@@ -260,17 +294,20 @@ export class FollowupPageComponent implements OnInit, OnDestroy {
     const formValue = this.form.value;
     const itemId = this.itemId();
     const itemType = this.itemType();
+    const editingId = this.editingFollowupId();
 
-    const observable =
-      itemType === 'goodPoint'
-        ? this.followupService.addEpisode(itemId, {
-            date: formValue.date,
-            memo: formValue.memo || undefined,
-          })
-        : this.followupService.addAction(itemId, {
-            date: formValue.date,
-            memo: formValue.memo || undefined,
-          });
+    const requestData = {
+      date: formValue.date,
+      memo: formValue.memo || undefined,
+    };
+
+    const observable = editingId
+      ? itemType === 'goodPoint'
+        ? this.followupService.updateEpisode(itemId, editingId, requestData)
+        : this.followupService.updateAction(itemId, editingId, requestData)
+      : itemType === 'goodPoint'
+        ? this.followupService.addEpisode(itemId, requestData)
+        : this.followupService.addAction(itemId, requestData);
 
     const submitSubscription = observable.subscribe({
       next: () => {
@@ -279,6 +316,7 @@ export class FollowupPageComponent implements OnInit, OnDestroy {
         this.isModalOpen.set(false);
         this.form.reset();
         this.errorMessage.set(null);
+        this.editingFollowupId.set(null);
         // データを読み込む（非同期で実行し、エラーが発生してもモーダルは閉じたまま）
         setTimeout(() => {
           try {
@@ -290,8 +328,15 @@ export class FollowupPageComponent implements OnInit, OnDestroy {
             console.error('データの読み込みに失敗しました:', error);
           }
         }, 0);
+        const isEditing = editingId !== null;
         this.showToast(
-          itemType === 'goodPoint' ? 'エピソードを追加しました' : 'アクションを追加しました',
+          isEditing
+            ? itemType === 'goodPoint'
+              ? 'エピソードを更新しました'
+              : 'アクションを更新しました'
+            : itemType === 'goodPoint'
+              ? 'エピソードを追加しました'
+              : 'アクションを追加しました',
           'success'
         );
       },

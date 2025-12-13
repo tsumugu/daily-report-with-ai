@@ -49,6 +49,13 @@ export class DailyReportService {
   }
 
   /**
+   * 日報を更新
+   */
+  update(id: string, request: CreateDailyReportRequest): Observable<DailyReport> {
+    return this.http.put<DailyReport>(`${this.baseUrl}/daily-reports/${id}`, request);
+  }
+
+  /**
    * よかったことを作成
    */
   createGoodPoint(request: {

@@ -6,6 +6,7 @@ import { goodPointsDb, improvementsDb, dailyReportsDb } from '../db/daily-report
 import {
   Followup,
   CreateFollowupRequest,
+  UpdateFollowupRequest,
   GoodPoint,
   Improvement,
   FollowupItem,
@@ -43,15 +44,11 @@ function validateFollowup(body: CreateFollowupRequest, status: string): string |
     if (!dateRegex.test(body.date)) {
       return 'date はYYYY-MM-DD形式で入力してください';
     }
-    // 日付文字列をローカル時間としてパース（タイムゾーン問題を回避）
-    const [year, month, day] = body.date.split('-').map(Number);
-    const inputDate = new Date(year, month - 1, day);
-    inputDate.setHours(0, 0, 0, 0);
-    
+    // 日付文字列を直接比較（タイムゾーン問題を回避）
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayStr = today.toISOString().split('T')[0];
     
-    if (inputDate > today) {
+    if (body.date > todayStr) {
       return '未来の日付は入力できません';
     }
   }
@@ -308,6 +305,182 @@ followupsRouter.post('/improvements/:id/followups', (req: Request, res: Response
     improvementsDb.update(updated);
 
   res.status(201).json(followup);
+});
+
+/**
+ * PUT /api/good-points/:id/followups/:followupId
+ * エピソードを更新
+ */
+followupsRouter.put('/good-points/:id/followups/:followupId', (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ message: '認証が必要です' });
+    return;
+  }
+
+  const goodPointId = req.params.id;
+  const followupId = req.params.followupId;
+
+  // よかったことの存在確認
+  const goodPoint = goodPointsDb.findById(goodPointId);
+  if (!goodPoint) {
+    res.status(404).json({ message: 'よかったことが見つかりません' });
+    return;
+  }
+
+  // 編集権限チェック
+  if (goodPoint.userId !== userId) {
+    res.status(403).json({ message: 'アクセス権限がありません' });
+    return;
+  }
+
+  // エピソードの存在確認
+  const followup = followupsDb.findById(followupId);
+  if (!followup) {
+    res.status(404).json({ message: 'エピソードが見つかりません' });
+    return;
+  }
+
+  // エピソードの編集権限チェック
+  if (followup.userId !== userId) {
+    res.status(403).json({ message: 'アクセス権限がありません' });
+    return;
+  }
+
+  // エピソードがこのよかったことに紐づいているか確認
+  if (followup.itemType !== 'goodPoint' || followup.itemId !== goodPointId) {
+    res.status(400).json({ message: 'このエピソードはこのよかったことに紐づいていません' });
+    return;
+  }
+
+  const body: UpdateFollowupRequest = req.body;
+  
+  // バリデーション（エピソードは常に「再現成功」）
+  const validationError = validateFollowup({ ...body, status: '再現成功' }, '再現成功');
+  if (validationError) {
+    res.status(400).json({ message: validationError });
+    return;
+  }
+
+  // dateは必須
+  if (!body.date) {
+    res.status(400).json({ message: 'date は必須です' });
+    return;
+  }
+
+  const now = new Date().toISOString();
+  
+  // エピソードを更新
+  const updatedFollowup: Followup = {
+    ...followup,
+    memo: body.memo || null,
+    date: body.date,
+    updatedAt: now,
+  };
+  followupsDb.update(updatedFollowup);
+
+  // エピソード数を再カウント
+  const episodeCount = countEpisodes(goodPointId);
+  
+  // ステータスを自動再計算
+  const newStatus = calculateGoodPointStatus(episodeCount);
+  const updatedGoodPoint: GoodPoint = {
+    ...goodPoint,
+    status: newStatus,
+    success_count: episodeCount,
+    updatedAt: now,
+  };
+  goodPointsDb.update(updatedGoodPoint);
+
+  res.status(200).json(updatedFollowup);
+});
+
+/**
+ * PUT /api/improvements/:id/followups/:followupId
+ * アクションを更新
+ */
+followupsRouter.put('/improvements/:id/followups/:followupId', (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ message: '認証が必要です' });
+    return;
+  }
+
+  const improvementId = req.params.id;
+  const followupId = req.params.followupId;
+
+  // 改善点の存在確認
+  const improvement = improvementsDb.findById(improvementId);
+  if (!improvement) {
+    res.status(404).json({ message: '改善点が見つかりません' });
+    return;
+  }
+
+  // 編集権限チェック
+  if (improvement.userId !== userId) {
+    res.status(403).json({ message: 'アクセス権限がありません' });
+    return;
+  }
+
+  // アクションの存在確認
+  const followup = followupsDb.findById(followupId);
+  if (!followup) {
+    res.status(404).json({ message: 'アクションが見つかりません' });
+    return;
+  }
+
+  // アクションの編集権限チェック
+  if (followup.userId !== userId) {
+    res.status(403).json({ message: 'アクセス権限がありません' });
+    return;
+  }
+
+  // アクションがこの改善点に紐づいているか確認
+  if (followup.itemType !== 'improvement' || followup.itemId !== improvementId) {
+    res.status(400).json({ message: 'このアクションはこの改善点に紐づいていません' });
+    return;
+  }
+
+  const body: UpdateFollowupRequest = req.body;
+  
+  // バリデーション（アクションは常に「完了」）
+  const validationError = validateFollowup({ ...body, status: '完了' }, '完了');
+  if (validationError) {
+    res.status(400).json({ message: validationError });
+    return;
+  }
+
+  // dateは必須
+  if (!body.date) {
+    res.status(400).json({ message: 'date は必須です' });
+    return;
+  }
+
+  const now = new Date().toISOString();
+  
+  // アクションを更新
+  const updatedFollowup: Followup = {
+    ...followup,
+    memo: body.memo || null,
+    date: body.date,
+    updatedAt: now,
+  };
+  followupsDb.update(updatedFollowup);
+
+  // アクション数を再カウント
+  const actionCount = countActions(improvementId);
+  
+  // ステータスを自動再計算
+  const newStatus = calculateImprovementStatus(actionCount);
+  const updatedImprovement: Improvement = {
+    ...improvement,
+    status: newStatus,
+    success_count: actionCount,
+    updatedAt: now,
+  };
+  improvementsDb.update(updatedImprovement);
+
+  res.status(200).json(updatedFollowup);
 });
 
 /**

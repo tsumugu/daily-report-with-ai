@@ -41,6 +41,14 @@ export const routes: Routes = [
         (m) => m.DailyReportDetailPageComponent
       ),
   },
+  {
+    path: 'daily-reports/:id/edit',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/daily-report/pages/daily-report-edit-page/daily-report-edit-page.component').then(
+        (m) => m.DailyReportEditPageComponent
+      ),
+  },
 
   // Followup routes
   {

@@ -184,6 +184,17 @@ describe('AuthService (Server環境)', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;
 
+  const mockUser = {
+    id: '1',
+    email: 'test@example.com',
+    createdAt: new Date().toISOString(),
+  };
+
+  const mockAuthResponse = {
+    token: 'mock-jwt-token',
+    user: mockUser,
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
@@ -206,6 +217,38 @@ describe('AuthService (Server環境)', () => {
     it('サーバー環境の場合、nullを返す', () => {
       expect(service.getToken()).toBeNull();
     });
+  });
+
+  describe('setToken (private)', () => {
+    it('サーバー環境の場合、トークンを設定しない', fakeAsync(() => {
+      // signup()を呼び出してsetToken()を間接的にテスト
+      const request = { email: 'test@example.com', password: 'password123' };
+      
+      service.signup(request).subscribe();
+      
+      const req = httpMock.expectOne(`${environment.apiUrl}/auth/signup`);
+      req.flush(mockAuthResponse);
+      
+      tick();
+      
+      // サーバー環境ではlocalStorageに保存されない
+      expect(localStorage.getItem('auth_token')).toBeNull();
+    }));
+  });
+
+  describe('clearToken (private)', () => {
+    it('サーバー環境の場合、トークンを削除しない', fakeAsync(() => {
+      // logout()を呼び出してclearToken()を間接的にテスト
+      service.logout().subscribe();
+      
+      const req = httpMock.expectOne(`${environment.apiUrl}/auth/logout`);
+      req.flush(null);
+      
+      tick();
+      
+      // サーバー環境ではlocalStorageから削除されない（そもそも保存されていない）
+      expect(localStorage.getItem('auth_token')).toBeNull();
+    }));
   });
 });
 

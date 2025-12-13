@@ -168,4 +168,32 @@ export class FollowupService {
       `${this.baseUrl}/improvements/${improvementId}/followups/${followupId}`
     );
   }
+
+  /**
+   * エピソードを更新
+   */
+  updateEpisode(
+    goodPointId: string,
+    followupId: string,
+    data: AddEpisodeRequest
+  ): Observable<Followup> {
+    return this.http.put<Followup>(
+      `${this.baseUrl}/good-points/${goodPointId}/followups/${followupId}`,
+      data
+    );
+  }
+
+  /**
+   * アクションを更新
+   */
+  updateAction(
+    improvementId: string,
+    followupId: string,
+    data: AddActionRequest
+  ): Observable<Followup> {
+    return this.http.put<Followup>(
+      `${this.baseUrl}/improvements/${improvementId}/followups/${followupId}`,
+      data
+    );
+  }
 }

@@ -34,6 +34,12 @@ export class FollowupsDatabase {
     return results;
   }
 
+  update(followup: Followup): void {
+    if (this.followups.has(followup.id)) {
+      this.followups.set(followup.id, followup);
+    }
+  }
+
   delete(id: string): void {
     this.followups.delete(id);
   }

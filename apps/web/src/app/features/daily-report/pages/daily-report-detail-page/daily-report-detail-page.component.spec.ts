@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { importProvidersFrom } from '@angular/core';
 import {
@@ -260,6 +260,17 @@ describe('DailyReportDetailPageComponent', () => {
         expect(component.getImprovementStatusBadgeType(status)).toBe(status);
       });
     });
+
+    it('getGoodPointStatusBadgeTypeのdefaultケースが正しく動作すること', () => {
+      // 新しいステータス型が追加された場合のdefaultケースをテスト
+      expect(component.getGoodPointStatusBadgeType('未着手' as GoodPointStatus)).toBe('未着手');
+    });
+
+    it('retry()で日報IDが存在する場合、loadReportが呼ばれること', () => {
+      const loadReportSpy = spyOn(component, 'loadReport');
+      component.retry();
+      expect(loadReportSpy).toHaveBeenCalledWith('report-1');
+    });
   });
 
   describe('logout()エラーケース', () => {
@@ -343,6 +354,119 @@ describe('DailyReportDetailPageComponent (IDなし)', () => {
     expect(component.errorMessage()).toBe('日報IDが指定されていません');
     expect(component.isLoading()).toBe(false);
     expect(mockDailyReportService.getById).not.toHaveBeenCalled();
+  });
+});
+
+describe('DailyReportDetailPageComponent (IDあり)', () => {
+  let component: DailyReportDetailPageComponent;
+  let fixture: ComponentFixture<DailyReportDetailPageComponent>;
+  let mockDailyReportService: jasmine.SpyObj<DailyReportService>;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
+  let paramMapGetSpy: jasmine.Spy;
+
+  const mockReport: DailyReport = {
+    id: 'report-1',
+    userId: 'user-1',
+    date: '2025-12-05',
+    events: '今日のできごと',
+    learnings: '今日の学び',
+    goodPoints: [],
+    improvements: [],
+    createdAt: '2025-12-05T10:00:00Z',
+    updatedAt: '2025-12-05T10:00:00Z',
+  };
+
+  beforeEach(async () => {
+    mockDailyReportService = jasmine.createSpyObj('DailyReportService', ['getById']);
+    mockAuthService = jasmine.createSpyObj('AuthService', ['logout'], {
+      currentUser: signal({ id: 'user1', email: 'test@example.com' }),
+    });
+
+    mockDailyReportService.getById.and.returnValue(of(mockReport));
+
+    paramMapGetSpy = jasmine.createSpy('get').and.returnValue('report-1');
+
+    await TestBed.configureTestingModule({
+      imports: [DailyReportDetailPageComponent, RouterTestingModule.withRoutes([])],
+      providers: [
+        { provide: DailyReportService, useValue: mockDailyReportService },
+        { provide: AuthService, useValue: mockAuthService },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: {
+                get: paramMapGetSpy,
+              },
+            },
+          },
+        },
+        importProvidersFrom(
+          LucideAngularModule.pick({
+            FileText,
+            Clipboard,
+            ChartBar,
+            Target,
+            Sparkles,
+            Lightbulb,
+            Calendar,
+            TriangleAlert,
+            Eye,
+            EyeOff,
+            Heart,
+            Pin,
+          })
+        ),
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(DailyReportDetailPageComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  describe('onEdit', () => {
+    it('日報IDが存在する場合、編集画面に遷移すること', () => {
+      const router = TestBed.inject(Router);
+      spyOn(router, 'navigate');
+      
+      component.onEdit();
+
+      expect(router.navigate).toHaveBeenCalledWith(['/daily-reports', 'report-1', 'edit']);
+    });
+
+    it('日報IDがnullの場合、遷移しないこと', () => {
+      const router = TestBed.inject(Router);
+      spyOn(router, 'navigate');
+      
+      // paramMap.get('id')がnullを返すようにモック
+      paramMapGetSpy.and.returnValue(null);
+      
+      component.onEdit();
+
+      expect(router.navigate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('retry', () => {
+    it('日報IDがnullの場合、loadReportが呼ばれないこと', () => {
+      // paramMap.get('id')がnullを返すようにモック
+      const activatedRoute = TestBed.inject(ActivatedRoute);
+      const nullParamMapGetSpy = jasmine.createSpy('get').and.returnValue(null);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (activatedRoute.snapshot.paramMap as any).get = nullParamMapGetSpy;
+      
+      // 既存のコンポーネントインスタンスを使用
+      const loadReportSpy = spyOn(component, 'loadReport');
+      
+      // retry()を呼び出す（nullParamMapGetSpyがnullを返すため、loadReportは呼ばれない）
+      component.retry();
+
+      // loadReportが呼ばれていないことを確認
+      expect(loadReportSpy).not.toHaveBeenCalled();
+      // nullParamMapGetSpyが呼ばれたことを確認
+      expect(nullParamMapGetSpy).toHaveBeenCalledWith('id');
+    });
   });
 });
 

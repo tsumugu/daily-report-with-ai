@@ -4,6 +4,82 @@
 
 ---
 
+## Cursor CLIのインストール（Driverロール用）
+
+Driverロールが他のロールに指示を出す際に使用するCursor CLIをインストールします。
+
+### インストール方法
+
+**macOS、Linux、Windows（WSL）**:
+
+```bash
+curl https://cursor.com/install -fsS | bash
+```
+
+### PATHへの追加
+
+インストール後、`~/.local/bin`をPATHに追加します：
+
+**zshの場合**:
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+**bashの場合**:
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### インストール確認
+
+```bash
+cursor-agent --version
+```
+
+バージョン情報が表示されれば、インストールは成功です。
+
+### 認証
+
+Cursor CLIを使用する前に、認証が必要です：
+
+```bash
+cursor-agent login
+```
+
+ブラウザが開き、Cursorアカウントでログインします。認証が完了すると、CLIが使用可能になります。
+
+**環境変数での認証（CI/CD等）**:
+
+```bash
+export CURSOR_API_KEY="your-api-key"
+```
+
+### 使用方法
+
+Driverロールが他のロールに指示を出す際は、以下の形式を使用します：
+
+```bash
+# 対話型セッションの開始
+cursor-agent
+
+# または、初期プロンプトを指定して開始
+cursor-agent "@PdM: Phase 3-1のPRD作成を開始してください。要件はロードマップに記載されています。"
+```
+
+**非対話モードでの使用**:
+
+```bash
+cursor-agent -p "@Eng: Tech Spec作成を開始してください。PRDはApprovedステータスです。" --output-format text
+```
+
+**注意**: Cursor CLIは現在ベータ版です。ターミナルコマンドを実行する前に、CLIが実行の可否を確認します。承認する場合は`Y`、拒否する場合は`N`を押してください。
+
+---
+
 ## 前提条件
 
 ### 必須

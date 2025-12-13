@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日報編集画面 プロトタイプ</title>
+  <link rel="stylesheet" href="daily-report-edit.css">
+</head>
+<body>
+  <div class="prototype-container">
+    <h1 class="prototype-title">日報編集画面 プロトタイプ</h1>
+
+    <!-- 状態1: 正常系（既存データを読み込んだ状態） -->
+    <section class="prototype-section">
+      <h2 class="prototype-section__title">状態1: 正常系（既存データを読み込んだ状態）</h2>
+      
+      <div class="page-container">
+        <!-- ページヘッダー -->
+        <header class="page-header">
+          <button class="page-header__back" aria-label="戻る">←</button>
+          <h1 class="page-header__title">日報を編集</h1>
+        </header>
+
+        <!-- フォーム -->
+        <form class="daily-report-form" id="edit-form">
+          <!-- 日付 -->
+          <div class="form-group">
+            <label class="form-label" for="date">
+              日付 <span class="form-required">*</span>
+            </label>
+            <input
+              type="date"
+              id="date"
+              name="date"
+              class="form-input"
+              value="2025-01-15"
+              required
+            />
+          </div>
+
+          <!-- できごと -->
+          <div class="form-group">
+            <label class="form-label" for="events">
+              できごと <span class="form-required">*</span>
+            </label>
+            <textarea
+              id="events"
+              name="events"
+              class="form-textarea"
+              rows="4"
+              maxlength="1000"
+              required
+              aria-describedby="events-char-count"
+            >今日の主な業務は、チーム会議への参加とコードレビューでした。会議では積極的に発言でき、良いフィードバックをもらえました。</textarea>
+            <div class="form-char-count" id="events-char-count">
+              <span class="form-char-count__current">78</span>
+              <span class="form-char-count__max">/1000</span>
+            </div>
+          </div>
+
+          <!-- 学び -->
+          <div class="form-group">
+            <label class="form-label" for="learnings">
+              学び
+            </label>
+            <textarea
+              id="learnings"
+              name="learnings"
+              class="form-textarea"
+              rows="4"
+              maxlength="1000"
+              aria-describedby="learnings-char-count"
+            >積極的に発言することで、チームの議論が活発になり、より良い結論にたどり着けることがわかりました。</textarea>
+            <div class="form-char-count" id="learnings-char-count">
+              <span class="form-char-count__current">45</span>
+              <span class="form-char-count__max">/1000</span>
+            </div>
+          </div>
+
+          <!-- よかったこと -->
+          <fieldset class="form-group form-group--no-border">
+            <legend class="form-label">
+              <span class="form-label__icon">✨</span>
+              よかったこと
+            </legend>
+
+            <!-- よかったこと1 -->
+            <div class="card-item">
+              <div class="card-item__content">
+                <div class="card-field">
+                  <label class="card-field__label" for="gp-content-1">内容</label>
+                  <textarea
+                    id="gp-content-1"
+                    class="card-field__textarea"
+                    rows="2"
+                    maxlength="1000"
+                  >チーム会議で積極的に発言できた</textarea>
+                </div>
+                <div class="card-field">
+                  <label class="card-field__label" for="gp-factors-1">要因・背景</label>
+                  <textarea
+                    id="gp-factors-1"
+                    class="card-field__textarea"
+                    rows="2"
+                    maxlength="1000"
+                  >事前に議題を確認し、自分の意見を整理しておいた</textarea>
+                </div>
+              </div>
+              <button type="button" class="card-item__delete" aria-label="削除" onclick="confirmDelete('gp-1')">🗑️</button>
+            </div>
+
+            <!-- よかったこと2 -->
+            <div class="card-item">
+              <div class="card-item__content">
+                <div class="card-field">
+                  <label class="card-field__label" for="gp-content-2">内容</label>
+                  <textarea
+                    id="gp-content-2"
+                    class="card-field__textarea"
+                    rows="2"
+                    maxlength="1000"
+                  >コードレビューで良いフィードバックをもらえた</textarea>
+                </div>
+                <div class="card-field">
+                  <label class="card-field__label" for="gp-factors-2">要因・背景</label>
+                  <textarea
+                    id="gp-factors-2"
+                    class="card-field__textarea"
+                    rows="2"
+                    maxlength="1000"
+                  >テストコードをしっかり書いていた</textarea>
+                </div>
+              </div>
+              <button type="button" class="card-item__delete" aria-label="削除" onclick="confirmDelete('gp-2')">🗑️</button>
+            </div>
+
+            <button type="button" class="form-add-button" onclick="addGoodPoint()">
+              <span class="form-add-button__icon">＋</span>
+              <span class="form-add-button__label">追加</span>
+            </button>
+          </fieldset>
+
+          <!-- 改善点/アクション -->
+          <fieldset class="form-group form-group--no-border">
+            <legend class="form-label">
+              <span class="form-label__icon">📝</span>
+              改善点/アクション
+            </legend>
+
+            <!-- 改善点1 -->
+            <div class="card-item">
+              <div class="card-item__content">
+                <div class="card-field">
+                  <label class="card-field__label" for="imp-content-1">改善したいこと</label>
+                  <textarea
+                    id="imp-content-1"
+                    class="card-field__textarea"
+                    rows="2"
+                    maxlength="1000"
+                  >コミットメッセージをより明確にしたい</textarea>
+                </div>
+                <div class="card-field">
+                  <label class="card-field__label" for="imp-action-1">アクション</label>
+                  <textarea
+                    id="imp-action-1"
+                    class="card-field__textarea"
+                    rows="2"
+                    maxlength="1000"
+                  >Conventional Commitsの形式に従う</textarea>
+                </div>
+              </div>
+              <button type="button" class="card-item__delete" aria-label="削除" onclick="confirmDelete('imp-1')">🗑️</button>
+            </div>
+
+            <button type="button" class="form-add-button" onclick="addImprovement()">
+              <span class="form-add-button__icon">＋</span>
+              <span class="form-add-button__label">追加</span>
+            </button>
+          </fieldset>
+
+          <!-- フォームアクション -->
+          <div class="form-actions">
+            <button type="button" class="button button--outline" onclick="cancelEdit()">キャンセル</button>
+            <button type="submit" class="button button--primary">保存する</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 状態2: エラー状態 -->
+    <section class="prototype-section">
+      <h2 class="prototype-section__title">状態2: エラー状態（バリデーションエラー）</h2>
+      
+      <div class="page-container">
+        <header class="page-header">
+          <button class="page-header__back" aria-label="戻る">←</button>
+          <h1 class="page-header__title">日報を編集</h1>
+        </header>
+
+        <form class="daily-report-form">
+          <div class="form-group">
+            <label class="form-label" for="date-error">
+              日付 <span class="form-required">*</span>
+            </label>
+            <input
+              type="date"
+              id="date-error"
+              name="date"
+              class="form-input form-input--error"
+              required
+            />
+            <span class="form-error" role="alert">日付は必須です</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="events-error">
+              できごと <span class="form-required">*</span>
+            </label>
+            <textarea
+              id="events-error"
+              name="events"
+              class="form-textarea form-textarea--error"
+              rows="4"
+              maxlength="1000"
+              required
+            ></textarea>
+            <span class="form-error" role="alert">できごとは必須です</span>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="button button--outline">キャンセル</button>
+            <button type="submit" class="button button--primary">保存する</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <!-- 削除確認ダイアログ -->
+  <div class="confirm-dialog" id="confirm-dialog" style="display: none;">
+    <div class="confirm-dialog__content">
+      <p class="confirm-dialog__message">この項目を削除しますか？<br>削除すると元に戻せません</p>
+      <div class="confirm-dialog__actions">
+        <button type="button" class="button button--outline" onclick="closeConfirmDialog()">キャンセル</button>
+        <button type="button" class="button button--destructive" onclick="deleteItem()">削除する</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let deleteTargetId = null;
+
+    function confirmDelete(id) {
+      deleteTargetId = id;
+      document.getElementById('confirm-dialog').style.display = 'flex';
+    }
+
+    function closeConfirmDialog() {
+      document.getElementById('confirm-dialog').style.display = 'none';
+      deleteTargetId = null;
+    }
+
+    function deleteItem() {
+      if (deleteTargetId) {
+        const item = document.querySelector(`[data-id="${deleteTargetId}"]`);
+        if (item) {
+          item.remove();
+        }
+        closeConfirmDialog();
+      }
+    }
+
+    function addGoodPoint() {
+      alert('よかったことを追加します（デモ）');
+    }
+
+    function addImprovement() {
+      alert('改善点を追加します（デモ）');
+    }
+
+    function cancelEdit() {
+      if (confirm('編集内容が失われますが、よろしいですか？')) {
+        alert('日報詳細画面に戻ります（デモ）');
+      }
+    }
+
+    // 文字数カウント
+    document.querySelectorAll('.form-textarea').forEach((textarea) => {
+      const charCountId = textarea.getAttribute('aria-describedby');
+      if (charCountId) {
+        const charCount = document.getElementById(charCountId);
+        if (charCount) {
+          const currentSpan = charCount.querySelector('.form-char-count__current');
+          textarea.addEventListener('input', (e) => {
+            const length = e.target.value.length;
+            if (currentSpan) {
+              currentSpan.textContent = length;
+            }
+          });
+        }
+      }
+    });
+
+    // フォーム送信
+    document.getElementById('edit-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('日報を更新しました（デモ）');
+    });
+  </script>
+</body>
+</html>
+

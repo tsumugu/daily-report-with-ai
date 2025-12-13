@@ -7,6 +7,7 @@ import {
   GoodPoint,
   Improvement,
   CreateDailyReportRequest,
+  UpdateDailyReportRequest,
   CreateGoodPointRequest,
   CreateImprovementRequest,
   UpdateGoodPointRequest,
@@ -16,6 +17,7 @@ import {
   GoodPointSummary,
   ImprovementSummary,
 } from '../models/daily-report.model.js';
+import { followupsDb } from '../db/followups.db.js';
 
 export const dailyReportsRouter = Router();
 
@@ -350,6 +352,193 @@ dailyReportsRouter.get('/daily-reports/:id', (req: Request, res: Response) => {
   }
 
   res.status(200).json(toDailyReportResponse(report));
+});
+
+/**
+ * PUT /api/daily-reports/:id
+ * 日報を更新
+ */
+dailyReportsRouter.put('/daily-reports/:id', (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ message: '認証が必要です' });
+    return;
+  }
+
+  const reportId = req.params.id;
+  const report = dailyReportsDb.findById(reportId);
+  if (!report) {
+    res.status(404).json({ message: '日報が見つかりません' });
+    return;
+  }
+
+  // 編集権限チェック
+  if (report.userId !== userId) {
+    res.status(403).json({ message: 'アクセス権限がありません' });
+    return;
+  }
+
+  const body: UpdateDailyReportRequest = req.body;
+
+  // バリデーション
+  const validationError = validateDailyReport(body);
+  if (validationError) {
+    res.status(400).json({ message: validationError });
+    return;
+  }
+
+  // 日付変更時の同日チェック
+  if (body.date !== report.date) {
+    const existing = dailyReportsDb.findByUserIdAndDate(userId, body.date);
+    if (existing && existing.id !== reportId) {
+      res.status(400).json({ message: 'この日付の日報は既に存在します' });
+      return;
+    }
+  }
+
+  const now = new Date().toISOString();
+  const newGoodPointIds: string[] = [];
+  const newImprovementIds: string[] = [];
+
+  // よかったことの処理
+  if (body.goodPoints && body.goodPoints.length > 0) {
+    for (const gp of body.goodPoints) {
+      const gpValidation = validateGoodPoint(gp);
+      if (gpValidation) {
+        res.status(400).json({ message: `goodPoints: ${gpValidation}` });
+        return;
+      }
+
+      if (gp.id) {
+        // 既存のよかったことを更新
+        // ID整合性チェック
+        if (!report.goodPointIds.includes(gp.id)) {
+          res.status(400).json({ message: 'このよかったことはこの日報に紐づいていません' });
+          return;
+        }
+
+        const existingGoodPoint = goodPointsDb.findById(gp.id);
+        if (!existingGoodPoint) {
+          res.status(404).json({ message: 'よかったことが見つかりません' });
+          return;
+        }
+
+        const updatedGoodPoint: GoodPoint = {
+          ...existingGoodPoint,
+          content: gp.content,
+          factors: gp.factors || null,
+          tags: gp.tags || [],
+          updatedAt: now,
+        };
+        goodPointsDb.update(updatedGoodPoint);
+        newGoodPointIds.push(gp.id);
+      } else {
+        // 新規作成
+        const goodPoint: GoodPoint = {
+          id: uuidv4(),
+          userId,
+          content: gp.content,
+          factors: gp.factors || null,
+          tags: gp.tags || [],
+          status: '未着手',
+          success_count: 0,
+          createdAt: now,
+          updatedAt: now,
+        };
+        goodPointsDb.save(goodPoint);
+        newGoodPointIds.push(goodPoint.id);
+      }
+    }
+  }
+
+  // リクエストに含まれていない既存のよかったことについて
+  // フォローアップデータが存在する場合は削除しない
+  for (const goodPointId of report.goodPointIds) {
+    if (!newGoodPointIds.includes(goodPointId)) {
+      const followups = followupsDb.findByItemId('goodPoint', goodPointId);
+      if (followups.length === 0) {
+        // フォローアップデータが存在しない場合のみ削除
+        goodPointsDb.delete(goodPointId);
+      }
+      // フォローアップデータが存在する場合は削除しない（PRDの要件）
+    }
+  }
+
+  // 改善点の処理
+  if (body.improvements && body.improvements.length > 0) {
+    for (const imp of body.improvements) {
+      const impValidation = validateImprovement(imp);
+      if (impValidation) {
+        res.status(400).json({ message: `improvements: ${impValidation}` });
+        return;
+      }
+
+      if (imp.id) {
+        // 既存の改善点を更新
+        // ID整合性チェック
+        if (!report.improvementIds.includes(imp.id)) {
+          res.status(400).json({ message: 'この改善点はこの日報に紐づいていません' });
+          return;
+        }
+
+        const existingImprovement = improvementsDb.findById(imp.id);
+        if (!existingImprovement) {
+          res.status(404).json({ message: '改善点が見つかりません' });
+          return;
+        }
+
+        const updatedImprovement: Improvement = {
+          ...existingImprovement,
+          content: imp.content,
+          action: imp.action || null,
+          updatedAt: now,
+        };
+        improvementsDb.update(updatedImprovement);
+        newImprovementIds.push(imp.id);
+      } else {
+        // 新規作成
+        const improvement: Improvement = {
+          id: uuidv4(),
+          userId,
+          content: imp.content,
+          action: imp.action || null,
+          status: '未着手',
+          success_count: 0,
+          createdAt: now,
+          updatedAt: now,
+        };
+        improvementsDb.save(improvement);
+        newImprovementIds.push(improvement.id);
+      }
+    }
+  }
+
+  // リクエストに含まれていない既存の改善点について
+  // フォローアップデータが存在する場合は削除しない
+  for (const improvementId of report.improvementIds) {
+    if (!newImprovementIds.includes(improvementId)) {
+      const followups = followupsDb.findByItemId('improvement', improvementId);
+      if (followups.length === 0) {
+        // フォローアップデータが存在しない場合のみ削除
+        improvementsDb.delete(improvementId);
+      }
+      // フォローアップデータが存在する場合は削除しない（PRDの要件）
+    }
+  }
+
+  // 日報の更新
+  const updatedReport: DailyReport = {
+    ...report,
+    date: body.date,
+    events: body.events,
+    learnings: body.learnings || null,
+    goodPointIds: newGoodPointIds,
+    improvementIds: newImprovementIds,
+    updatedAt: now,
+  };
+  dailyReportsDb.update(updatedReport);
+
+  res.status(200).json(toDailyReportResponse(updatedReport));
 });
 
 /**

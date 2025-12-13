@@ -1,0 +1,182 @@
+<div class="daily-report-edit">
+  <!-- ヘッダー -->
+  <header class="header">
+    <a routerLink="/daily-reports" class="back-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
+    </a>
+    <h1 class="title">日報を編集</h1>
+  </header>
+
+  <!-- ローディング -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>読み込み中...</p>
+    </div>
+  }
+
+  <!-- エラーメッセージ -->
+  @if (errorMessage()) {
+    <app-alert-banner
+      [message]="errorMessage()!"
+      variant="error"
+      [dismissible]="true"
+      (dismissed)="errorMessage.set(null)"
+    />
+  }
+
+  <!-- フォーム -->
+  @if (!isLoading()) {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+      <!-- 日付 -->
+      <app-date-field
+        label="日付"
+        id="date"
+        formControlName="date"
+        [required]="true"
+        [errorMessage]="getFieldError('date') || ''"
+        [touched]="form.get('date')?.touched || false"
+        [submitted]="isSubmitted()"
+      />
+
+      <!-- できごと -->
+      <app-textarea-field
+        label="できごと"
+        id="events"
+        [labelIcon]="'file-text'"
+        formControlName="events"
+        [required]="true"
+        [maxLength]="MAX_LENGTH"
+        [rows]="4"
+        placeholder="今日の主な業務内容、出来事を記入してください"
+        [errorMessage]="getFieldError('events') || ''"
+        [touched]="form.get('events')?.touched || false"
+        [submitted]="isSubmitted()"
+      />
+
+      <!-- 学び -->
+      <app-textarea-field
+        label="学び"
+        id="learnings"
+        [labelIcon]="'lightbulb'"
+        formControlName="learnings"
+        [maxLength]="MAX_LENGTH"
+        [rows]="3"
+        placeholder="業務を通じて得た気づき、学びを記入してください"
+        [touched]="form.get('learnings')?.touched || false"
+        [submitted]="isSubmitted()"
+      />
+
+      <!-- よかったこと -->
+      <fieldset class="form-group form-group--no-border" [class.form-group--empty]="goodPoints().length === 0">
+        <legend class="label">
+          <span class="label-icon">
+            <app-icon name="heart" [size]="20" color="var(--color-primary-500)" ariaLabel="よかったこと" />
+          </span>
+          よかったこと
+        </legend>
+
+        @for (gp of goodPoints(); track $index) {
+          <app-form-card (removed)="removeGoodPoint($index)" class="form-group__card">
+            <div class="card-field">
+              <app-textarea-field
+                [label]="'内容'"
+                [id]="'good-point-content-' + $index"
+                [maxLength]="MAX_LENGTH"
+                [rows]="2"
+                [showCharCount]="false"
+                placeholder="うまくいったこと、成功体験"
+                [value]="gp.content"
+                (valueChange)="updateGoodPoint($index, 'content', $event)"
+              />
+            </div>
+            <div class="card-field">
+              <app-textarea-field
+                [label]="'要因・背景'"
+                [id]="'good-point-factors-' + $index"
+                [maxLength]="MAX_LENGTH"
+                [rows]="2"
+                [showCharCount]="false"
+                placeholder="なぜうまくいったか"
+                [value]="gp.factors"
+                (valueChange)="updateGoodPoint($index, 'factors', $event)"
+              />
+            </div>
+          </app-form-card>
+        }
+
+        <div class="form-group__add-button">
+          <app-button variant="add" icon="plus" [fullWidth]="true" (clicked)="addGoodPoint()">追加</app-button>
+        </div>
+      </fieldset>
+
+      <!-- 改善点/アクション -->
+      <fieldset class="form-group form-group--no-border" [class.form-group--empty]="improvements().length === 0">
+        <legend class="label">
+          <span class="label-icon">
+            <app-icon name="file-text" [size]="20" color="var(--color-primary-500)" ariaLabel="改善点" />
+          </span>
+          改善点/アクション
+        </legend>
+
+        @for (imp of improvements(); track $index) {
+          <app-form-card (removed)="removeImprovement($index)" class="form-group__card">
+            <div class="card-field">
+              <app-textarea-field
+                [label]="'改善したいこと'"
+                [id]="'improvement-content-' + $index"
+                [maxLength]="MAX_LENGTH"
+                [rows]="2"
+                [showCharCount]="false"
+                placeholder="改善したい点、課題"
+                [value]="imp.content"
+                (valueChange)="updateImprovement($index, 'content', $event)"
+              />
+            </div>
+            <div class="card-field">
+              <app-textarea-field
+                [label]="'アクション'"
+                [id]="'improvement-action-' + $index"
+                [maxLength]="MAX_LENGTH"
+                [rows]="2"
+                [showCharCount]="false"
+                placeholder="明日以降に試したいこと"
+                [value]="imp.action"
+                (valueChange)="updateImprovement($index, 'action', $event)"
+              />
+            </div>
+          </app-form-card>
+        }
+
+        <div class="form-group__add-button">
+          <app-button variant="add" icon="plus" [fullWidth]="true" (clicked)="addImprovement()">追加</app-button>
+        </div>
+      </fieldset>
+
+      <!-- ボタン -->
+      <div class="form-actions">
+        <app-button
+          type="button"
+          variant="outline"
+          [fullWidth]="true"
+          (clicked)="onCancel()"
+          [disabled]="isSaving()"
+        >
+          キャンセル
+        </app-button>
+        <app-button
+          type="submit"
+          variant="primary"
+          [fullWidth]="true"
+          [loading]="isSaving()"
+          [disabled]="isSaving()"
+        >
+          保存する
+        </app-button>
+      </div>
+    </form>
+  }
+</div>
+

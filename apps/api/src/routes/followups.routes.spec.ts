@@ -906,5 +906,430 @@ describe('followupsRouter', () => {
       expect(response.body.data[0].itemType).toBe('goodPoint');
     });
   });
+
+  describe('PUT /api/good-points/:id/followups/:followupId', () => {
+    it('認証済みユーザーがエピソードを更新できること', async () => {
+      // よかったことを作成
+      const goodPoint = {
+        id: 'gp-1',
+        userId: testUserId,
+        content: 'よかったこと',
+        factors: null,
+        tags: [],
+        status: '未着手' as const,
+        success_count: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      goodPointsDb.save(goodPoint);
+
+      // エピソードを作成
+      const followup = {
+        id: 'followup-1',
+        userId: testUserId,
+        itemType: 'goodPoint' as const,
+        itemId: 'gp-1',
+        status: '再現成功' as const,
+        memo: '元のメモ',
+        date: getPastDate(2),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      followupsDb.save(followup);
+
+      // エピソードを更新
+      const response = await request(app)
+        .put(`/api/good-points/gp-1/followups/followup-1`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: getPastDate(1),
+          memo: '更新後のメモ',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.memo).toBe('更新後のメモ');
+      expect(response.body.date).toBe(getPastDate(1));
+    });
+
+    it('エピソード更新後にステータスが自動再計算されること', async () => {
+      // よかったことを作成
+      const goodPoint = {
+        id: 'gp-1',
+        userId: testUserId,
+        content: 'よかったこと',
+        factors: null,
+        tags: [],
+        status: '未着手' as const,
+        success_count: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      goodPointsDb.save(goodPoint);
+
+      // エピソードを2件作成（進行中になる）
+      const followup1 = {
+        id: 'followup-1',
+        userId: testUserId,
+        itemType: 'goodPoint' as const,
+        itemId: 'gp-1',
+        status: '再現成功' as const,
+        memo: 'メモ1',
+        date: getPastDate(2),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      followupsDb.save(followup1);
+
+      const followup2 = {
+        id: 'followup-2',
+        userId: testUserId,
+        itemType: 'goodPoint' as const,
+        itemId: 'gp-1',
+        status: '再現成功' as const,
+        memo: 'メモ2',
+        date: getPastDate(1),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      followupsDb.save(followup2);
+
+      // エピソードを更新（ステータスは変わらないが、再計算される）
+      await request(app)
+        .put(`/api/good-points/gp-1/followups/followup-1`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: getPastDate(3),
+          memo: '更新後のメモ',
+        });
+
+      // よかったことのステータスを確認
+      const updatedGoodPoint = goodPointsDb.findById('gp-1');
+      expect(updatedGoodPoint?.status).toBe('進行中');
+      expect(updatedGoodPoint?.success_count).toBe(2);
+    });
+
+    it('存在しないエピソードを更新しようとした場合、404エラーを返すこと', async () => {
+      const goodPoint = {
+        id: 'gp-1',
+        userId: testUserId,
+        content: 'よかったこと',
+        factors: null,
+        tags: [],
+        status: '未着手' as const,
+        success_count: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      goodPointsDb.save(goodPoint);
+
+      const response = await request(app)
+        .put(`/api/good-points/gp-1/followups/non-existent-id`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: getPastDate(1),
+          memo: 'メモ',
+        });
+
+      expect(response.status).toBe(404);
+      expect(response.body.message).toContain('見つかりません');
+    });
+
+    it('他のユーザーのエピソードを更新しようとした場合、403エラーを返すこと', async () => {
+      const otherUserId = 'other-user-id';
+      usersDb.save({
+        id: otherUserId,
+        email: 'other@example.com',
+        passwordHash: 'hashed',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      const _otherAuthToken = generateToken(otherUserId);
+
+      const goodPoint = {
+        id: 'gp-1',
+        userId: otherUserId,
+        content: 'よかったこと',
+        factors: null,
+        tags: [],
+        status: '未着手' as const,
+        success_count: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      goodPointsDb.save(goodPoint);
+
+      const followup = {
+        id: 'followup-1',
+        userId: otherUserId,
+        itemType: 'goodPoint' as const,
+        itemId: 'gp-1',
+        status: '再現成功' as const,
+        memo: 'メモ',
+        date: getPastDate(1),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      followupsDb.save(followup);
+
+      const response = await request(app)
+        .put(`/api/good-points/gp-1/followups/followup-1`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: getPastDate(1),
+          memo: '更新後のメモ',
+        });
+
+      expect(response.status).toBe(403);
+    });
+
+    it('バリデーションエラーの場合、400エラーを返すこと', async () => {
+      const goodPoint = {
+        id: 'gp-1',
+        userId: testUserId,
+        content: 'よかったこと',
+        factors: null,
+        tags: [],
+        status: '未着手' as const,
+        success_count: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      goodPointsDb.save(goodPoint);
+
+      const followup = {
+        id: 'followup-1',
+        userId: testUserId,
+        itemType: 'goodPoint' as const,
+        itemId: 'gp-1',
+        status: '再現成功' as const,
+        memo: 'メモ',
+        date: getPastDate(1),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      followupsDb.save(followup);
+
+      // dateが不足
+      const response = await request(app)
+        .put(`/api/good-points/gp-1/followups/followup-1`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          memo: 'メモ',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('date');
+    });
+  });
+
+  describe('PUT /api/improvements/:id/followups/:followupId', () => {
+    it('認証済みユーザーがアクションを更新できること', async () => {
+      // 改善点を作成
+      const improvement = {
+        id: 'imp-1',
+        userId: testUserId,
+        content: '改善点',
+        action: null,
+        status: '未着手' as const,
+        success_count: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      improvementsDb.save(improvement);
+
+      // アクションを作成
+      const followup = {
+        id: 'followup-1',
+        userId: testUserId,
+        itemType: 'improvement' as const,
+        itemId: 'imp-1',
+        status: '完了' as const,
+        memo: '元のメモ',
+        date: getPastDate(2),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      followupsDb.save(followup);
+
+      // アクションを更新
+      const response = await request(app)
+        .put(`/api/improvements/imp-1/followups/followup-1`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: getPastDate(1),
+          memo: '更新後のメモ',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.memo).toBe('更新後のメモ');
+      expect(response.body.date).toBe(getPastDate(1));
+    });
+
+    it('アクション更新後にステータスが自動再計算されること', async () => {
+      // 改善点を作成
+      const improvement = {
+        id: 'imp-1',
+        userId: testUserId,
+        content: '改善点',
+        action: null,
+        status: '未着手' as const,
+        success_count: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      improvementsDb.save(improvement);
+
+      // アクションを2件作成（進行中になる）
+      const followup1 = {
+        id: 'followup-1',
+        userId: testUserId,
+        itemType: 'improvement' as const,
+        itemId: 'imp-1',
+        status: '完了' as const,
+        memo: 'メモ1',
+        date: getPastDate(2),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      followupsDb.save(followup1);
+
+      const followup2 = {
+        id: 'followup-2',
+        userId: testUserId,
+        itemType: 'improvement' as const,
+        itemId: 'imp-1',
+        status: '完了' as const,
+        memo: 'メモ2',
+        date: getPastDate(1),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      followupsDb.save(followup2);
+
+      // アクションを更新（ステータスは変わらないが、再計算される）
+      await request(app)
+        .put(`/api/improvements/imp-1/followups/followup-1`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: getPastDate(3),
+          memo: '更新後のメモ',
+        });
+
+      // 改善点のステータスを確認
+      const updatedImprovement = improvementsDb.findById('imp-1');
+      expect(updatedImprovement?.status).toBe('進行中');
+      expect(updatedImprovement?.success_count).toBe(2);
+    });
+
+    it('存在しないアクションを更新しようとした場合、404エラーを返すこと', async () => {
+      const improvement = {
+        id: 'imp-1',
+        userId: testUserId,
+        content: '改善点',
+        action: null,
+        status: '未着手' as const,
+        success_count: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      improvementsDb.save(improvement);
+
+      const response = await request(app)
+        .put(`/api/improvements/imp-1/followups/non-existent-id`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: getPastDate(1),
+          memo: 'メモ',
+        });
+
+      expect(response.status).toBe(404);
+      expect(response.body.message).toContain('見つかりません');
+    });
+
+    it('他のユーザーのアクションを更新しようとした場合、403エラーを返すこと', async () => {
+      const otherUserId = 'other-user-id';
+      usersDb.save({
+        id: otherUserId,
+        email: 'other@example.com',
+        passwordHash: 'hashed',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      const _otherAuthToken = generateToken(otherUserId);
+
+      const improvement = {
+        id: 'imp-1',
+        userId: otherUserId,
+        content: '改善点',
+        action: null,
+        status: '未着手' as const,
+        success_count: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      improvementsDb.save(improvement);
+
+      const followup = {
+        id: 'followup-1',
+        userId: otherUserId,
+        itemType: 'improvement' as const,
+        itemId: 'imp-1',
+        status: '完了' as const,
+        memo: 'メモ',
+        date: getPastDate(1),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      followupsDb.save(followup);
+
+      const response = await request(app)
+        .put(`/api/improvements/imp-1/followups/followup-1`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: getPastDate(1),
+          memo: '更新後のメモ',
+        });
+
+      expect(response.status).toBe(403);
+    });
+
+    it('バリデーションエラーの場合、400エラーを返すこと', async () => {
+      const improvement = {
+        id: 'imp-1',
+        userId: testUserId,
+        content: '改善点',
+        action: null,
+        status: '未着手' as const,
+        success_count: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      improvementsDb.save(improvement);
+
+      const followup = {
+        id: 'followup-1',
+        userId: testUserId,
+        itemType: 'improvement' as const,
+        itemId: 'imp-1',
+        status: '完了' as const,
+        memo: 'メモ',
+        date: getPastDate(1),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      followupsDb.save(followup);
+
+      // dateが不足
+      const response = await request(app)
+        .put(`/api/improvements/imp-1/followups/followup-1`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          memo: 'メモ',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('date');
+    });
+  });
 });
 

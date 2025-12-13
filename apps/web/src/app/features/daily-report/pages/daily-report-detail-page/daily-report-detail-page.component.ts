@@ -114,6 +114,16 @@ export class DailyReportDetailPageComponent implements OnInit {
   }
 
   /**
+   * 編集画面に遷移
+   */
+  onEdit(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.router.navigate(['/daily-reports', id, 'edit']);
+    }
+  }
+
+  /**
    * よかったことのステータスをStatusBadgeTypeに変換
    */
   getGoodPointStatusBadgeType(status: GoodPointStatus): StatusBadgeType {

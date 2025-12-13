@@ -1,0 +1,184 @@
+.daily-report-edit {
+  min-height: 100vh;
+  background: var(--color-bg-secondary);
+  padding-bottom: 100px; // 固定ボタン分の余白
+}
+
+// ヘッダー
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-gray-200);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--color-gray-700);
+  transition: background-color 0.2s;
+
+  &:hover {
+    background: var(--color-gray-100);
+  }
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin: 0;
+}
+
+// ローディング
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--color-gray-600);
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--color-gray-200);
+    border-top-color: var(--color-primary-500);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 16px;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// フォーム
+.form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 20px;
+
+  // フォームフィールド間の余白を統一
+  > * {
+    margin-bottom: 32px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // 各フィールドコンポーネントに余白を追加
+  app-date-field,
+  app-textarea-field {
+    display: block;
+    margin-bottom: 32px;
+  }
+}
+
+.form-group {
+  margin-bottom: 32px;
+  border: none;
+  padding: 0;
+
+  &--no-border {
+    border: none;
+    padding: 0;
+    margin: 0 0 32px 0;
+  }
+
+  // カード同士の間隔を確保
+  ::ng-deep app-form-card.form-group__card {
+    display: block;
+    margin-bottom: 24px;
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+
+  // 追加ボタンの上に余白を追加
+  &__add-button {
+    margin-top: 24px;
+  }
+
+  // カードがない場合は間隔を狭くする
+  &--empty {
+    .label {
+      margin-bottom: 4px;
+    }
+
+    .form-group__add-button {
+      margin-top: 0;
+    }
+  }
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-gray-800);
+  margin-bottom: 16px;
+  padding: 0;
+}
+
+.label-icon {
+  font-size: 1.1rem;
+}
+
+.card-field {
+  margin-bottom: 16px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// ボタンエリア
+.form-actions {
+  display: flex;
+  gap: 12px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 20px;
+  background: var(--color-bg-primary);
+  border-top: 1px solid var(--color-gray-200);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+
+  @media (min-width: 640px) {
+    position: static;
+    padding: 24px 0 0;
+    background: transparent;
+    border-top: none;
+    box-shadow: none;
+  }
+}
+
+// アラートバナー用余白
+app-alert-banner {
+  display: block;
+  margin: 16px 20px 0;
+  max-width: 600px;
+
+  @media (min-width: 640px) {
+    margin: 16px auto 0;
+  }
+}
+

@@ -41,13 +41,22 @@
                   <p class="followup-page__item-memo">{{ episode.memo }}</p>
                 }
               </div>
-              <button
-                class="followup-page__item-delete"
-                (click)="onDelete(episode.id)"
-                [attr.aria-label]="'削除'"
-              >
-                ×
-              </button>
+              <div class="followup-page__item-actions">
+                <button
+                  class="followup-page__item-edit"
+                  (click)="onEditClick(episode.id)"
+                  [attr.aria-label]="'編集'"
+                >
+                  <app-icon name="pencil" [size]="18" color="currentColor" ariaLabel="編集" />
+                </button>
+                <button
+                  class="followup-page__item-delete"
+                  (click)="onDelete(episode.id)"
+                  [attr.aria-label]="'削除'"
+                >
+                  ×
+                </button>
+              </div>
             </div>
           }
         } @else {
@@ -62,13 +71,22 @@
                   <p class="followup-page__item-memo">{{ action.memo }}</p>
                 }
               </div>
-              <button
-                class="followup-page__item-delete"
-                (click)="onDelete(action.id)"
-                [attr.aria-label]="'削除'"
-              >
-                ×
-              </button>
+              <div class="followup-page__item-actions">
+                <button
+                  class="followup-page__item-edit"
+                  (click)="onEditClick(action.id)"
+                  [attr.aria-label]="'編集'"
+                >
+                  <app-icon name="pencil" [size]="18" color="currentColor" ariaLabel="編集" />
+                </button>
+                <button
+                  class="followup-page__item-delete"
+                  (click)="onDelete(action.id)"
+                  [attr.aria-label]="'削除'"
+                >
+                  ×
+                </button>
+              </div>
             </div>
           }
         }

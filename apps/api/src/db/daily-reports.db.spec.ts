@@ -272,6 +272,31 @@ describe('GoodPointsDatabase', () => {
       expect(found?.status).toBe('再現成功');
     });
   });
+
+  describe('delete', () => {
+    it('指定したIDのよかったことを削除すること', () => {
+      const goodPoint = {
+        id: 'gp-1',
+        userId: 'user-1',
+        content: 'テスト内容',
+        factors: null,
+        tags: [],
+        status: '未対応' as const,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      db.save(goodPoint);
+      db.delete('gp-1');
+
+      const found = db.findById('gp-1');
+      expect(found).toBeUndefined();
+    });
+
+    it('存在しないIDを削除してもエラーにならないこと', () => {
+      expect(() => db.delete('not-exist')).not.toThrow();
+    });
+  });
 });
 
 describe('ImprovementsDatabase', () => {
@@ -355,6 +380,30 @@ describe('ImprovementsDatabase', () => {
       const found = db.findById('imp-1');
 
       expect(found?.status).toBe('完了');
+    });
+  });
+
+  describe('delete', () => {
+    it('指定したIDの改善点を削除すること', () => {
+      const improvement = {
+        id: 'imp-1',
+        userId: 'user-1',
+        content: 'テスト内容',
+        action: null,
+        status: '未着手' as const,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      db.save(improvement);
+      db.delete('imp-1');
+
+      const found = db.findById('imp-1');
+      expect(found).toBeUndefined();
+    });
+
+    it('存在しないIDを削除してもエラーにならないこと', () => {
+      expect(() => db.delete('not-exist')).not.toThrow();
     });
   });
 });

@@ -19,7 +19,8 @@ export type IconName =
   | 'eye-off'
   | 'heart'
   | 'pin'
-  | 'check';
+  | 'check'
+  | 'pencil';
 
 @Component({
   selector: 'app-icon',

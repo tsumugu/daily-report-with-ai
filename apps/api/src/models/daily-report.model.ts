@@ -80,6 +80,26 @@ export interface CreateDailyReportRequest {
 }
 
 /**
+ * 日報更新リクエスト
+ */
+export interface UpdateDailyReportRequest {
+  date: string;
+  events: string;
+  learnings?: string;
+  goodPoints?: {
+    id?: string; // 既存のID（編集時）
+    content: string;
+    factors?: string;
+    tags?: string[];
+  }[];
+  improvements?: {
+    id?: string; // 既存のID（編集時）
+    content: string;
+    action?: string;
+  }[];
+}
+
+/**
  * よかったこと作成リクエスト
  */
 export interface CreateGoodPointRequest {
@@ -158,6 +178,14 @@ export interface Followup {
  */
 export interface CreateFollowupRequest {
   status?: FollowupStatus; // 任意（後方互換性のため）
+  memo?: string;
+  date?: string; // YYYY-MM-DD
+}
+
+/**
+ * フォローアップ更新リクエスト
+ */
+export interface UpdateFollowupRequest {
   memo?: string;
   date?: string; // YYYY-MM-DD
 }

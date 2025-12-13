@@ -167,6 +167,53 @@ describe('FollowupsDatabase', () => {
     });
   });
 
+  describe('update', () => {
+    it('フォローアップを更新できること', () => {
+      const followup: Followup = {
+        id: 'followup-1',
+        userId: 'user-1',
+        itemType: 'goodPoint',
+        itemId: 'gp-1',
+        status: '再現成功',
+        memo: '元のメモ',
+        date: '2025-12-10',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      db.save(followup);
+
+      const updated: Followup = {
+        ...followup,
+        memo: '更新後のメモ',
+        date: '2025-12-11',
+        updatedAt: new Date().toISOString(),
+      };
+
+      db.update(updated);
+      const found = db.findById('followup-1');
+
+      expect(found?.memo).toBe('更新後のメモ');
+      expect(found?.date).toBe('2025-12-11');
+    });
+
+    it('存在しないIDのフォローアップを更新してもエラーにならないこと', () => {
+      const followup: Followup = {
+        id: 'not-exist',
+        userId: 'user-1',
+        itemType: 'goodPoint',
+        itemId: 'gp-1',
+        status: '再現成功',
+        memo: null,
+        date: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      expect(() => db.update(followup)).not.toThrow();
+    });
+  });
+
   describe('delete', () => {
     it('指定したIDのフォローアップを削除すること', () => {
       const followup: Followup = {

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>エピソード/アクション編集モーダル プロトタイプ</title>
+  <link rel="stylesheet" href="followup-edit-modal.css">
+</head>
+<body>
+  <div class="prototype-container">
+    <h1 class="prototype-title">エピソード/アクション編集モーダル プロトタイプ</h1>
+
+    <!-- 状態1: エピソード編集モーダル（正常系） -->
+    <section class="prototype-section">
+      <h2 class="prototype-section__title">状態1: エピソード編集モーダル（正常系）</h2>
+      
+      <button class="trigger-button" onclick="openModal('episode')">エピソード編集モーダルを開く</button>
+
+      <div class="modal-overlay" id="episode-modal" style="display: none;">
+        <div class="modal-content">
+          <header class="modal-header">
+            <h2 class="modal-title" id="modal-title">エピソードを編集</h2>
+            <button class="modal-close" aria-label="閉じる" onclick="closeModal('episode')">×</button>
+          </header>
+
+          <form class="modal-form" id="episode-form">
+            <div class="form-field">
+              <label class="form-label" for="episode-date">
+                日付 <span class="form-required">*</span>
+              </label>
+              <input
+                type="date"
+                id="episode-date"
+                name="date"
+                class="form-input"
+                value="2025-01-15"
+                required
+                aria-describedby="episode-date-error"
+              />
+              <span class="form-error" id="episode-date-error" role="alert" style="display: none;">
+                日付は必須です
+              </span>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="episode-memo">
+                メモ
+              </label>
+              <textarea
+                id="episode-memo"
+                name="memo"
+                class="form-textarea"
+                rows="4"
+                maxlength="500"
+                placeholder="再現メモを入力してください"
+                aria-describedby="episode-memo-char-count episode-memo-error"
+              >チーム会議で積極的に発言できた。前回よりも自信を持って意見を述べられた。</textarea>
+              <div class="form-char-count" id="episode-memo-char-count">
+                <span class="form-char-count__current">45</span>
+                <span class="form-char-count__max">/500</span>
+              </div>
+              <span class="form-error" id="episode-memo-error" role="alert" style="display: none;">
+                メモは500文字以内で入力してください
+              </span>
+            </div>
+
+            <footer class="modal-footer">
+              <button type="button" class="button button--outline" onclick="closeModal('episode')">
+                キャンセル
+              </button>
+              <button type="submit" class="button button--primary">
+                保存
+              </button>
+            </footer>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 状態2: アクション編集モーダル（正常系） -->
+    <section class="prototype-section">
+      <h2 class="prototype-section__title">状態2: アクション編集モーダル（正常系）</h2>
+      
+      <button class="trigger-button" onclick="openModal('action')">アクション編集モーダルを開く</button>
+
+      <div class="modal-overlay" id="action-modal" style="display: none;">
+        <div class="modal-content">
+          <header class="modal-header">
+            <h2 class="modal-title">アクションを編集</h2>
+            <button class="modal-close" aria-label="閉じる" onclick="closeModal('action')">×</button>
+          </header>
+
+          <form class="modal-form" id="action-form">
+            <div class="form-field">
+              <label class="form-label" for="action-date">
+                日付 <span class="form-required">*</span>
+              </label>
+              <input
+                type="date"
+                id="action-date"
+                name="date"
+                class="form-input"
+                value="2025-01-14"
+                required
+              />
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="action-memo">
+                メモ
+              </label>
+              <textarea
+                id="action-memo"
+                name="memo"
+                class="form-textarea"
+                rows="4"
+                maxlength="500"
+                placeholder="進捗メモを入力してください"
+                aria-describedby="action-memo-char-count"
+              >Conventional Commitsの形式に従ってコミットメッセージを書いた。レビューで良いフィードバックをもらえた。</textarea>
+              <div class="form-char-count" id="action-memo-char-count">
+                <span class="form-char-count__current">52</span>
+                <span class="form-char-count__max">/500</span>
+              </div>
+            </div>
+
+            <footer class="modal-footer">
+              <button type="button" class="button button--outline" onclick="closeModal('action')">
+                キャンセル
+              </button>
+              <button type="submit" class="button button--primary">
+                保存
+              </button>
+            </footer>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 状態3: エラー状態 -->
+    <section class="prototype-section">
+      <h2 class="prototype-section__title">状態3: エラー状態（バリデーションエラー）</h2>
+      
+      <button class="trigger-button" onclick="openModal('error')">エラー状態のモーダルを開く</button>
+
+      <div class="modal-overlay" id="error-modal" style="display: none;">
+        <div class="modal-content">
+          <header class="modal-header">
+            <h2 class="modal-title">エピソードを編集</h2>
+            <button class="modal-close" aria-label="閉じる" onclick="closeModal('error')">×</button>
+          </header>
+
+          <form class="modal-form">
+            <div class="form-field">
+              <label class="form-label" for="error-date">
+                日付 <span class="form-required">*</span>
+              </label>
+              <input
+                type="date"
+                id="error-date"
+                name="date"
+                class="form-input form-input--error"
+                required
+              />
+              <span class="form-error" role="alert">日付は必須です</span>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="error-memo">
+                メモ
+              </label>
+              <textarea
+                id="error-memo"
+                name="memo"
+                class="form-textarea form-textarea--error"
+                rows="4"
+                maxlength="500"
+              >あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん</textarea>
+              <div class="form-char-count form-char-count--error">
+                <span class="form-char-count__current">501</span>
+                <span class="form-char-count__max">/500</span>
+              </div>
+              <span class="form-error" role="alert">メモは500文字以内で入力してください</span>
+            </div>
+
+            <footer class="modal-footer">
+              <button type="button" class="button button--outline" onclick="closeModal('error')">
+                キャンセル
+              </button>
+              <button type="submit" class="button button--primary">
+                保存
+              </button>
+            </footer>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function openModal(type) {
+      const modal = document.getElementById(`${type}-modal`);
+      if (modal) {
+        modal.style.display = 'flex';
+      }
+    }
+
+    function closeModal(type) {
+      const modal = document.getElementById(`${type}-modal`);
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    }
+
+    // オーバーレイクリックで閉じる
+    document.querySelectorAll('.modal-overlay').forEach((overlay) => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.style.display = 'none';
+        }
+      });
+    });
+
+    // Escapeキーで閉じる
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay').forEach((overlay) => {
+          if (overlay.style.display === 'flex') {
+            overlay.style.display = 'none';
+          }
+        });
+      }
+    });
+
+    // 文字数カウント
+    document.querySelectorAll('.form-textarea').forEach((textarea) => {
+      const charCountId = textarea.getAttribute('aria-describedby')?.split(' ')[0];
+      if (charCountId) {
+        const charCount = document.getElementById(charCountId);
+        if (charCount) {
+          const currentSpan = charCount.querySelector('.form-char-count__current');
+          textarea.addEventListener('input', (e) => {
+            const length = e.target.value.length;
+            if (currentSpan) {
+              currentSpan.textContent = length;
+              if (length > 500) {
+                charCount.classList.add('form-char-count--error');
+                currentSpan.style.color = 'var(--color-error)';
+              } else {
+                charCount.classList.remove('form-char-count--error');
+                currentSpan.style.color = '';
+              }
+            }
+          });
+        }
+      }
+    });
+
+    // フォーム送信
+    document.getElementById('episode-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('エピソードを更新しました（デモ）');
+      closeModal('episode');
+    });
+
+    document.getElementById('action-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('アクションを更新しました（デモ）');
+      closeModal('action');
+    });
+  </script>
+</body>
+</html>
+

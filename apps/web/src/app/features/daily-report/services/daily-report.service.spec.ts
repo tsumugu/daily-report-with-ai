@@ -228,5 +228,56 @@ describe('DailyReportService', () => {
       req.flush(updatedImprovement);
     });
   });
+
+  describe('update', () => {
+    it('日報を更新できること', () => {
+      const request: CreateDailyReportRequest = {
+        date: '2025-12-06',
+        events: '更新後のイベント',
+        learnings: '更新後の学び',
+        goodPoints: [{ content: '更新後のよかったこと', factors: '更新後の要因' }],
+        improvements: [{ content: '更新後の改善点', action: '更新後のアクション' }],
+      };
+
+      const updatedReport: DailyReport = {
+        ...mockDailyReport,
+        date: '2025-12-06',
+        events: '更新後のイベント',
+        learnings: '更新後の学び',
+        goodPoints: [
+          {
+            id: 'gp-1',
+            userId: 'user-1',
+            content: '更新後のよかったこと',
+            factors: '更新後の要因',
+            tags: [],
+            status: '未対応',
+            createdAt: '2025-12-05T00:00:00Z',
+            updatedAt: '2025-12-05T00:00:00Z',
+          },
+        ],
+        improvements: [
+          {
+            id: 'imp-1',
+            userId: 'user-1',
+            content: '更新後の改善点',
+            action: '更新後のアクション',
+            status: '未着手',
+            createdAt: '2025-12-05T00:00:00Z',
+            updatedAt: '2025-12-05T00:00:00Z',
+          },
+        ],
+      };
+
+      service.update('report-1', request).subscribe((result) => {
+        expect(result).toEqual(updatedReport);
+      });
+
+      const req = httpMock.expectOne('/api/daily-reports/report-1');
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual(request);
+      req.flush(updatedReport);
+    });
+  });
 });
 

@@ -158,6 +158,41 @@
   color: var(--color-text-primary);
 }
 
+.followup-page__item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.followup-page__item-edit {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: var(--color-primary-500);
+    color: var(--color-text-inverse);
+
+    app-icon {
+      ::ng-deep svg {
+        color: var(--color-text-inverse);
+      }
+    }
+  }
+}
+
 .followup-page__item-delete {
   background: none;
   border: none;
@@ -176,7 +211,7 @@
 
   &:hover {
     background-color: var(--color-error);
-    color: white;
+    color: var(--color-text-inverse);
   }
 }
 
@@ -200,7 +235,7 @@
 
   &:hover {
     border-color: var(--color-primary-500);
-    background-color: #f0f7ff;
+    background-color: var(--color-primary-50);
   }
 }
 

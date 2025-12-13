@@ -54,10 +54,15 @@
             </span>
             {{ formatDate(report()!.date) }}
           </h1>
-          <!-- 編集ボタン（Phase 1では非活性） -->
-          <button class="edit-button" disabled title="編集機能は準備中です">
+          <!-- 編集ボタン -->
+          <app-button
+            variant="outline"
+            size="sm"
+            (clicked)="onEdit()"
+            ariaLabel="編集する"
+          >
             編集する
-          </button>
+          </app-button>
         </header>
 
         <!-- できごと -->

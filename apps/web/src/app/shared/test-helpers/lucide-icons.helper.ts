@@ -14,6 +14,7 @@ import {
   Heart,
   Pin,
   Check,
+  Pencil,
 } from 'lucide-angular';
 
 /**
@@ -36,6 +37,7 @@ export function provideLucideIconsForTesting() {
       Heart,
       Pin,
       Check,
+      Pencil,
     })
   );
 }

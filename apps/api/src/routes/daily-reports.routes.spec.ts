@@ -503,5 +503,282 @@ describe('dailyReportsRouter', () => {
       expect(response.status).toBe(403);
     });
   });
+
+  describe('PUT /api/daily-reports/:id', () => {
+    it('認証済みユーザーが日報を更新できること', async () => {
+      // 日報を作成
+      const createResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '今日のできごと',
+          learnings: '今日の学び',
+          goodPoints: [
+            { content: 'よかったこと1', factors: '要因1' },
+          ],
+          improvements: [
+            { content: '改善点1', action: 'アクション1' },
+          ],
+        });
+
+      const reportId = createResponse.body.id;
+      const goodPointId = createResponse.body.goodPoints[0].id;
+      const improvementId = createResponse.body.improvements[0].id;
+
+      // 日報を更新
+      const updateResponse = await request(app)
+        .put(`/api/daily-reports/${reportId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '更新後のできごと',
+          learnings: '更新後の学び',
+          goodPoints: [
+            { id: goodPointId, content: '更新後のよかったこと1', factors: '更新後の要因1' },
+          ],
+          improvements: [
+            { id: improvementId, content: '更新後の改善点1', action: '更新後のアクション1' },
+          ],
+        });
+
+      expect(updateResponse.status).toBe(200);
+      expect(updateResponse.body.events).toBe('更新後のできごと');
+      expect(updateResponse.body.learnings).toBe('更新後の学び');
+      expect(updateResponse.body.goodPoints[0].content).toBe('更新後のよかったこと1');
+      expect(updateResponse.body.improvements[0].content).toBe('更新後の改善点1');
+    });
+
+    it('よかったこと・改善点を追加できること', async () => {
+      // 日報を作成
+      const createResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '今日のできごと',
+          goodPoints: [
+            { content: 'よかったこと1' },
+          ],
+        });
+
+      const reportId = createResponse.body.id;
+      const goodPointId = createResponse.body.goodPoints[0].id;
+
+      // よかったこと・改善点を追加
+      const updateResponse = await request(app)
+        .put(`/api/daily-reports/${reportId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '今日のできごと',
+          goodPoints: [
+            { id: goodPointId, content: 'よかったこと1' },
+            { content: '新しいよかったこと' },
+          ],
+          improvements: [
+            { content: '新しい改善点' },
+          ],
+        });
+
+      expect(updateResponse.status).toBe(200);
+      expect(updateResponse.body.goodPoints).toHaveLength(2);
+      expect(updateResponse.body.improvements).toHaveLength(1);
+    });
+
+    it('存在しない日報を更新しようとした場合、404エラーを返すこと', async () => {
+      const response = await request(app)
+        .put('/api/daily-reports/non-existent-id')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '今日のできごと',
+        });
+
+      expect(response.status).toBe(404);
+      expect(response.body.message).toContain('見つかりません');
+    });
+
+    it('他のユーザーの日報を更新しようとした場合、403エラーを返すこと', async () => {
+      // 別ユーザーを作成
+      const otherUserId = 'other-user-id';
+      usersDb.save({
+        id: otherUserId,
+        email: 'other@example.com',
+        passwordHash: 'hashed',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      const otherAuthToken = generateToken(otherUserId);
+
+      // 別ユーザーが日報を作成
+      const createResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${otherAuthToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '今日のできごと',
+        });
+
+      const reportId = createResponse.body.id;
+
+      // 元のユーザーが更新しようとする
+      const response = await request(app)
+        .put(`/api/daily-reports/${reportId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '更新後のできごと',
+        });
+
+      expect(response.status).toBe(403);
+    });
+
+    it('日付を変更した場合、新しい日付で既に日報が存在する場合は400エラーを返すこと', async () => {
+      // 日報1を作成
+      const createResponse1 = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '日報1',
+        });
+
+      // 日報2を作成
+      await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-06',
+          events: '日報2',
+        });
+
+      const reportId1 = createResponse1.body.id;
+
+      // 日報1の日付を日報2と同じ日付に変更しようとする
+      const response = await request(app)
+        .put(`/api/daily-reports/${reportId1}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-06',
+          events: '日報1',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('既に存在します');
+    });
+
+    it('日付を変更した場合、同じ日報IDの場合は許可されること', async () => {
+      // 日報を作成
+      const createResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '今日のできごと',
+        });
+
+      const reportId = createResponse.body.id;
+
+      // 同じ日報の日付を変更（同じIDなので許可される）
+      const response = await request(app)
+        .put(`/api/daily-reports/${reportId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-06',
+          events: '今日のできごと',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.date).toBe('2025-12-06');
+    });
+
+    it('よかったことのIDが日報に紐づいていない場合、400エラーを返すこと', async () => {
+      // 日報を作成
+      const createResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '今日のできごと',
+          goodPoints: [
+            { content: 'よかったこと1' },
+          ],
+        });
+
+      const reportId = createResponse.body.id;
+
+      // 存在しないよかったことIDを指定
+      const response = await request(app)
+        .put(`/api/daily-reports/${reportId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '今日のできごと',
+          goodPoints: [
+            { id: 'non-existent-id', content: 'よかったこと1' },
+          ],
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('紐づいていません');
+    });
+
+    it('改善点のIDが日報に紐づいていない場合、400エラーを返すこと', async () => {
+      // 日報を作成
+      const createResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '今日のできごと',
+          improvements: [
+            { content: '改善点1' },
+          ],
+        });
+
+      const reportId = createResponse.body.id;
+
+      // 存在しない改善点IDを指定
+      const response = await request(app)
+        .put(`/api/daily-reports/${reportId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '今日のできごと',
+          improvements: [
+            { id: 'non-existent-id', content: '改善点1' },
+          ],
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('紐づいていません');
+    });
+
+    it('バリデーションエラーの場合、400エラーを返すこと', async () => {
+      // 日報を作成
+      const createResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: '今日のできごと',
+        });
+
+      const reportId = createResponse.body.id;
+
+      // eventsが不足
+      const response = await request(app)
+        .put(`/api/daily-reports/${reportId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          // events が不足
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('events');
+    });
+  });
 });
 

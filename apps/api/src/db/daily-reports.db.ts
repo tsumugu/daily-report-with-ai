@@ -85,6 +85,10 @@ export class GoodPointsDatabase {
     }
   }
 
+  delete(id: string): void {
+    this.goodPoints.delete(id);
+  }
+
   clear(): void {
     this.goodPoints.clear();
   }
@@ -129,6 +133,10 @@ export class ImprovementsDatabase {
     if (this.improvements.has(improvement.id)) {
       this.improvements.set(improvement.id, improvement);
     }
+  }
+
+  delete(id: string): void {
+    this.improvements.delete(id);
   }
 
   clear(): void {

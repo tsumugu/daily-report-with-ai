@@ -9,6 +9,7 @@
  *   node scripts/create-doc.js prd {feature_name}
  *   node scripts/create-doc.js tech-spec {feature_name}
  *   node scripts/create-doc.js ui-design {feature_name}
+ *   node scripts/create-doc.js human-check {feature_name}
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
@@ -34,6 +35,11 @@ const docTypes = {
     template: 'ui_design.template.md',
     output: 'ui_design.md',
     description: 'UI Design'
+  },
+  'human-check': {
+    template: 'human_check.template.md',
+    output: 'human_check.md',
+    description: 'Human Check'
   }
 };
 
@@ -42,7 +48,7 @@ function main() {
   
   if (args.length < 2) {
     console.error('使用方法: node scripts/create-doc.js {doc_type} {feature_name}');
-    console.error('  doc_type: prd, tech-spec, ui-design');
+    console.error('  doc_type: prd, tech-spec, ui-design, human-check');
     console.error('  feature_name: 機能名（例: auth, daily-report-input）');
     process.exit(1);
   }
@@ -79,9 +85,11 @@ function main() {
   // プレースホルダーを置換
   const today = new Date().toISOString().split('T')[0];
   template = template
+    .replace(/{feature_name}/g, featureName)
     .replace(/{機能名}/g, featureName)
-    .replace(/{作成日}/g, today)
-    .replace(/{機能名}/g, featureName);
+    .replace(/{version}/g, 'v1')
+    .replace(/{date}/g, today)
+    .replace(/{作成日}/g, today);
 
   // ディレクトリを作成
   if (!existsSync(featureDir)) {
