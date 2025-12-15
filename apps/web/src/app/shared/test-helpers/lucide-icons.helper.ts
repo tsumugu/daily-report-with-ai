@@ -15,6 +15,9 @@ import {
   Pin,
   Check,
   Pencil,
+  ChevronDown,
+  ChevronRight,
+  Plus,
 } from 'lucide-angular';
 
 /**
@@ -38,6 +41,9 @@ export function provideLucideIconsForTesting() {
       Pin,
       Check,
       Pencil,
+      ChevronDown,
+      ChevronRight,
+      Plus,
     })
   );
 }

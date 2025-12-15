@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>目標階層管理機能 プロトタイプ</title>
+  <link rel="stylesheet" href="goal-hierarchy-management.css">
+</head>
+<body>
+  <div class="prototype-container">
+    <h1 class="prototype-title">目標階層管理機能 プロトタイプ</h1>
+    <p class="prototype-note">※ 各セクションをクリックして表示を切り替えられます</p>
+
+    <!-- 状態1: 目標一覧画面（正常系 - 階層表示デフォルト） -->
+    <section class="prototype-section">
+      <h2 class="prototype-section__title">状態1: 目標一覧画面（正常系 - 階層表示デフォルト）</h2>
+      
+      <div class="page-container">
+        <!-- ページヘッダー -->
+        <header class="page-header">
+          <button class="page-header__back" aria-label="戻る">←</button>
+          <h1 class="page-header__title">目標管理</h1>
+        </header>
+
+        <!-- アクションバー -->
+        <div class="action-bar">
+          <button class="button button--primary" onclick="showSection('goal-create')">目標を作成</button>
+          <div class="view-toggle">
+            <button class="view-toggle__button view-toggle__button--active" id="tree-view-btn" onclick="toggleView('tree')" aria-pressed="true">
+              <span>階層表示</span>
+            </button>
+            <button class="view-toggle__button" id="card-view-btn" onclick="toggleView('card')" aria-pressed="false">
+              <span>カード表示</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 目標ツリー一覧（デフォルト表示） -->
+        <div class="goal-tree-view" id="goal-tree-view">
+          <!-- 長期目標1（展開済み） -->
+          <div class="goal-tree-item goal-tree-item--expanded goal-tree-item--root">
+            <div class="goal-tree-item__content" onclick="showSection('goal-detail-1')">
+              <button class="goal-tree-item__toggle" onclick="event.stopPropagation(); toggleTreeItem(this)" aria-expanded="true">▼</button>
+              <div class="goal-tree-item__info">
+                <h3 class="goal-tree-item__name">🎯 スキル習得</h3>
+                <div class="goal-tree-item__meta">
+                  <span class="goal-tree-item__badge goal-tree-item__badge--long-term">長期目標</span>
+                  <span class="goal-tree-item__period">2025-01-01 〜 2025-06-30</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 中期目標1（展開済み） -->
+            <div class="goal-tree-item goal-tree-item--expanded goal-tree-item--child">
+              <div class="goal-tree-item__content" onclick="showSection('goal-detail-2')">
+                <button class="goal-tree-item__toggle" onclick="event.stopPropagation(); toggleTreeItem(this)" aria-expanded="true">▼</button>
+                <div class="goal-tree-item__info">
+                  <h3 class="goal-tree-item__name">🎯 React基礎を習得</h3>
+                  <div class="goal-tree-item__meta">
+                    <span class="goal-tree-item__badge goal-tree-item__badge--mid-term">中期目標</span>
+                    <span class="goal-tree-item__period">2025-01-01 〜 2025-03-31</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 短期目標1 -->
+              <div class="goal-tree-item goal-tree-item--leaf goal-tree-item--child">
+                <div class="goal-tree-item__content" onclick="showSection('goal-detail-short')">
+                  <div class="goal-tree-item__info">
+                    <h3 class="goal-tree-item__name">🎯 週次学習計画を立てる</h3>
+                    <div class="goal-tree-item__meta">
+                      <span class="goal-tree-item__badge goal-tree-item__badge--short-term">短期目標</span>
+                      <span class="goal-tree-item__period">2025-01-01 〜 2025-01-07</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 短期目標2 -->
+              <div class="goal-tree-item goal-tree-item--leaf goal-tree-item--child">
+                <div class="goal-tree-item__content" onclick="showSection('goal-detail-short')">
+                  <div class="goal-tree-item__info">
+                    <h3 class="goal-tree-item__name">🎯 チュートリアルを完了</h3>
+                    <div class="goal-tree-item__meta">
+                      <span class="goal-tree-item__badge goal-tree-item__badge--short-term">短期目標</span>
+                      <span class="goal-tree-item__period">2025-01-08 〜 2025-01-14</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 中期目標2（折りたたみ済み） -->
+            <div class="goal-tree-item goal-tree-item--child">
+              <div class="goal-tree-item__content" onclick="showSection('goal-detail-3')">
+                <button class="goal-tree-item__toggle" onclick="event.stopPropagation(); toggleTreeItem(this)" aria-expanded="false">▶</button>
+                <div class="goal-tree-item__info">
+                  <h3 class="goal-tree-item__name">🎯 Next.js実践</h3>
+                  <div class="goal-tree-item__meta">
+                    <span class="goal-tree-item__badge goal-tree-item__badge--mid-term">中期目標</span>
+                    <span class="goal-tree-item__period">2025-04-01 〜 2025-06-30</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 長期目標2（折りたたみ済み） -->
+          <div class="goal-tree-item goal-tree-item--root">
+            <div class="goal-tree-item__content" onclick="showSection('goal-detail-4')">
+              <button class="goal-tree-item__toggle" onclick="event.stopPropagation(); toggleTreeItem(this)" aria-expanded="false">▶</button>
+              <div class="goal-tree-item__info">
+                <h3 class="goal-tree-item__name">🎯 プロジェクト完了</h3>
+                <div class="goal-tree-item__meta">
+                  <span class="goal-tree-item__badge goal-tree-item__badge--long-term">長期目標</span>
+                  <span class="goal-tree-item__period">2025-01-01 〜 2025-12-31</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 状態2: 目標一覧画面（空状態） -->
+    <section class="prototype-section">
+      <h2 class="prototype-section__title">状態2: 目標一覧画面（空状態）</h2>
+      
+      <div class="page-container">
+        <header class="page-header">
+          <button class="page-header__back" aria-label="戻る">←</button>
+          <h1 class="page-header__title">目標管理</h1>
+        </header>
+
+        <div class="action-bar">
+          <button class="button button--primary" onclick="showSection('goal-create')">目標を作成</button>
+          <div class="view-toggle">
+            <button class="view-toggle__button view-toggle__button--active" onclick="toggleView('tree')" aria-pressed="true">
+              <span>階層表示</span>
+            </button>
+            <button class="view-toggle__button" onclick="toggleView('card')" aria-pressed="false">
+              <span>カード表示</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="empty-state">
+          <p class="empty-state__message">まだ目標が作成されていません。<br>「目標を作成」ボタンから目標を作成してください。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 状態3: 目標作成画面（正常系） -->
+    <section class="prototype-section" id="goal-create">
+      <h2 class="prototype-section__title">状態3: 目標作成画面（正常系）</h2>
+      
+      <div class="page-container">
+        <header class="page-header">
+          <button class="page-header__back" aria-label="戻る" onclick="showSection('goal-list')">←</button>
+          <h1 class="page-header__title">目標を作成</h1>
+        </header>
+
+        <form class="goal-form" id="goal-create-form">
+          <!-- 目標名 -->
+          <div class="form-field">
+            <label class="form-label" for="goal-name">
+              目標名 <span class="form-required">*</span>
+            </label>
+            <input
+              type="text"
+              id="goal-name"
+              name="goal-name"
+              class="form-input"
+              placeholder="例: フロントエンド開発スキルを習得する"
+              maxlength="100"
+              required
+              aria-required="true"
+              aria-describedby="goal-name-char-count goal-name-error"
+            />
+            <div class="form-char-count" id="goal-name-char-count">
+              <span class="form-char-count__current">0</span>
+              <span class="form-char-count__max">/100</span>
+            </div>
+            <span class="form-error" id="goal-name-error" role="alert" style="display: none;"></span>
+          </div>
+
+          <!-- 目標の説明 -->
+          <div class="form-field">
+            <label class="form-label" for="goal-description">
+              目標の説明
+            </label>
+            <textarea
+              id="goal-description"
+              name="goal-description"
+              class="form-textarea"
+              rows="4"
+              maxlength="1000"
+              placeholder="目標の詳細な説明を入力してください"
+              aria-describedby="goal-description-char-count"
+            ></textarea>
+            <div class="form-char-count" id="goal-description-char-count">
+              <span class="form-char-count__current">0</span>
+              <span class="form-char-count__max">/1000</span>
+            </div>
+          </div>
+
+          <!-- 開始日 -->
+          <div class="form-field">
+            <label class="form-label" for="goal-start-date">
+              開始日 <span class="form-required">*</span>
+            </label>
+            <input
+              type="date"
+              id="goal-start-date"
+              name="goal-start-date"
+              class="form-input"
+              required
+              aria-required="true"
+              aria-describedby="goal-start-date-error"
+            />
+            <span class="form-error" id="goal-start-date-error" role="alert" style="display: none;"></span>
+          </div>
+
+          <!-- 終了日 -->
+          <div class="form-field">
+            <label class="form-label" for="goal-end-date">
+              終了日 <span class="form-required">*</span>
+            </label>
+            <input
+              type="date"
+              id="goal-end-date"
+              name="goal-end-date"
+              class="form-input"
+              required
+              aria-required="true"
+              aria-describedby="goal-end-date-error"
+            />
+            <span class="form-error" id="goal-end-date-error" role="alert" style="display: none;"></span>
+          </div>
+
+          <!-- 上位目標 -->
+          <div class="form-field">
+            <label class="form-label" for="goal-parent">
+              上位目標
+            </label>
+            <select
+              id="goal-parent"
+              name="goal-parent"
+              class="form-select"
+              aria-describedby="goal-parent-error"
+            >
+              <option value="">なし（最上位目標）</option>
+              <option value="goal-1">スキル習得（長期目標）</option>
+              <option value="goal-2">プロジェクト完了（中期目標）</option>
+            </select>
+            <span class="form-error" id="goal-parent-error" role="alert" style="display: none;"></span>
+          </div>
+
+          <!-- 目標の性質 -->
+          <div class="form-field">
+            <label class="form-label" for="goal-type">
+              目標の性質
+            </label>
+            <select
+              id="goal-type"
+              name="goal-type"
+              class="form-select"
+            >
+              <option value="">未選択</option>
+              <option value="skill">スキル習得</option>
+              <option value="project">プロジェクト完了</option>
+              <option value="habit">習慣形成</option>
+              <option value="other">その他</option>
+            </select>
+          </div>
+
+          <!-- 達成基準 -->
+          <div class="form-field">
+            <label class="form-label" for="goal-success-criteria">
+              達成基準
+            </label>
+            <textarea
+              id="goal-success-criteria"
+              name="goal-success-criteria"
+              class="form-textarea"
+              rows="3"
+              maxlength="500"
+              placeholder="目標達成の判断基準を入力してください"
+              aria-describedby="goal-success-criteria-char-count"
+            ></textarea>
+            <div class="form-char-count" id="goal-success-criteria-char-count">
+              <span class="form-char-count__current">0</span>
+              <span class="form-char-count__max">/500</span>
+            </div>
+          </div>
+
+          <!-- フォームアクション -->
+          <div class="form-actions">
+            <button type="button" class="button button--secondary" onclick="showSection('goal-list')">キャンセル</button>
+            <button type="submit" class="button button--primary">保存する</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 状態4: 目標作成画面（バリデーションエラー） -->
+    <section class="prototype-section">
+      <h2 class="prototype-section__title">状態4: 目標作成画面（バリデーションエラー）</h2>
+      
+      <div class="page-container">
+        <header class="page-header">
+          <button class="page-header__back" aria-label="戻る">←</button>
+          <h1 class="page-header__title">目標を作成</h1>
+        </header>
+
+        <form class="goal-form">
+          <!-- 目標名（エラー状態） -->
+          <div class="form-field form-field--error">
+            <label class="form-label" for="goal-name-error">
+              目標名 <span class="form-required">*</span>
+            </label>
+            <input
+              type="text"
+              id="goal-name-error"
+              name="goal-name-error"
+              class="form-input form-input--error"
+              maxlength="100"
+              aria-invalid="true"
+              aria-describedby="goal-name-error-message"
+            />
+            <span class="form-error" id="goal-name-error-message" role="alert">目標名を入力してください</span>
+          </div>
+
+          <!-- 終了日（エラー状態：開始日より前） -->
+          <div class="form-field form-field--error">
+            <label class="form-label" for="goal-end-date-error">
+              終了日 <span class="form-required">*</span>
+            </label>
+            <input
+              type="date"
+              id="goal-end-date-error"
+              name="goal-end-date-error"
+              class="form-input form-input--error"
+              value="2024-12-31"
+              aria-invalid="true"
+              aria-describedby="goal-end-date-error-message"
+            />
+            <span class="form-error" id="goal-end-date-error-message" role="alert">終了日は開始日以降である必要があります</span>
+          </div>
+
+          <!-- フォームアクション -->
+          <div class="form-actions">
+            <button type="button" class="button button--secondary">キャンセル</button>
+            <button type="submit" class="button button--primary" disabled>保存する</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 状態5: 目標詳細画面（長期目標） -->
+    <section class="prototype-section" id="goal-detail-1">
+      <h2 class="prototype-section__title">状態5: 目標詳細画面（長期目標）</h2>
+      
+      <div class="page-container">
+        <header class="page-header">
+          <button class="page-header__back" aria-label="戻る" onclick="showSection('goal-list')">←</button>
+          <h1 class="page-header__title">目標詳細</h1>
+        </header>
+
+        <!-- 目標情報セクション -->
+        <div class="goal-detail-card">
+          <div class="goal-detail-card__header">
+            <h2 class="goal-detail-card__title">🎯 スキル習得</h2>
+            <span class="goal-detail-card__badge goal-detail-card__badge--long-term">長期目標</span>
+          </div>
+
+          <div class="goal-detail-card__content">
+            <div class="goal-detail-item">
+              <span class="goal-detail-item__label">期間:</span>
+              <span class="goal-detail-item__value">2025-01-01 〜 2025-06-30</span>
+            </div>
+
+            <div class="goal-detail-item">
+              <span class="goal-detail-item__label">説明:</span>
+              <p class="goal-detail-item__value">フロントエンド開発のスキルを向上させ、React/Next.jsを使った開発ができるようになる。</p>
+            </div>
+
+            <div class="goal-detail-item">
+              <span class="goal-detail-item__label">達成基準:</span>
+              <p class="goal-detail-item__value">React/Next.jsで実用的なWebアプリケーションを1つ作成できる。</p>
+            </div>
+          </div>
+
+          <!-- アクションバー -->
+          <div class="goal-detail-actions">
+            <button class="button button--secondary" onclick="showSection('goal-edit')">編集</button>
+            <button class="button button--secondary" onclick="showSection('goal-create-child')">下位目標を作成</button>
+            <button class="button button--danger" onclick="showDeleteConfirm()">削除</button>
+          </div>
+        </div>
+
+        <!-- 下位目標一覧セクション -->
+        <div class="goal-detail-card">
+          <h3 class="goal-detail-card__section-title">下位目標</h3>
+          <div class="goal-children-list">
+            <div class="goal-child-item" onclick="showSection('goal-detail-2')">
+              <span class="goal-child-item__name">中期目標1: React基礎を習得</span>
+              <span class="goal-child-item__badge">中期目標</span>
+            </div>
+            <div class="goal-child-item" onclick="showSection('goal-detail-3')">
+              <span class="goal-child-item__name">中期目標2: Next.js実践</span>
+              <span class="goal-child-item__badge">中期目標</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 状態6: 目標詳細画面（短期目標、週次フォーカス接続可能） -->
+    <section class="prototype-section" id="goal-detail-short">
+      <h2 class="prototype-section__title">状態6: 目標詳細画面（短期目標、週次フォーカス接続可能）</h2>
+      
+      <div class="page-container">
+        <header class="page-header">
+          <button class="page-header__back" aria-label="戻る">←</button>
+          <h1 class="page-header__title">目標詳細</h1>
+        </header>
+
+        <div class="goal-detail-card">
+          <div class="goal-detail-card__header">
+            <h2 class="goal-detail-card__title">🎯 週次学習計画を立てる</h2>
+            <span class="goal-detail-card__badge goal-detail-card__badge--short-term">短期目標</span>
+          </div>
+
+          <div class="goal-detail-card__content">
+            <div class="goal-detail-item">
+              <span class="goal-detail-item__label">期間:</span>
+              <span class="goal-detail-item__value">2025-01-01 〜 2025-01-07</span>
+            </div>
+
+            <div class="goal-detail-item">
+              <span class="goal-detail-item__label">説明:</span>
+              <p class="goal-detail-item__value">今週の学習計画を立て、毎日1時間の学習時間を確保する。</p>
+            </div>
+          </div>
+
+          <div class="goal-detail-actions">
+            <button class="button button--secondary" onclick="showSection('goal-edit')">編集</button>
+            <button class="button button--danger" onclick="showDeleteConfirm()">削除</button>
+          </div>
+        </div>
+
+        <!-- 週次フォーカス接続セクション -->
+        <div class="goal-detail-card">
+          <h3 class="goal-detail-card__section-title">週次フォーカスとの接続</h3>
+          <p class="goal-detail-card__description">この短期目標を週次フォーカスに設定することで、日々の活動と目標達成を結びつけることができます。</p>
+          <button class="button button--secondary" onclick="showWeeklyFocusConnect()">週次フォーカスを設定</button>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 状態8: 週次フォーカスカード（拡張、goalId接続時） -->
+    <section class="prototype-section">
+      <h2 class="prototype-section__title">状態8: 週次フォーカスカード（拡張、goalId接続時）</h2>
+      
+      <div class="page-container">
+        <div class="weekly-focus-card">
+          <div class="weekly-focus-card__header">
+            <span class="weekly-focus-card__icon">✨</span>
+            <span class="weekly-focus-card__type">よかったこと</span>
+          </div>
+          
+          <div class="weekly-focus-card__content">
+            <p class="weekly-focus-card__text">チーム会議で積極的に発言できた</p>
+            <div class="weekly-focus-card__status">
+              <span class="status-badge status-badge--progress">進行中</span>
+              <span class="weekly-focus-card__success-count">成功: 1回</span>
+            </div>
+          </div>
+
+          <!-- 目標接続表示（新規追加） -->
+          <div class="weekly-focus-card__goal">
+            <span class="goal-badge">🎯 短期目標: 週次学習計画を立てる</span>
+          </div>
+
+          <div class="weekly-focus-card__footer">
+            <span class="weekly-focus-card__date">📅 2025-12-05</span>
+            <div class="weekly-focus-card__actions">
+              <button class="button button--secondary button--sm">フォローアップ</button>
+              <button class="button button--secondary button--sm">日報を見る</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="goal-hierarchy-management.js"></script>
+</body>
+</html>
+

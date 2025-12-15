@@ -589,4 +589,4 @@ git push
 | `docs/general/backlog.md`       | バックログ（Adopt されたアイテムの管理） |
 | `docs/general/roadmap.md`       | ロードマップ（Defer されたアイテムの管理） |
 | `docs/general/test_rules.md`    | テストスニペット集                         |
-| `docs/general/design_system.md` | デザインシステム                           |
+| `.cursor/rules/design_system_rules.mdc` | デザインシステムルール（実体はStorybook参照） |

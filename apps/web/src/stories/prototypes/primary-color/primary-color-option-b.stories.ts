@@ -141,7 +141,7 @@ export const Buttons: Story = {
             <h3 style="margin-bottom: 1rem; font-size: 1rem; color: #374151;">Secondary Button</h3>
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
               <app-button variant="secondary" size="md">保存</app-button>
-              <app-button variant="outline" size="md">キャンセル</app-button>
+              <app-button variant="secondary" size="md">キャンセル</app-button>
             </div>
           </div>
           <div>

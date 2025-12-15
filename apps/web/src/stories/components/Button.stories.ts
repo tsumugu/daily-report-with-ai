@@ -8,7 +8,7 @@ const meta: Meta<ButtonComponent> = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'secondary', 'outline', 'ghost', 'danger', 'add'],
+      options: ['primary', 'secondary', 'ghost', 'danger'],
     },
     size: {
       control: 'select',
@@ -46,23 +46,16 @@ export const Secondary: Story = {
   args: {
     variant: 'secondary',
     size: 'md',
+    icon: 'none',
   },
   render: (args) => ({
     props: args,
-    template: '<app-button [variant]="variant" [size]="size">保存</app-button>',
+    template: '<app-button [variant]="variant" [size]="size" [icon]="icon">保存</app-button>',
   }),
 };
 
-export const Outline: Story = {
-  args: {
-    variant: 'outline',
-    size: 'md',
-  },
-  render: (args) => ({
-    props: args,
-    template: '<app-button [variant]="variant" [size]="size">キャンセル</app-button>',
-  }),
-};
+// Outline variantはsecondaryに統合されました
+// このストーリーは削除され、Secondaryストーリーで確認できます
 
 export const Ghost: Story = {
   args: {
@@ -144,16 +137,4 @@ export const FullWidth: Story = {
   }),
 };
 
-export const Add: Story = {
-  args: {
-    variant: 'add',
-    size: 'md',
-    icon: 'plus',
-    fullWidth: true,
-  },
-  render: (args) => ({
-    props: args,
-    template: '<app-button [variant]="variant" [size]="size" [icon]="icon" [fullWidth]="fullWidth">追加</app-button>',
-  }),
-};
 

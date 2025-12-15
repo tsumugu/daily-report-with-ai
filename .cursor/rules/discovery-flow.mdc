@@ -50,6 +50,8 @@ Phase 0: Discovery（PDL）
 ├── [PDL] value_hypotheses.md 作成（仮説立案）
 ├── [PDL] requirements.md 作成（要求定義）
 ├── [PDL] handoff.md 作成（PdM への判断要約）
+├── [PDL] critical_review.md 作成（批判的レビューとリサーチ）
+├── [PDL] 批判的レビュー結果を成果物に反映
 ├── [Human] PDL の成果物に合意（Agreed between Human and PDL）
 ├── [Driver] フロー監視：Discovery 完了を確認
 └── [PdM] handoff.md を起点に判断（Adopt / Defer / Reject）
@@ -71,7 +73,7 @@ Phase 0: Discovery（PDL）
 
 | ロール | 成果物                                                      | 詳細ルール                 |
 | ------ | ----------------------------------------------------------- | -------------------------- |
-| PDL    | `problem_statements.md`, `value_hypotheses.md`, `requirements.md`, `handoff.md` | → `.cursor/rules/jobs/pdl.mdc` |
+| PDL    | `problem_statements.md`, `value_hypotheses.md`, `requirements.md`, `handoff.md`, `critical_review.md` | → `.cursor/rules/jobs/pdl.mdc` |
 
 ---
 
@@ -122,6 +124,49 @@ PDL が `handoff.md` を作成：
 - 推奨される判断（Adopt / Defer / Reject）を提示する
 
 **重要**: `handoff.md` は一時的・使い捨ての成果物である。次のサイクルには引き継がれない。
+
+---
+
+## 批判的レビューとリサーチ
+
+PDL が `critical_review.md` を作成し、以下の観点から成果物を批判的に検証する：
+
+### 批判的レビューの観点
+
+1. **設計の妥当性**
+   - 問題定義が適切か
+   - 仮説が検証可能か
+   - 要求が実現可能か
+   - 設計に矛盾や不整合がないか
+
+2. **一般的なアプローチとの整合性**
+   - 業界標準やベストプラクティスとの整合性
+   - 類似プロダクトやフレームワーク（OKR、MBO、SMART目標など）との比較
+   - 一般的なアプローチとの差異とその理由
+
+3. **潜在的な問題点**
+   - 設計の複雑さや実装の難易度
+   - ユーザーの負担やハードル
+   - スケーラビリティや拡張性
+   - エッジケースや例外処理
+
+### リサーチの実施
+
+- 一般的なアプローチやフレームワークをリサーチ
+- 類似プロダクトや事例を調査
+- ベストプラクティスを確認
+- リサーチ結果を `critical_review.md` に記録
+
+### 成果物への反映
+
+批判的レビューとリサーチ結果を以下の成果物に反映：
+
+- `problem_statements.md`: 問題定義の見直し（必要に応じて）
+- `value_hypotheses.md`: 仮説の見直し（必要に応じて）
+- `requirements.md`: 要求の見直し（改善点の反映）
+- `handoff.md`: 批判的レビュー結果の要約を追加
+
+**重要**: 批判的レビューは必須のステップであり、Human との合意前に実施する。
 
 ---
 
@@ -207,6 +252,8 @@ PDL は以下をすべて満たした時点で、Discovery を完了とみなす
 - [ ] 要求がすべて特定の問題に紐づいている
 - [ ] `handoff.md` を読めば PdM が判断できる
 - [ ] 優先順位の理由を説明できる
+- [ ] 批判的レビューとリサーチが完了している
+- [ ] 批判的レビュー結果が成果物に反映されている
 
 これ以上踏み込まず、判断を PdM に委ねる。
 
@@ -220,6 +267,8 @@ Discovery の最後に、**Driver**が以下を確認：
 - [ ] `value_hypotheses.md` が作成されている
 - [ ] `requirements.md` が作成されている
 - [ ] `handoff.md` が作成されている
+- [ ] `critical_review.md` が作成されている
+- [ ] 批判的レビュー結果が成果物に反映されている
 - [ ] Human との合意が得られている（Status: Agreed between Human and PDL）
 - [ ] PdM の判断が完了している（Adopt / Defer / Reject）
 

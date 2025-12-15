@@ -51,6 +51,7 @@ describe('WeeklyFocusSectionComponent', () => {
         userId: 'user-1',
         itemType: 'goodPoint',
         itemId: 'gp-1',
+        goalId: null,
         weekStartDate: '2025-12-09',
         createdAt: '2025-12-09T12:00:00Z',
         item: {
@@ -124,6 +125,7 @@ describe('WeeklyFocusSectionComponent', () => {
         userId: 'user-1',
         itemType: 'goodPoint',
         itemId: 'gp-1',
+        goalId: null,
         weekStartDate: '2025-12-09',
         createdAt: '2025-12-09T12:00:00Z',
         item: null,
@@ -199,6 +201,7 @@ describe('WeeklyFocusSectionComponent', () => {
           userId: 'user-1',
           itemType: 'goodPoint',
           itemId: 'gp-1',
+          goalId: null,
           weekStartDate: '2025-12-09',
           createdAt: '2025-12-09T12:00:00Z',
           item: {

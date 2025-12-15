@@ -29,6 +29,11 @@ export interface WeeklyFocusResponse extends WeeklyFocus {
     success_count: number;
   } | null;
   reportId: string | null; // 日報ID
+  goalId: string | null; // 短期目標のID（接続時、Phase 1で追加）
+  goal?: {
+    id: string;
+    name: string;
+  } | null; // 短期目標の情報（接続時）
 }
 
 /**

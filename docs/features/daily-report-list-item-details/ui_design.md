@@ -276,7 +276,7 @@
 - PRD: `docs/features/daily-report-list-item-details/prd.md`
 - Tech Spec: `docs/features/daily-report-list-item-details/tech_spec.md`
 - 日報一覧機能: `docs/features/daily-report-list/ui_design.md`
-- デザインシステム: `docs/general/design_system.md`
+- デザインシステムルール: `.cursor/rules/design_system_rules.mdc`（実体はStorybook: `apps/web/src/stories/`）
 - フォローアップ管理機能: `docs/features/followup-management/ui_design.md`
 
 ---

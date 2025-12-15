@@ -1,0 +1,23 @@
+<div class="view-toggle">
+  <button
+    type="button"
+    class="view-toggle__button"
+    [class.view-toggle__button--active]="viewType === 'tree'"
+    (click)="onViewTypeChange('tree')"
+    [attr.aria-pressed]="viewType === 'tree'"
+    aria-label="階層表示に切り替え"
+  >
+    {{ treeLabel }}
+  </button>
+  <button
+    type="button"
+    class="view-toggle__button"
+    [class.view-toggle__button--active]="viewType === 'card'"
+    (click)="onViewTypeChange('card')"
+    [attr.aria-pressed]="viewType === 'card'"
+    aria-label="カード表示に切り替え"
+  >
+    {{ cardLabel }}
+  </button>
+</div>
+

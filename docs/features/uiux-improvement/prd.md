@@ -441,12 +441,12 @@ Phase 3: インタラクション向上
 
 ## 12. 関連ドキュメント
 
-| ドキュメント                                     | 説明                         |
-| :----------------------------------------------- | :--------------------------- |
-| `docs/features/uiux-improvement/proposal.md`     | UIUX改善提案書               |
-| `docs/features/uiux-improvement/des_research.md` | デザインリサーチ             |
-| `docs/general/roadmap.md`                        | Phase 2.5 の位置付け         |
-| `docs/general/design_system.md`                  | デザインシステムガイドライン |
+| ドキュメント                                     | 説明                                          |
+| :----------------------------------------------- | :-------------------------------------------- |
+| `docs/features/uiux-improvement/proposal.md`     | UIUX改善提案書                                |
+| `docs/features/uiux-improvement/des_research.md` | デザインリサーチ                              |
+| `docs/general/roadmap.md`                        | Phase 2.5 の位置付け                          |
+| `.cursor/rules/design_system_rules.mdc`          | デザインシステムルール（実体はStorybook参照） |
 
 ---
 

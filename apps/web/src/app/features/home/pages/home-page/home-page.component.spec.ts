@@ -7,6 +7,8 @@ import { of, throwError } from 'rxjs';
 import { HomePageComponent } from './home-page.component';
 import { AuthService } from '../../../auth/services/auth.service';
 import { provideLucideIconsForTesting } from '../../../../shared/test-helpers/lucide-icons.helper';
+import { WeeklyFocusSectionComponent } from '../../../../shared/components/weekly-focus-section/weekly-focus-section.component';
+import { By } from '@angular/platform-browser';
 
 describe('HomePageComponent', () => {
   let component: HomePageComponent;
@@ -99,11 +101,36 @@ describe('HomePageComponent', () => {
       const dailyReportLink = fixture.nativeElement.querySelector('a[routerLink="/daily-reports/new"]');
       expect(dailyReportLink).toBeTruthy();
     });
+
+    it('目標管理へのリンクが表示されること', () => {
+      const goalLink = fixture.nativeElement.querySelector('a[routerLink="/goals"]');
+      expect(goalLink).toBeTruthy();
+      expect(goalLink.textContent).toContain('目標管理');
+    });
   });
 
   describe('onAddWeeklyFocus', () => {
     it('週次フォーカス追加ボタンクリック時、フォロー項目一覧ページに遷移すること', () => {
       component.onAddWeeklyFocus();
+      expect(router.navigate).toHaveBeenCalledWith(['/followups']);
+    });
+
+    it('テンプレートからonAddWeeklyFocusが呼ばれること', () => {
+      // テンプレート内の(addClicked)="onAddWeeklyFocus()"をカバー
+      // 実際のテンプレートのイベントバインディングを実行するために、
+      // WeeklyFocusSectionComponentのインスタンスを取得してaddClickedイベントを発火
+      fixture.detectChanges();
+      const weeklyFocusSectionDebugElement = fixture.debugElement.query(By.directive(WeeklyFocusSectionComponent));
+      expect(weeklyFocusSectionDebugElement).toBeTruthy();
+      
+      // WeeklyFocusSectionComponentのインスタンスを取得
+      const weeklyFocusSectionComponent = weeklyFocusSectionDebugElement.componentInstance;
+      
+      // addClickedイベントを発火（これでテンプレートのイベントバインディングが実行される）
+      weeklyFocusSectionComponent.addClicked.emit();
+      fixture.detectChanges();
+      
+      // onAddWeeklyFocusが呼ばれたことを確認
       expect(router.navigate).toHaveBeenCalledWith(['/followups']);
     });
   });

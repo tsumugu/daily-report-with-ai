@@ -20,7 +20,10 @@ export type IconName =
   | 'heart'
   | 'pin'
   | 'check'
-  | 'pencil';
+  | 'pencil'
+  | 'chevron-down'
+  | 'chevron-right'
+  | 'plus';
 
 @Component({
   selector: 'app-icon',

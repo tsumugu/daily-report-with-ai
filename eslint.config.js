@@ -15,6 +15,7 @@ export default tseslint.config(
       '**/.angular/**',
       '**/coverage/**',
       '**/storybook-static/**',
+      '**/docs/**/*.js', // プロトタイプファイル（実装コードではない）
     ],
   },
 

@@ -635,7 +635,7 @@ Storybookで以下を実装：
 - `docs/features/uiux-improvement/prd.md` - PRD
 - `docs/features/uiux-improvement/des_research.md` - デザインリサーチ
 - `docs/features/uiux-improvement/proposal.md` - 提案書
-- `docs/general/design_system.md` - デザインシステム
+- `.cursor/rules/design_system_rules.mdc` - デザインシステムルール（実体はStorybook: `apps/web/src/stories/`）
 
 ---
 

@@ -1,0 +1,79 @@
+<div class="hierarchy-tree-view" #treeViewContainer>
+  <!-- 同じ階層のノード間の縦線（プラスボタン同士を縦に繋ぐ） -->
+  @for (node of nodes; track node.id) {
+    @if (hasSiblingVerticalLine(node.id)) {
+      <div
+        class="hierarchy-tree-view__sibling-vertical-line"
+        [style.left.px]="getSiblingVerticalLineLeft(node.id)"
+        [style.top.px]="getSiblingVerticalLineTop(node.id)"
+        [style.height.px]="getSiblingVerticalLineHeight(node.id)"
+      ></div>
+    }
+  }
+  @for (node of nodes; track node.id) {
+    <div
+      class="hierarchy-tree-view__node"
+      [class.has-children]="hasChildren(node) && isExpanded(node.id)"
+      #nodeElement
+    >
+      <div class="hierarchy-tree-view__node-wrapper">
+        <!-- 同じ階層のノード間の横線 -->
+        @if (hasSiblingLine(node.id)) {
+          <div
+            class="hierarchy-tree-view__sibling-line"
+            [style.left.px]="getSiblingLineLeft(node.id)"
+            [style.top.px]="getSiblingLineTop(node.id)"
+            [style.width.px]="getSiblingLineWidth(node.id)"
+          ></div>
+        }
+        @if (showCreateChildButton) {
+          <button
+            type="button"
+            class="hierarchy-tree-view__create-child-button"
+            [attr.data-node-id]="node.id"
+            (click)="onCreateChild(node.id)"
+            aria-label="子目標を作成"
+            title="子目標を作成"
+            #parentButton
+          >
+            <app-icon name="plus" [size]="16" color="var(--color-primary-600)" />
+          </button>
+        }
+        <app-hierarchy-card
+          [data]="node.data"
+          [showExpandIcon]="hasChildren(node)"
+          [isExpanded]="isExpanded(node.id)"
+          (clicked)="onNodeClick(node.id)"
+          (expandToggled)="onExpandToggle(node.id)"
+          #cardElement
+        />
+      </div>
+      @if (hasChildren(node) && isExpanded(node.id)) {
+        <div class="hierarchy-tree-view__children">
+          <!-- L字の線を描画（縦線と横線） -->
+          <div
+            class="hierarchy-tree-view__connector-line hierarchy-tree-view__connector-line--vertical"
+            [style.left.px]="getConnectorLineLeft(node.id)"
+            [style.top.px]="getConnectorLineTop(node.id)"
+            [style.height.px]="getConnectorLineHeight(node.id)"
+          ></div>
+          <div
+            class="hierarchy-tree-view__connector-line hierarchy-tree-view__connector-line--horizontal"
+            [style.left.px]="getConnectorLineHorizontalLeft(node.id)"
+            [style.top.px]="getConnectorLineHorizontalTop(node.id)"
+            [style.width.px]="getConnectorLineWidth(node.id)"
+          ></div>
+          <app-hierarchy-tree-view
+            [nodes]="node.children"
+            [expandedIds]="expandedIds"
+            [showCreateChildButton]="showCreateChildButton"
+            (nodeClicked)="onNodeClick($event)"
+            (expandToggled)="onExpandToggle($event)"
+            (createChild)="createChild.emit($event)"
+          />
+        </div>
+      }
+    </div>
+  }
+</div>
+

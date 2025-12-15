@@ -40,7 +40,7 @@ export const OpenClose: Story = {
           <h3 style="margin: 0 0 1rem 0; color: #111827; font-size: 1.25rem;">モーダル例</h3>
           <p style="margin: 0 0 1.5rem 0; color: #6b7280; line-height: 1.6;">これはモーダルの例です。開閉時にスケールアニメーションが適用されます。</p>
           <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-            <app-button variant="outline" size="md">キャンセル</app-button>
+            <app-button variant="secondary" size="md">キャンセル</app-button>
             <app-button variant="primary" size="md">保存</app-button>
           </div>
         </div>

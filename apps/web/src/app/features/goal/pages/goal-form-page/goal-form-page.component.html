@@ -1,0 +1,133 @@
+<div class="goal-form-page">
+  <!-- ヘッダー -->
+  <header class="goal-form-page__header">
+    <button
+      type="button"
+      class="goal-form-page__back-button"
+      (click)="onCancel()"
+      aria-label="戻る"
+    >
+      ←
+    </button>
+    <h1 class="goal-form-page__title">
+      {{ isEditMode() ? '目標を編集' : '目標を作成' }}
+    </h1>
+  </header>
+
+  <!-- エラーメッセージ -->
+  @if (errorMessage()) {
+    <app-alert-banner variant="error" [message]="errorMessage()!" />
+  }
+
+  <!-- フォーム -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="goal-form-page__form">
+    <!-- 目標名 -->
+    <div class="goal-form-page__field">
+      <app-input-field
+        formControlName="name"
+        label="目標名"
+        placeholder="目標名を入力してください"
+        [errorMessage]="getErrorMessage('name')"
+        id="goal-name"
+      />
+      <div class="goal-form-page__character-count">
+        {{ getCharacterCount('name') }} / {{ getMaxLength('name') }}
+      </div>
+    </div>
+
+    <!-- 目標の説明 -->
+    <div class="goal-form-page__field">
+      <app-textarea-field
+        formControlName="description"
+        label="目標の説明"
+        placeholder="目標の説明を入力してください（任意）"
+        [errorMessage]="getErrorMessage('description')"
+        id="goal-description"
+      />
+      <div class="goal-form-page__character-count">
+        {{ getCharacterCount('description') }} / {{ getMaxLength('description') }}
+      </div>
+    </div>
+
+    <!-- 開始日 -->
+    <div class="goal-form-page__field">
+      <app-date-field
+        formControlName="startDate"
+        label="開始日"
+        [errorMessage]="getErrorMessage('startDate')"
+        id="goal-start-date"
+      />
+    </div>
+
+    <!-- 終了日 -->
+    <div class="goal-form-page__field">
+      <app-date-field
+        formControlName="endDate"
+        label="終了日"
+        [errorMessage]="getErrorMessage('endDate')"
+        id="goal-end-date"
+      />
+    </div>
+
+    <!-- 上位目標 -->
+    <div class="goal-form-page__field">
+      <app-entity-select-field
+        formControlName="parentId"
+        label="上位目標"
+        [options]="parentGoalOptions()"
+        emptyLabel="なし"
+        id="goal-parent-id"
+      />
+    </div>
+
+    <!-- 目標の性質 -->
+    <div class="goal-form-page__field">
+      <app-entity-select-field
+        formControlName="goalType"
+        label="目標の性質"
+        [options]="goalTypeOptions"
+        [showEmptyOption]="false"
+        placeholder="選択してください（任意）"
+        id="goal-type"
+      />
+    </div>
+
+    <!-- 達成基準 -->
+    <div class="goal-form-page__field">
+      <app-textarea-field
+        formControlName="successCriteria"
+        label="達成基準"
+        placeholder="達成基準を入力してください（任意）"
+        [errorMessage]="getErrorMessage('successCriteria')"
+        id="goal-success-criteria"
+      />
+      <div class="goal-form-page__character-count">
+        {{ getCharacterCount('successCriteria') }} / {{ getMaxLength('successCriteria') }}
+      </div>
+    </div>
+
+    <!-- ボタン -->
+    <div class="goal-form-page__actions">
+      <app-button
+        variant="secondary"
+        (clicked)="onCancel()"
+        [disabled]="isLoading()"
+      >
+        キャンセル
+      </app-button>
+      <app-button
+        variant="primary"
+        type="submit"
+        [disabled]="form.invalid || isLoading()"
+      >
+        {{ isEditMode() ? '更新する' : '保存する' }}
+      </app-button>
+    </div>
+  </form>
+
+  <!-- トースト通知 -->
+  @if (toastMessage()) {
+    <app-toast [message]="toastMessage()!" [variant]="toastVariant()" />
+  }
+</div>
+

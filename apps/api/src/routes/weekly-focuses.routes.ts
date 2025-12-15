@@ -3,9 +3,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { weeklyFocusesDb } from '../db/weekly-focuses.db.js';
 import { goodPointsDb, improvementsDb, dailyReportsDb } from '../db/daily-reports.db.js';
+import { goalsDb } from '../db/goals.db.js';
 import {
   WeeklyFocus,
   CreateWeeklyFocusRequest,
+  ConnectWeeklyFocusToGoalRequest,
 } from '../models/daily-report.model.js';
 
 export const weeklyFocusesRouter = Router();
@@ -71,6 +73,7 @@ weeklyFocusesRouter.get('/weekly-focuses', (req: Request, res: Response) => {
       userId: focus.userId,
       itemType: focus.itemType,
       itemId: focus.itemId,
+      goalId: focus.goalId, // Phase 1で追加
       weekStartDate: focus.weekStartDate,
       createdAt: focus.createdAt,
       item: item || null,
@@ -141,6 +144,7 @@ weeklyFocusesRouter.post('/weekly-focuses', (req: Request, res: Response) => {
     userId,
     itemType: body.itemType,
     itemId: body.itemId,
+    goalId: null, // Phase 1で追加
     weekStartDate,
     createdAt: now,
   };
@@ -191,5 +195,101 @@ weeklyFocusesRouter.delete('/weekly-focuses/:id', (req: Request, res: Response) 
 
   weeklyFocusesDb.delete(req.params.id);
   res.status(200).json({ message: '削除しました' });
+});
+
+/**
+ * PUT /api/weekly-focuses/:id/goal
+ * 週次フォーカスと短期目標を接続する。
+ */
+weeklyFocusesRouter.put('/weekly-focuses/:id/goal', (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ message: '認証が必要です' });
+    return;
+  }
+
+  const weeklyFocusId = req.params.id;
+  const weeklyFocus = weeklyFocusesDb.findById(weeklyFocusId);
+
+  if (!weeklyFocus) {
+    res.status(404).json({ message: '週次フォーカスが見つかりません' });
+    return;
+  }
+
+  if (weeklyFocus.userId !== userId) {
+    res.status(403).json({ message: 'アクセス権限がありません' });
+    return;
+  }
+
+  const body: ConnectWeeklyFocusToGoalRequest = req.body;
+
+  if (!body.goalId) {
+    res.status(400).json({ message: 'goalId は必須です' });
+    return;
+  }
+
+  const goal = goalsDb.findById(body.goalId);
+
+  if (!goal) {
+    res.status(404).json({ message: '目標が見つかりません' });
+    return;
+  }
+
+  if (goal.userId !== userId) {
+    res.status(403).json({ message: '目標へのアクセス権限がありません' });
+    return;
+  }
+
+  // 接続する目標は短期目標（最下位階層）であること
+  const children = goalsDb.findByParentId(goal.id);
+  if (children.length > 0) {
+    res.status(400).json({ message: '接続する目標は短期目標（最下位階層）である必要があります' });
+    return;
+  }
+
+  // 週次フォーカスを更新
+  const updatedWeeklyFocus: WeeklyFocus = {
+    ...weeklyFocus,
+    goalId: body.goalId,
+  };
+
+  weeklyFocusesDb.save(updatedWeeklyFocus);
+
+  res.json(updatedWeeklyFocus);
+});
+
+/**
+ * DELETE /api/weekly-focuses/:id/goal
+ * 週次フォーカスと短期目標の接続を解除する。
+ */
+weeklyFocusesRouter.delete('/weekly-focuses/:id/goal', (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ message: '認証が必要です' });
+    return;
+  }
+
+  const weeklyFocusId = req.params.id;
+  const weeklyFocus = weeklyFocusesDb.findById(weeklyFocusId);
+
+  if (!weeklyFocus) {
+    res.status(404).json({ message: '週次フォーカスが見つかりません' });
+    return;
+  }
+
+  if (weeklyFocus.userId !== userId) {
+    res.status(403).json({ message: 'アクセス権限がありません' });
+    return;
+  }
+
+  // 週次フォーカスを更新
+  const updatedWeeklyFocus: WeeklyFocus = {
+    ...weeklyFocus,
+    goalId: null,
+  };
+
+  weeklyFocusesDb.save(updatedWeeklyFocus);
+
+  res.json(updatedWeeklyFocus);
 });
 

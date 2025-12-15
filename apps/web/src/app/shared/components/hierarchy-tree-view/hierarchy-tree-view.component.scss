@@ -1,0 +1,109 @@
+.hierarchy-tree-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+}
+
+.hierarchy-tree-view__node {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.hierarchy-tree-view__node-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  position: relative; // 同じ階層の線の位置基準
+}
+
+// L字型の線はJavaScriptで動的に描画されるため、CSSでの線描画は削除
+
+.hierarchy-tree-view__create-child-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--color-primary-600);
+  background-color: transparent;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  margin-top: 0.25rem; // カードのパディングと揃える
+  position: relative;
+  z-index: 1; // 線の上に表示
+
+  &:hover {
+    background-color: var(--color-primary-50);
+    border-color: var(--color-primary-700);
+  }
+
+  &:active {
+    background-color: var(--color-primary-100);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+  }
+}
+
+.hierarchy-tree-view__node-wrapper app-hierarchy-card {
+  flex: 1;
+  min-width: 0; // flexboxで縮小を許可
+  position: relative;
+  z-index: 1; // 線の上に表示
+}
+
+.hierarchy-tree-view__children {
+  // インデント計算:
+  // 子のプラスボタン中央 = 3.5rem (親のプラスボタン中央1rem + 横線2.5rem)
+  // インデント = 子のプラスボタン中央 - 子のボタン半分 = 3.5rem - 1rem = 2.5rem
+  margin-left: 2.5rem;
+  padding-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+}
+
+// L字の接続線（JavaScriptで動的に描画）
+.hierarchy-tree-view__connector-line {
+  position: absolute;
+  background-color: var(--color-gray-200);
+  z-index: 0;
+  pointer-events: none;
+  
+  // 縦線
+  &--vertical {
+    width: 2px;
+  }
+  
+  // 横線
+  &--horizontal {
+    height: 2px;
+  }
+}
+
+// 同じ階層のノード間の横線
+.hierarchy-tree-view__sibling-line {
+  position: absolute;
+  background-color: var(--color-gray-200);
+  height: 2px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+// 同じ階層のノード間の縦線（プラスボタン同士を縦に繋ぐ）
+.hierarchy-tree-view__sibling-vertical-line {
+  position: absolute;
+  background-color: var(--color-gray-200);
+  width: 2px;
+  z-index: 0;
+  pointer-events: none;
+}
+

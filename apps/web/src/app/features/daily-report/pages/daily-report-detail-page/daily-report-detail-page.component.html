@@ -38,7 +38,7 @@
       <div class="error-container">
         <app-alert-banner variant="error" [message]="errorMessage()!" />
         <div class="error-actions">
-          <app-button variant="outline" (clicked)="goBack()">一覧に戻る</app-button>
+          <app-button variant="secondary" (clicked)="goBack()">一覧に戻る</app-button>
           <app-button variant="primary" (clicked)="retry()">再読み込み</app-button>
         </div>
       </div>
@@ -56,7 +56,7 @@
           </h1>
           <!-- 編集ボタン -->
           <app-button
-            variant="outline"
+            variant="secondary"
             size="sm"
             (clicked)="onEdit()"
             ariaLabel="編集する"

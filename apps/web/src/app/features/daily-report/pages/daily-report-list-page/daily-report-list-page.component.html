@@ -43,17 +43,14 @@
 
     <!-- Empty State -->
     @if (!isLoading() && !errorMessage() && reports().length === 0) {
-      <div class="empty-container">
-        <span class="empty-icon">
-          <app-icon name="clipboard" [size]="48" color="var(--color-gray-400)" ariaLabel="日報なし" />
-        </span>
-        <h2>まだ日報がありません</h2>
-        <p>今日の日報を書いてみましょう！</p>
-        <a routerLink="/daily-reports/new" class="new-report-button new-report-button--large">
-          <span class="plus-icon">＋</span>
-          日報を書く
-        </a>
-      </div>
+      <app-empty-state
+        iconName="clipboard"
+        message="まだ日報がありません"
+        subMessage="今日の日報を書いてみましょう！"
+        actionButtonText="日報を書く"
+        actionButtonRoute="/daily-reports/new"
+        actionButtonIcon="plus"
+      />
     }
 
     <!-- Report List -->
@@ -71,7 +68,7 @@
             <div class="spinner spinner--small"></div>
             <p>読み込み中...</p>
           } @else {
-            <app-button variant="outline" (clicked)="loadMore()">もっと見る</app-button>
+            <app-button variant="secondary" (clicked)="loadMore()">もっと見る</app-button>
           }
         </div>
       }

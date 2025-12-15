@@ -270,4 +270,4 @@ docs/
 | `docs/general/roadmap.md`        | ロードマップ（Defer されたアイテムの管理） |
 | `docs/general/general_prd.md`    | 全体要件定義（憲法と同等）   |
 | `docs/general/test_rules.md`     | テストルール・スニペット集   |
-| `docs/general/design_system.md`  | デザインシステム             |
+| `.cursor/rules/design_system_rules.mdc`  | デザインシステムルール（実体はStorybook参照） |

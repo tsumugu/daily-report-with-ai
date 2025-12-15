@@ -1,0 +1,48 @@
+<div class="empty-state" [class.empty-state--compact]="variant === 'compact'">
+  @if (variant === 'default') {
+    @if (iconName) {
+      <div class="empty-state__icon">
+        <app-icon
+          [name]="iconName"
+          [size]="iconSize"
+          [color]="iconColor"
+          [ariaLabel]="message"
+        />
+      </div>
+    }
+    <h2 class="empty-state__message">{{ message }}</h2>
+    @if (subMessage) {
+      <p class="empty-state__submessage">{{ subMessage }}</p>
+    }
+    @if (actionButtonText) {
+      <div class="empty-state__action">
+        @if (actionButtonRoute) {
+          <a
+            [routerLink]="actionButtonRoute"
+            class="empty-state__action-link"
+          >
+            <app-button
+              [variant]="actionButtonVariant"
+              [icon]="actionButtonIcon || 'none'"
+              [ariaLabel]="actionButtonText"
+            >
+              {{ actionButtonText }}
+            </app-button>
+          </a>
+        } @else {
+          <app-button
+            [variant]="actionButtonVariant"
+            [icon]="actionButtonIcon || 'none'"
+            (clicked)="onActionButtonClick()"
+            [ariaLabel]="actionButtonText"
+          >
+            {{ actionButtonText }}
+          </app-button>
+        }
+      </div>
+    }
+  } @else {
+    <p class="empty-state__message-compact">{{ message }}</p>
+  }
+</div>
+

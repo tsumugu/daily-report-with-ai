@@ -1,0 +1,47 @@
+<div class="entity-select-field">
+  @if (label) {
+    <label [for]="id || 'entity-select'" class="entity-select-field__label">
+      {{ label }}
+    </label>
+  }
+  <div class="entity-select-field__wrapper">
+    <select
+      [id]="id || 'entity-select'"
+      [value]="value() || ''"
+      [disabled]="disabled"
+      (change)="onSelect($event)"
+      (blur)="onBlur()"
+      (focus)="onFocus()"
+      class="entity-select-field__select"
+      [class.entity-select-field__select--error]="hasError"
+      [class.entity-select-field__select--focused]="isFocused()"
+      [attr.aria-invalid]="hasError"
+      [attr.aria-describedby]="hasError ? (id || 'entity-select') + '-error' : null"
+    >
+      @if (showEmptyOption) {
+        <option value="">{{ emptyLabel }}</option>
+      }
+      @for (option of filteredOptions; track option.id) {
+        <option [value]="option.id" [disabled]="option.disabled">
+          {{ option.label }}
+        </option>
+      }
+    </select>
+    <app-icon
+      name="chevron-down"
+      [size]="20"
+      color="var(--color-gray-500)"
+      class="entity-select-field__icon"
+    />
+  </div>
+  @if (hasError) {
+    <span
+      [id]="(id || 'entity-select') + '-error'"
+      class="entity-select-field__error"
+      role="alert"
+    >
+      {{ errorMessage }}
+    </span>
+  }
+</div>
+

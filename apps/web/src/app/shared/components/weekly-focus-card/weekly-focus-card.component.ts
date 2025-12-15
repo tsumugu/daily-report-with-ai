@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { StatusBadgeComponent, StatusBadgeType } from '../status-badge/status-badge.component';
-import { ButtonComponent } from '../button/button.component';
 import { IconComponent, IconName } from '../icon';
 import { IconButtonComponent } from '../icon-button';
 import { WeeklyFocusResponse } from '../../models/weekly-focus.model';
@@ -10,7 +9,7 @@ import { WeeklyFocusResponse } from '../../models/weekly-focus.model';
 @Component({
   selector: 'app-weekly-focus-card',
   standalone: true,
-  imports: [CommonModule, RouterLink, StatusBadgeComponent, ButtonComponent, IconComponent, IconButtonComponent],
+  imports: [CommonModule, RouterLink, StatusBadgeComponent, IconComponent, IconButtonComponent],
   templateUrl: './weekly-focus-card.component.html',
   styleUrl: './weekly-focus-card.component.scss',
 })

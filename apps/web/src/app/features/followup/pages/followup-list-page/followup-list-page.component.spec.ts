@@ -354,6 +354,7 @@ describe('FollowupListPageComponent', () => {
         userId: 'user-1',
         itemType: 'goodPoint',
         itemId: 'gp-1',
+        goalId: null,
         weekStartDate: '2025-12-01',
         createdAt: '2025-12-05T12:00:00Z',
         item: {
@@ -391,6 +392,7 @@ describe('FollowupListPageComponent', () => {
       userId: 'user-1',
       itemType: 'goodPoint',
       itemId: 'gp-1',
+      goalId: null,
       weekStartDate: '2025-12-01',
       createdAt: '2025-12-05T12:00:00Z',
       item: {
@@ -535,6 +537,7 @@ describe('FollowupListPageComponent', () => {
         userId: 'user-1',
         itemType: 'goodPoint',
         itemId: 'gp-1',
+        goalId: null,
         weekStartDate: '2025-12-01',
         createdAt: '2025-12-05T12:00:00Z',
         item: {
@@ -579,6 +582,7 @@ describe('FollowupListPageComponent', () => {
         userId: 'user-1',
         itemType: 'goodPoint',
         itemId: 'gp-1',
+        goalId: null,
         weekStartDate: '2025-12-01',
         createdAt: '2025-12-05T12:00:00Z',
         item: {
@@ -702,6 +706,7 @@ describe('FollowupListPageComponent', () => {
         userId: 'user-1',
         itemType: 'goodPoint',
         itemId: 'gp-1',
+        goalId: null,
         weekStartDate: '2025-12-01',
         createdAt: '2025-12-05T12:00:00Z',
         item: {

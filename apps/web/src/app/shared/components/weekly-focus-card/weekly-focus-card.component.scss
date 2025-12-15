@@ -56,6 +56,23 @@
   color: var(--color-text-secondary);
 }
 
+.weekly-focus-card__goal {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  background-color: var(--color-primary-50);
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-primary-200);
+}
+
+.weekly-focus-card__goal-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-primary-700);
+}
+
 .weekly-focus-card__footer {
   display: flex;
   justify-content: space-between;

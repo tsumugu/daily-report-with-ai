@@ -69,7 +69,7 @@ npm run dev
 - [PRD（サービス要件）](./docs/general/prd.md) - サービス全体の要件定義
 - [ロードマップ](./docs/general/roadmap.md) - 開発計画
 - [アーキテクチャ](./docs/general/arch.md) - システム構成
-- [デザインシステム](./docs/general/design_system.md) - UIガイドライン
+- [デザインシステムルール](./.cursor/rules/design_system_rules.mdc) - UIルール（実体はStorybook: `apps/web/src/stories/`）
 - [Lint設定ガイド](./docs/general/lint-rules.md) - コード品質管理
 
 ### 🔧 機能別仕様

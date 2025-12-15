@@ -25,6 +25,9 @@ import {
   Pin,
   Check,
   Pencil,
+  ChevronDown,
+  ChevronRight,
+  Plus,
 } from 'lucide-angular';
 
 export const appConfig: ApplicationConfig = {
@@ -53,6 +56,9 @@ export const appConfig: ApplicationConfig = {
         Pin,
         Check,
         Pencil,
+        ChevronDown,
+        ChevronRight,
+        Plus,
       })
     ),
   ],

@@ -10,7 +10,7 @@ import { FollowupInputModalComponent } from '../../components/followup-input-mod
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { AlertBannerComponent } from '../../../../shared/components/alert-banner/alert-banner.component';
 import { ToastComponent } from '../../../../shared/components/toast/toast.component';
-import { IconComponent } from '../../../../shared/components/icon';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state';
 import { Subscription, forkJoin } from 'rxjs';
 
 @Component({
@@ -23,7 +23,7 @@ import { Subscription, forkJoin } from 'rxjs';
     ButtonComponent,
     AlertBannerComponent,
     ToastComponent,
-    IconComponent,
+    EmptyStateComponent,
   ],
   templateUrl: './followup-list-page.component.html',
   styleUrl: './followup-list-page.component.scss',

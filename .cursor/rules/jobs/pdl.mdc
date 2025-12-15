@@ -47,7 +47,8 @@ PDL が生成・更新してよい成果物は、以下に限定される。
 ├─ problem_statements.md
 ├─ value_hypotheses.md
 ├─ requirements.md
-└─ handoff.md
+├─ handoff.md
+└─ critical_review.md
 ```
 
 ### 4.1 各成果物の役割
@@ -86,6 +87,17 @@ PdM が判断可能な粒度の要求（R-xx）を定義する。
 
 **重要**: PdM の判断が行われた時点で、現在の `handoff.md` を `.discovery/archived/` に移動し、新しい Discovery サイクルでは必ず空の `handoff.md` を新規作成する。
 
+#### critical_review.md
+
+成果物を批判的に検証し、一般的なアプローチをリサーチした結果を記述する。
+
+- 設計の妥当性を検証する
+- 一般的なアプローチ（OKR、MBO、SMART目標など）との整合性を確認する
+- 潜在的な問題点を洗い出す
+- リサーチ結果を成果物に反映する
+
+**重要**: 批判的レビューは必須のステップであり、Human との合意前に実施する。
+
 ## 5. 非責務（明確な非責務）
 
 PDL は以下を**絶対に行わない**。
@@ -112,6 +124,17 @@ PDL は以下を**絶対に行わない**。
 - **Problem**: P-xx
 - **Hypothesis**: H-xx（対応する P-xx を明記）
 - **Requirement**: R-xx（対応する P-xx を明記）
+
+### 6.3 批判的レビュー原則
+
+成果物を作成した後、必ず批判的に検証する。
+
+- 設計の妥当性を検証する
+- 一般的なアプローチやフレームワークと比較する
+- 潜在的な問題点を洗い出す
+- リサーチ結果を成果物に反映する
+
+**重要**: 批判的レビューは必須のステップであり、Human との合意前に実施する。
 
 ## 7. Agreement vs Decision（重要）
 
@@ -186,6 +209,8 @@ PDL は以下をすべて満たした時点で、Discovery を完了とみなす
 - [ ] 要求がすべて特定の問題に紐づいている
 - [ ] `handoff.md` を読めば PdM が判断できる
 - [ ] 優先順位の理由を説明できる
+- [ ] 批判的レビューとリサーチが完了している
+- [ ] 批判的レビュー結果が成果物に反映されている
 
 これ以上踏み込まず、判断を PdM に委ねる。
 
@@ -222,7 +247,8 @@ Product Discovery Lead は、Human の思考と PdM の判断の間に立ち、�
 ├── problem_statements.md       # 問題定義（P-xx）
 ├── value_hypotheses.md         # 価値仮説（H-xx）
 ├── requirements.md             # 要求（R-xx）
-└── handoff.md                  # PdM への判断要約（一時的・使い捨て）
+├── handoff.md                  # PdM への判断要約（一時的・使い捨て）
+└── critical_review.md          # 批判的レビューとリサーチ結果
 ```
 
 ## 14. 成果物のテンプレート

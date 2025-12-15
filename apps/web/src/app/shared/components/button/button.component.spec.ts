@@ -86,9 +86,6 @@ describe('ButtonComponent', () => {
       component.variant = 'secondary';
       expect(component.buttonClasses).toContain('button--secondary');
 
-      component.variant = 'outline';
-      expect(component.buttonClasses).toContain('button--outline');
-
       component.variant = 'ghost';
       expect(component.buttonClasses).toContain('button--ghost');
 

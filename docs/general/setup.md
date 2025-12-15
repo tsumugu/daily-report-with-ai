@@ -357,7 +357,7 @@ export const environment = {
 
 1. ✅ 環境構築完了
 2. 📚 [アーキテクチャドキュメント](./arch.md)を読む
-3. 🎨 [デザインシステム](./design_system.md)を確認
+3. 🎨 [デザインシステムルール](../.cursor/rules/design_system_rules.mdc)を確認（実体はStorybook: `apps/web/src/stories/`）
 4. 💻 [コーディングルール](./lint-rules.md)を確認
 5. 🚀 開発開始！
 

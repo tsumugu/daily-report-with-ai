@@ -28,77 +28,90 @@
       }
 
       <!-- エピソード/アクション一覧 -->
-      <div class="followup-page__list" role="list">
-        @if (itemType() === 'goodPoint') {
-          @for (episode of episodes(); track episode.id) {
-            <div class="followup-page__item" role="listitem">
-              <div class="followup-page__item-content">
-                <div class="followup-page__item-date">
-                  <span class="followup-page__item-date-label">再現日:</span>
-                  <span class="followup-page__item-date-value">{{ episode.date }}</span>
+      @if (isEmpty) {
+        <app-empty-state
+          [iconName]="itemType() === 'goodPoint' ? 'heart' : 'file-text'"
+          [message]="itemType() === 'goodPoint' ? 'エピソードがまだありません' : 'アクションがまだありません'"
+          [subMessage]="itemType() === 'goodPoint' ? '再現エピソードを追加して、よかったことを記録しましょう' : '実施アクションを追加して、改善を進めましょう'"
+          [actionButtonText]="itemType() === 'goodPoint' ? 'エピソードを追加' : 'アクションを追加'"
+          [actionButtonIcon]="'plus'"
+          (actionButtonClick)="onAddClick()"
+        />
+      } @else {
+        <div class="followup-page__list" role="list">
+          @if (itemType() === 'goodPoint') {
+            @for (episode of episodes(); track episode.id) {
+              <div class="followup-page__item" role="listitem">
+                <div class="followup-page__item-content">
+                  <div class="followup-page__item-date">
+                    <span class="followup-page__item-date-label">再現日:</span>
+                    <span class="followup-page__item-date-value">{{ episode.date }}</span>
+                  </div>
+                  @if (episode.memo) {
+                    <p class="followup-page__item-memo">{{ episode.memo }}</p>
+                  }
                 </div>
-                @if (episode.memo) {
-                  <p class="followup-page__item-memo">{{ episode.memo }}</p>
-                }
-              </div>
-              <div class="followup-page__item-actions">
-                <button
-                  class="followup-page__item-edit"
-                  (click)="onEditClick(episode.id)"
-                  [attr.aria-label]="'編集'"
-                >
-                  <app-icon name="pencil" [size]="18" color="currentColor" ariaLabel="編集" />
-                </button>
-                <button
-                  class="followup-page__item-delete"
-                  (click)="onDelete(episode.id)"
-                  [attr.aria-label]="'削除'"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          }
-        } @else {
-          @for (action of actions(); track action.id) {
-            <div class="followup-page__item" role="listitem">
-              <div class="followup-page__item-content">
-                <div class="followup-page__item-date">
-                  <span class="followup-page__item-date-label">アクションをした日:</span>
-                  <span class="followup-page__item-date-value">{{ action.date }}</span>
+                <div class="followup-page__item-actions">
+                  <button
+                    class="followup-page__item-edit"
+                    (click)="onEditClick(episode.id)"
+                    [attr.aria-label]="'編集'"
+                  >
+                    <app-icon name="pencil" [size]="18" color="currentColor" ariaLabel="編集" />
+                  </button>
+                  <button
+                    class="followup-page__item-delete"
+                    (click)="onDelete(episode.id)"
+                    [attr.aria-label]="'削除'"
+                  >
+                    ×
+                  </button>
                 </div>
-                @if (action.memo) {
-                  <p class="followup-page__item-memo">{{ action.memo }}</p>
-                }
               </div>
-              <div class="followup-page__item-actions">
-                <button
-                  class="followup-page__item-edit"
-                  (click)="onEditClick(action.id)"
-                  [attr.aria-label]="'編集'"
-                >
-                  <app-icon name="pencil" [size]="18" color="currentColor" ariaLabel="編集" />
-                </button>
-                <button
-                  class="followup-page__item-delete"
-                  (click)="onDelete(action.id)"
-                  [attr.aria-label]="'削除'"
-                >
-                  ×
-                </button>
+            }
+          } @else {
+            @for (action of actions(); track action.id) {
+              <div class="followup-page__item" role="listitem">
+                <div class="followup-page__item-content">
+                  <div class="followup-page__item-date">
+                    <span class="followup-page__item-date-label">アクションをした日:</span>
+                    <span class="followup-page__item-date-value">{{ action.date }}</span>
+                  </div>
+                  @if (action.memo) {
+                    <p class="followup-page__item-memo">{{ action.memo }}</p>
+                  }
+                </div>
+                <div class="followup-page__item-actions">
+                  <button
+                    class="followup-page__item-edit"
+                    (click)="onEditClick(action.id)"
+                    [attr.aria-label]="'編集'"
+                  >
+                    <app-icon name="pencil" [size]="18" color="currentColor" ariaLabel="編集" />
+                  </button>
+                  <button
+                    class="followup-page__item-delete"
+                    (click)="onDelete(action.id)"
+                    [attr.aria-label]="'削除'"
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
-            </div>
+            }
           }
-        }
-      </div>
+        </div>
+      }
 
-      <!-- エピソード/アクション追加ボタン -->
-      <button class="followup-page__add-button" (click)="onAddClick()">
-        <span class="followup-page__add-button-icon">＋</span>
-        <span class="followup-page__add-button-label">
-          {{ itemType() === 'goodPoint' ? 'エピソードを追加' : 'アクションを追加' }}
-        </span>
-      </button>
+      <!-- エピソード/アクション追加ボタン（空状態でない場合のみ表示） -->
+      @if (!isEmpty) {
+        <button class="followup-page__add-button" (click)="onAddClick()">
+          <span class="followup-page__add-button-icon">＋</span>
+          <span class="followup-page__add-button-label">
+            {{ itemType() === 'goodPoint' ? 'エピソードを追加' : 'アクションを追加' }}
+          </span>
+        </button>
+      }
     </section>
   </main>
 
@@ -153,7 +166,7 @@
 
           <footer class="followup-page__modal-footer">
             <app-button
-              variant="outline"
+              variant="secondary"
               size="sm"
               type="button"
               (clicked)="onCloseModal()"

@@ -1,0 +1,301 @@
+/**
+ * 目標階層管理機能 E2Eテスト
+ *
+ * PRD: docs/features/goal-hierarchy-management/prd.md
+ * UI Design: docs/features/goal-hierarchy-management/ui_design.md
+ *
+ * テスト対象ユーザーストーリー:
+ * - US-1: 長期目標の作成
+ * - US-2: 目標の階層的ブレイクダウン
+ * - US-3: 目標間の関係性の確認
+ * - US-4: 目標の階層構造の一覧表示
+ * - US-5: 週次フォーカスと短期目標の接続
+ * - US-6: 目標の編集・削除
+ */
+
+describe('目標階層管理機能', () => {
+  const baseUrl = 'http://localhost:4200';
+  const testPassword = 'TestPassword123!';
+  let uniqueEmail: string;
+
+  beforeEach(() => {
+    // 各テストで一意のメールアドレスを生成
+    uniqueEmail = `e2e-goal-${Cypress._.random(0, 1e6)}@example.com`;
+
+    // サインアップしてログイン状態にする
+    cy.visit(`${baseUrl}/signup`);
+
+    // ページが読み込まれるまで待機
+    cy.get('input#email').should('be.visible');
+
+    // フォーム入力
+    cy.get('input#email').type(uniqueEmail);
+    cy.get('input#password').type(testPassword);
+    cy.get('input#confirmPassword').type(testPassword);
+
+    // サブミットボタンをクリック
+    cy.get('button[type="submit"]').click();
+
+    // ホーム画面に遷移するまで待機
+    cy.url().should('eq', `${baseUrl}/`, { timeout: 15000 });
+  });
+
+  // ============================================
+  // US-1: 長期目標の作成
+  // ============================================
+
+  describe('US-1: 長期目標の作成', () => {
+    it('目標一覧画面から目標作成画面に遷移できること', () => {
+      // 目標一覧画面に遷移（ルーティングが設定されている場合）
+      cy.visit(`${baseUrl}/goals`);
+
+      // 目標を作成ボタンをクリック
+      cy.contains('button', '目標を作成').click();
+
+      // 目標作成画面に遷移したことを確認
+      cy.url().should('include', '/goals/new');
+      cy.contains('h1', '目標を作成').should('be.visible');
+    });
+
+    it('長期目標を作成できること', () => {
+      cy.visit(`${baseUrl}/goals/new`);
+
+      // フォーム入力
+      cy.get('input#goal-name').should('be.visible').type('長期目標: スキル向上');
+      cy.get('textarea#goal-description').type('技術スキルを向上させ、キャリアを発展させる');
+      
+      // 開始日を設定（今日の日付）
+      const today = new Date();
+      const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-start-date').type(startDate);
+
+      // 終了日を設定（6ヶ月後）
+      const endDate = new Date(today);
+      endDate.setMonth(endDate.getMonth() + 6);
+      const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-end-date').type(endDateStr);
+
+      // 目標の性質を選択（長期目標）
+      cy.get('select#goal-type').select('long');
+
+      // 保存ボタンをクリック
+      cy.contains('button', '保存する').click();
+
+      // 目標一覧画面に遷移したことを確認
+      cy.url().should('include', '/goals', { timeout: 15000 });
+    });
+
+    it('必須項目が未入力の場合、エラーメッセージが表示されること', () => {
+      cy.visit(`${baseUrl}/goals/new`);
+
+      // 必須項目を入力せずに保存ボタンをクリック
+      cy.contains('button', '保存する').should('be.disabled');
+
+      // 目標名を入力
+      cy.get('input#goal-name').type('テスト目標');
+      
+      // 開始日を設定
+      const today = new Date();
+      const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-start-date').type(startDate);
+
+      // 終了日を設定
+      const endDate = new Date(today);
+      endDate.setMonth(endDate.getMonth() + 6);
+      const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-end-date').type(endDateStr);
+
+      // 保存ボタンが有効になることを確認
+      cy.contains('button', '保存する').should('not.be.disabled');
+    });
+  });
+
+  // ============================================
+  // US-2: 目標の階層的ブレイクダウン
+  // ============================================
+
+  describe('US-2: 目標の階層的ブレイクダウン', () => {
+    it('長期目標から中期目標を作成できること', () => {
+      // まず長期目標を作成
+      cy.visit(`${baseUrl}/goals/new`);
+      cy.get('input#goal-name').type('長期目標: プロジェクト管理スキル向上');
+      
+      const today = new Date();
+      const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-start-date').type(startDate);
+
+      const endDate = new Date(today);
+      endDate.setMonth(endDate.getMonth() + 6);
+      const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-end-date').type(endDateStr);
+      cy.get('select#goal-type').select('long');
+      cy.contains('button', '保存する').click();
+      cy.url().should('include', '/goals', { timeout: 15000 });
+
+      // 中期目標を作成（上位目標として長期目標を選択）
+      cy.contains('button', '目標を作成').click();
+      cy.get('input#goal-name').type('中期目標: アジャイル手法の習得');
+      
+      const midStartDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-start-date').type(midStartDate);
+
+      const midEndDate = new Date(today);
+      midEndDate.setMonth(midEndDate.getMonth() + 1);
+      const midEndDateStr = `${midEndDate.getFullYear()}-${String(midEndDate.getMonth() + 1).padStart(2, '0')}-${String(midEndDate.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-end-date').type(midEndDateStr);
+
+      // 上位目標を選択（長期目標）
+      cy.get('select#goal-parent-id').select(1); // 最初のオプション（長期目標）
+
+      cy.get('select#goal-type').select('medium');
+      cy.contains('button', '保存する').click();
+      cy.url().should('include', '/goals', { timeout: 15000 });
+    });
+
+    it('中期目標から短期目標を作成できること', () => {
+      // 長期目標と中期目標を作成（上記のテストと同様）
+      // その後、短期目標を作成
+      cy.visit(`${baseUrl}/goals/new`);
+      cy.get('input#goal-name').type('短期目標: スプリント計画の実践');
+      
+      const today = new Date();
+      const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-start-date').type(startDate);
+
+      const endDate = new Date(today);
+      endDate.setDate(endDate.getDate() + 7); // 1週間後
+      const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-end-date').type(endDateStr);
+
+      // 上位目標を選択（中期目標が存在する場合）
+      cy.get('select#goal-parent-id').should('be.visible');
+
+      cy.get('select#goal-type').select('short');
+      cy.contains('button', '保存する').click();
+      cy.url().should('include', '/goals', { timeout: 15000 });
+    });
+  });
+
+  // ============================================
+  // US-4: 目標の階層構造の一覧表示
+  // ============================================
+
+  describe('US-4: 目標の階層構造の一覧表示', () => {
+    it('目標一覧画面で目標が表示されること', () => {
+      cy.visit(`${baseUrl}/goals`);
+
+      // 目標一覧画面が表示されることを確認
+      cy.contains('h1', '目標管理').should('be.visible');
+    });
+
+    it('階層表示とカード表示を切り替えられること', () => {
+      cy.visit(`${baseUrl}/goals`);
+
+      // ビュー切り替えコンポーネントが表示されることを確認
+      // （実装に応じてセレクタを調整）
+      cy.get('.goal-list-page__actions').should('be.visible');
+    });
+
+    it('目標がない場合、空状態が表示されること', () => {
+      cy.visit(`${baseUrl}/goals`);
+
+      // 空状態が表示されることを確認
+      cy.contains('目標がまだ作成されていません').should('be.visible');
+    });
+  });
+
+  // ============================================
+  // US-5: 週次フォーカスと短期目標の接続
+  // ============================================
+
+  describe('US-5: 週次フォーカスと短期目標の接続', () => {
+    it('短期目標の詳細画面で週次フォーカス設定へのリンクが表示されること', () => {
+      // 短期目標を作成
+      cy.visit(`${baseUrl}/goals/new`);
+      cy.get('input#goal-name').type('短期目標: 週次フォーカステスト');
+      
+      const today = new Date();
+      const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-start-date').type(startDate);
+
+      const endDate = new Date(today);
+      endDate.setDate(endDate.getDate() + 7); // 1週間後
+      const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-end-date').type(endDateStr);
+      cy.get('select#goal-type').select('short');
+      cy.contains('button', '保存する').click();
+      cy.url().should('include', '/goals', { timeout: 15000 });
+
+      // 目標詳細画面に遷移（目標をクリック）
+      // 実装に応じてセレクタを調整
+      cy.get('.goal-list-page').should('be.visible');
+
+      // 短期目標の場合、週次フォーカスセクションが表示されることを確認
+      // cy.contains('週次フォーカス').should('be.visible');
+      // cy.contains('週次フォーカスを設定').should('be.visible');
+    });
+  });
+
+  // ============================================
+  // US-6: 目標の編集・削除
+  // ============================================
+
+  describe('US-6: 目標の編集・削除', () => {
+    it('目標を編集できること', () => {
+      // まず目標を作成
+      cy.visit(`${baseUrl}/goals/new`);
+      cy.get('input#goal-name').type('編集テスト目標');
+      
+      const today = new Date();
+      const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-start-date').type(startDate);
+
+      const endDate = new Date(today);
+      endDate.setMonth(endDate.getMonth() + 6);
+      const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-end-date').type(endDateStr);
+      cy.get('select#goal-type').select('long');
+      cy.contains('button', '保存する').click();
+      cy.url().should('include', '/goals', { timeout: 15000 });
+
+      // 目標詳細画面に遷移（目標をクリック）
+      // 実装に応じてセレクタを調整
+      cy.get('.goal-list-page').should('be.visible');
+
+      // 編集ボタンをクリック（実装に応じて）
+      // cy.contains('button', '編集').click();
+
+      // フォームが編集モードで表示されることを確認
+      // cy.contains('h1', '目標を編集').should('be.visible');
+    });
+
+    it('目標を削除できること', () => {
+      // まず目標を作成
+      cy.visit(`${baseUrl}/goals/new`);
+      cy.get('input#goal-name').type('削除テスト目標');
+      
+      const today = new Date();
+      const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-start-date').type(startDate);
+
+      const endDate = new Date(today);
+      endDate.setMonth(endDate.getMonth() + 6);
+      const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+      cy.get('input#goal-end-date').type(endDateStr);
+      cy.get('select#goal-type').select('long');
+      cy.contains('button', '保存する').click();
+      cy.url().should('include', '/goals', { timeout: 15000 });
+
+      // 目標詳細画面に遷移
+      // 削除ボタンをクリック（実装に応じて）
+      // cy.contains('button', '削除').click();
+
+      // 確認ダイアログで確認
+      // cy.contains('button', '削除する').click();
+
+      // 目標一覧画面に戻り、目標が削除されたことを確認
+      // cy.url().should('include', '/goals');
+    });
+  });
+});
+

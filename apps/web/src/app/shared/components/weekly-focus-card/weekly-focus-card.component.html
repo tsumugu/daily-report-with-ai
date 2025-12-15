@@ -18,6 +18,12 @@
           </span>
         }
       </div>
+      @if (focus.goalId && focus.goal) {
+        <div class="weekly-focus-card__goal">
+          <app-icon name="target" [size]="16" color="var(--color-primary-500)" ariaLabel="短期目標" />
+          <span class="weekly-focus-card__goal-name">{{ focus.goal.name }}</span>
+        </div>
+      }
     </div>
     <div class="weekly-focus-card__footer">
       <span class="weekly-focus-card__date">

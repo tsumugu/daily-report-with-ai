@@ -48,24 +48,15 @@
     }
 
     @if (isEmpty) {
-      <div class="followup-list-page__empty">
-        <p class="followup-list-page__empty-message">
-          <app-icon name="alert-triangle" [size]="48" color="var(--color-error-500)" ariaLabel="警告" />
-          <br />
-          フォローする項目が<br />
-          ありません
-        </p>
-        <p class="followup-list-page__empty-submessage">
-          日報を入力して、よかったことや改善点を記録しましょう
-        </p>
-        <app-button
-          variant="primary"
-          (clicked)="router.navigate(['/daily-reports/new'])"
-          ariaLabel="日報を書く"
-        >
-          日報を書く
-        </app-button>
-      </div>
+      <app-empty-state
+        iconName="alert-triangle"
+        iconColor="var(--color-error-500)"
+        message="フォローする項目がありません"
+        subMessage="日報を入力して、よかったことや改善点を記録しましょう"
+        actionButtonText="日報を書く"
+        actionButtonRoute="/daily-reports/new"
+        actionButtonIcon="plus"
+      />
     }
 
     @if (!isLoading() && !isEmpty) {
@@ -87,7 +78,7 @@
     @if (hasMore && !isLoading()) {
       <div class="followup-list-page__load-more">
         <app-button
-          variant="outline"
+          variant="secondary"
           [loading]="isLoadingMore()"
           (clicked)="onLoadMore()"
           ariaLabel="もっと見る"

@@ -68,6 +68,14 @@ export const routes: Routes = [
       ),
   },
 
+  // Goal routes
+  {
+    path: 'goals',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./features/goal/goal.routes').then((m) => m.goalRoutes),
+  },
+
   // Fallback
   {
     path: '**',

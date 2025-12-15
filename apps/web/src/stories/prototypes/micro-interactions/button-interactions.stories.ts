@@ -36,7 +36,7 @@ export const Hover: Story = {
         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
           <app-button variant="primary" size="md">Primary Button</app-button>
           <app-button variant="secondary" size="md">Secondary Button</app-button>
-          <app-button variant="outline" size="md">Outline Button</app-button>
+          <app-button variant="secondary" size="md">Secondary Button</app-button>
         </div>
       </div>
     `,

@@ -3,7 +3,7 @@
     <h2 class="weekly-focus-section__title">今週のフォーカス</h2>
     @if (showAddButton) {
       <app-button
-        variant="add"
+        variant="secondary"
         size="sm"
         (clicked)="onAddClick()"
         ariaLabel="フォーカスを追加"
@@ -32,16 +32,6 @@
           今週のフォーカスが<br />
           設定されていません
         </p>
-        @if (showAddButton) {
-          <app-button
-            variant="primary"
-            size="sm"
-            (clicked)="onAddClick()"
-            ariaLabel="フォーカスを追加"
-          >
-            ＋ フォーカスを追加
-          </app-button>
-        }
       </div>
     }
 

@@ -10,6 +10,7 @@ import { TextareaFieldComponent } from '../../../../shared/components/textarea-f
 import { StatusBadgeComponent, StatusBadgeType } from '../../../../shared/components/status-badge/status-badge.component';
 import { ToastComponent } from '../../../../shared/components/toast/toast.component';
 import { IconComponent } from '../../../../shared/components/icon/icon.component';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -25,6 +26,7 @@ import { Subscription } from 'rxjs';
     StatusBadgeComponent,
     ToastComponent,
     IconComponent,
+    EmptyStateComponent,
   ],
   templateUrl: './followup-page.component.html',
   styleUrl: './followup-page.component.scss',
@@ -441,6 +443,15 @@ export class FollowupPageComponent implements OnInit, OnDestroy {
         this.onCloseModal();
       }
     }
+  }
+
+  /**
+   * エピソード/アクション一覧が空かどうか
+   */
+  get isEmpty(): boolean {
+    return this.itemType() === 'goodPoint' 
+      ? this.episodes().length === 0 
+      : this.actions().length === 0;
   }
 }
 

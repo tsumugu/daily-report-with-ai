@@ -1,0 +1,62 @@
+<div class="goal-list-page">
+  <!-- ヘッダー -->
+  <header class="goal-list-page__header">
+    <button
+      type="button"
+      class="goal-list-page__back-button"
+      (click)="router.navigate(['/'])"
+      aria-label="戻る"
+    >
+      ←
+    </button>
+    <h1 class="goal-list-page__title">目標管理</h1>
+  </header>
+
+  <!-- アクションバー -->
+  <div class="goal-list-page__actions">
+    <app-button
+      variant="primary"
+      icon="plus"
+      (clicked)="router.navigate(['/goals/new'])"
+    >
+      目標を作成
+    </app-button>
+  </div>
+
+  <!-- エラーメッセージ -->
+  @if (errorMessage()) {
+    <app-alert-banner variant="error" [message]="errorMessage()!" />
+  }
+
+  <!-- ローディング状態 -->
+  @if (isLoading()) {
+    <div class="goal-list-page__loading">読み込み中...</div>
+  }
+
+  <!-- 空状態 -->
+  @if (isEmpty) {
+    <app-empty-state
+      iconName="target"
+      message="目標がまだ作成されていません"
+      subMessage="目標を作成して、目標達成を目指しましょう"
+      actionButtonText="目標を作成"
+      actionButtonRoute="/goals/new"
+      actionButtonIcon="plus"
+    />
+  }
+
+  <!-- 目標一覧 -->
+  @if (!isLoading() && !isEmpty) {
+    <div class="goal-list-page__tree-view">
+      <app-hierarchy-tree-view
+        [nodes]="convertToTreeNodes(goals())"
+        [expandedIds]="expandedIds()"
+        [showCreateChildButton]="true"
+        (nodeClicked)="onGoalClick($event)"
+        (expandToggled)="onExpandToggle($event)"
+        (createChild)="onCreateChild($event)"
+      />
+    </div>
+  }
+</div>
+

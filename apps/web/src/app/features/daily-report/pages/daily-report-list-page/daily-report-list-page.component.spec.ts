@@ -238,8 +238,8 @@ describe('DailyReportListPageComponent', () => {
       tick();
       fixture.detectChanges();
 
-      const emptyContainer = fixture.nativeElement.querySelector('.empty-container');
-      expect(emptyContainer).toBeTruthy();
+      const emptyState = fixture.nativeElement.querySelector('app-empty-state');
+      expect(emptyState).toBeTruthy();
     }));
   });
 

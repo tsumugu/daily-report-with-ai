@@ -34,6 +34,16 @@ export class WeeklyFocusesDatabase {
     return results;
   }
 
+  findByGoalId(goalId: string): WeeklyFocus[] {
+    const results: WeeklyFocus[] = [];
+    for (const weeklyFocus of this.weeklyFocuses.values()) {
+      if (weeklyFocus.goalId === goalId) {
+        results.push(weeklyFocus);
+      }
+    }
+    return results;
+  }
+
   delete(id: string): void {
     this.weeklyFocuses.delete(id);
   }
