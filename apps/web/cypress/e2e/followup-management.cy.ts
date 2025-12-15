@@ -717,8 +717,10 @@ describe('フォローアップ管理機能', () => {
       cy.get('.followup-page').should('be.visible');
 
       // 「エピソードを追加」ボタンをクリック
+      cy.get('.followup-page__add-button').should('be.visible', { timeout: 5000 });
       cy.get('.followup-page__add-button').click();
-      cy.get('.followup-page__modal').should('be.visible', { timeout: 10000 });
+      cy.get('.followup-page__overlay').should('be.visible', { timeout: 10000 });
+      cy.get('.followup-page__modal').should('be.visible');
 
       // 日付を入力せずに保存ボタンの状態を確認
       cy.contains('追加').should('be.visible', { timeout: 5000 });

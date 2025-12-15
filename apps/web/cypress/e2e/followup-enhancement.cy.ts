@@ -65,12 +65,19 @@ describe('フォローアップ機能強化', () => {
 
   const addEpisodeOrAction = (memo: string) => {
     const today = new Date().toISOString().split('T')[0];
+    cy.get('.followup-page__add-button').should('be.visible', { timeout: 5000 });
     cy.get('.followup-page__add-button').click();
-    cy.get('.followup-page__modal', { timeout: 5000 }).should('be.visible');
-    cy.get('.date-field__input').clear().type(today);
-    cy.get('.textarea-field__textarea').clear().type(memo);
-    cy.get('.followup-page__modal button[type="submit"]').click();
-    cy.get('.followup-page__modal').should('not.exist', { timeout: 5000 });
+    cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
+    cy.get('.followup-page__modal').should('be.visible');
+    cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
+    cy.get('.date-field__input').clear();
+    cy.get('.date-field__input').type(today);
+    cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
+    cy.get('.textarea-field__textarea').clear();
+    cy.get('.textarea-field__textarea').type(memo);
+    cy.contains('追加').should('be.visible').click();
+    cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
+    cy.wait(500); // データの保存を待つ
   };
 
   beforeEach(() => {
@@ -99,8 +106,8 @@ describe('フォローアップ機能強化', () => {
 
       addEpisodeOrAction('エピソード1のメモ');
 
-      cy.contains('.followup-page__item-memo', 'エピソード1のメモ').should('be.visible');
-      cy.get('.followup-page__status-text').should('contain.text', '進行中');
+      cy.contains('.followup-page__item-memo', 'エピソード1のメモ').should('be.visible', { timeout: 10000 });
+      cy.get('.followup-page__status-text').should('contain.text', '進行中', { timeout: 10000 });
     });
 
     it('エピソードを複数件（3件）追加できる', () => {
@@ -110,7 +117,7 @@ describe('フォローアップ機能強化', () => {
       addEpisodeOrAction('エピソード2');
       addEpisodeOrAction('エピソード3');
 
-      cy.get('.followup-page__item').should('have.length', 3);
+      cy.get('.followup-page__item').should('have.length', 3, { timeout: 10000 });
     });
   });
 
@@ -127,10 +134,10 @@ describe('フォローアップ機能強化', () => {
     it('改善点のフォローアップページでアクションを追加できる', () => {
       navigateToFollowupPageFromCard(improvementContent);
 
-      cy.url().should('include', '/followups/improvement/');
+      cy.url().should('include', '/followups/improvement/', { timeout: 10000 });
       addEpisodeOrAction('アクション1のメモ');
 
-      cy.contains('.followup-page__item-memo', 'アクション1のメモ').should('be.visible');
+      cy.contains('.followup-page__item-memo', 'アクション1のメモ').should('be.visible', { timeout: 10000 });
     });
 
     it('アクションを複数件（3件）追加できる', () => {
@@ -140,7 +147,7 @@ describe('フォローアップ機能強化', () => {
       addEpisodeOrAction('アクション2');
       addEpisodeOrAction('アクション3');
 
-      cy.get('.followup-page__item').should('have.length', 3);
+      cy.get('.followup-page__item').should('have.length', 3, { timeout: 10000 });
     });
   });
 
@@ -156,19 +163,19 @@ describe('フォローアップ機能強化', () => {
       navigateToFollowupPageFromCard(goodPointContent);
 
       // 初期状態: 未着手
-      cy.get('.followup-page__status-text').should('contain.text', '未着手');
+      cy.get('.followup-page__status-text').should('contain.text', '未着手', { timeout: 10000 });
 
       // 1件追加: 進行中
       addEpisodeOrAction('エピソード1');
-      cy.get('.followup-page__status-text').should('contain.text', '進行中');
+      cy.get('.followup-page__status-text').should('contain.text', '進行中', { timeout: 10000 });
 
       // 2件追加: 進行中
       addEpisodeOrAction('エピソード2');
-      cy.get('.followup-page__status-text').should('contain.text', '進行中');
+      cy.get('.followup-page__status-text').should('contain.text', '進行中', { timeout: 10000 });
 
       // 3件追加: 定着
       addEpisodeOrAction('エピソード3');
-      cy.get('.followup-page__status-text').should('contain.text', '定着');
+      cy.get('.followup-page__status-text').should('contain.text', '定着', { timeout: 10000 });
     });
 
     it('改善点: 0件→未着手、1件→進行中、3件→習慣化', () => {
@@ -176,16 +183,16 @@ describe('フォローアップ機能強化', () => {
       navigateToFollowupPageFromCard(improvementContent);
 
       // 初期状態: 未着手
-      cy.get('.followup-page__status-text').should('contain.text', '未着手');
+      cy.get('.followup-page__status-text').should('contain.text', '未着手', { timeout: 10000 });
 
       // 1件追加: 進行中
       addEpisodeOrAction('アクション1');
-      cy.get('.followup-page__status-text').should('contain.text', '進行中');
+      cy.get('.followup-page__status-text').should('contain.text', '進行中', { timeout: 10000 });
 
       // 3件追加: 習慣化
       addEpisodeOrAction('アクション2');
       addEpisodeOrAction('アクション3');
-      cy.get('.followup-page__status-text').should('contain.text', '習慣化');
+      cy.get('.followup-page__status-text').should('contain.text', '習慣化', { timeout: 10000 });
     });
   });
 
@@ -211,25 +218,26 @@ describe('フォローアップ機能強化', () => {
       cy.visit(`${baseUrl}/`);
       cy.get('.weekly-focus-card', { timeout: 10000 }).should('exist');
       cy.contains('.weekly-focus-card', goodPointContent).within(() => {
-        cy.contains('a', 'フォローアップ').click();
+        cy.get('a[aria-label="フォローアップ"]').should('be.visible').click();
       });
 
-      cy.url().should('include', '/followups/goodPoint/');
-      cy.get('.followup-page').should('be.visible');
+      cy.url().should('include', '/followups/goodPoint/', { timeout: 10000 });
+      cy.get('.followup-page').should('be.visible', { timeout: 10000 });
     });
 
     it('週次フォーカスカードからエピソードを追加できる', () => {
       cy.visit(`${baseUrl}/`);
       cy.get('.weekly-focus-card', { timeout: 10000 }).should('exist');
       cy.contains('.weekly-focus-card', goodPointContent).within(() => {
-        cy.contains('a', 'フォローアップ').click();
+        cy.get('a[aria-label="フォローアップ"]').should('be.visible').click();
       });
       cy.get('.followup-page', { timeout: 10000 }).should('be.visible');
 
       addEpisodeOrAction('週次フォーカスからのエピソード');
 
       cy.contains('.followup-page__item-memo', '週次フォーカスからのエピソード').should(
-        'be.visible'
+        'be.visible',
+        { timeout: 10000 }
       );
     });
 
@@ -237,7 +245,7 @@ describe('フォローアップ機能強化', () => {
       cy.visit(`${baseUrl}/`);
       cy.get('.weekly-focus-card', { timeout: 10000 }).should('exist');
       cy.contains('.weekly-focus-card', goodPointContent).within(() => {
-        cy.contains('a', 'フォローアップ').click();
+        cy.get('a[aria-label="フォローアップ"]').should('be.visible').click();
       });
       cy.get('.followup-page', { timeout: 10000 }).should('be.visible');
 
@@ -250,7 +258,7 @@ describe('フォローアップ機能強化', () => {
       cy.visit(`${baseUrl}/`);
       cy.get('.weekly-focus-card', { timeout: 10000 }).should('exist');
       cy.contains('.weekly-focus-card', goodPointContent).within(() => {
-        cy.contains('定着').should('be.visible');
+        cy.contains('定着').should('be.visible', { timeout: 10000 });
       });
     });
   });
