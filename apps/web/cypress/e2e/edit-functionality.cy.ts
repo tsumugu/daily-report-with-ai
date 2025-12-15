@@ -57,16 +57,19 @@ describe('編集機能', () => {
 
   const navigateToFollowupPage = (itemType: 'goodPoint' | 'improvement', itemContent: string) => {
     cy.visit(`${baseUrl}/followups`);
-    // フォローアップカードが読み込まれるまで待機
-    cy.get('.followup-list-page', { timeout: 10000 }).should('be.visible');
-    cy.get('.followup-card', { timeout: 10000 }).should('exist');
+    // フォローアップリストページが読み込まれるまで待機
+    cy.get('.followup-list-page', { timeout: 15000 }).should('be.visible');
+    // ローディングが完了するまで待機
+    cy.get('.followup-list-page__loading').should('not.exist', { timeout: 15000 });
+    // フォローアップカードが表示されるまで待機
+    cy.get('.followup-card', { timeout: 15000 }).should('exist').should('be.visible');
     // 特定のコンテンツを含むカードを探す
-    cy.contains('.followup-card', itemContent).should('be.visible', { timeout: 10000 });
+    cy.contains('.followup-card', itemContent, { timeout: 15000 }).should('be.visible');
     cy.contains('.followup-card', itemContent).within(() => {
       // app-buttonコンポーネント内のテキストを探す
-      cy.contains('フォローアップ').should('be.visible').click();
+      cy.contains('フォローアップ').should('be.visible', { timeout: 5000 }).click();
     });
-    cy.url().should('include', `/followups/${itemType}/`, { timeout: 10000 });
+    cy.url().should('include', `/followups/${itemType}/`, { timeout: 15000 });
   };
 
   const addEpisode = (memo: string) => {
@@ -258,8 +261,8 @@ describe('編集機能', () => {
         .type(goodPointContent);
       cy.get('button[type="submit"]').click();
       cy.url().should('include', '/daily-reports', { timeout: 15000 });
-      // 日報が保存されるまで待機
-      cy.wait(1000);
+      // 日報が保存され、フォローアップカードが作成されるまで待機
+      cy.wait(2000);
 
       // フォローアップページに遷移
       navigateToFollowupPage('goodPoint', goodPointContent);
@@ -355,8 +358,8 @@ describe('編集機能', () => {
         .type(improvementContent);
       cy.get('button[type="submit"]').click();
       cy.url().should('include', '/daily-reports', { timeout: 15000 });
-      // 日報が保存されるまで待機
-      cy.wait(1000);
+      // 日報が保存され、フォローアップカードが作成されるまで待機
+      cy.wait(2000);
 
       // フォローアップページに遷移
       navigateToFollowupPage('improvement', improvementContent);

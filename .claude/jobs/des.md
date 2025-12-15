@@ -26,7 +26,7 @@ alwaysApply: true
 
 ※全体共通のデザインシステム：
 
-- **ルール**: `.cursor/rules/design_system_rules.mdc` で管理
+- **ルール**: `.claude/design_system_rules.md` で管理
 - **実体（コンポーネントの見た目、使い方、バリエーション）**: Storybook（`apps/web/src/stories/`）を参照
   - `components/` - コンポーネントストーリー
   - `design-tokens/` - デザイントークン（カラー、アイコン等）
@@ -69,7 +69,7 @@ alwaysApply: true
 
 ### 4.1. デザイントークンとスタイリング
 
-> 詳細は `.cursor/rules/design_system_rules.mdc` の「2. スタイリングとカスタマイズ」を参照
+> 詳細は `.claude/design_system_rules.md` の「2. スタイリングとカスタマイズ」を参照
 
 - **デザイントークンの活用（必須）**: スタイルには必ずCSS変数（デザイントークン）を使用する
 - **Shadow-CNの活用**: Tailwind CSSベースのコンポーネントライブラリを最優先で使用する
@@ -77,7 +77,7 @@ alwaysApply: true
 
 ### 4.2. コンポーネント運用
 
-> 詳細は `.cursor/rules/design_system_rules.mdc` の「3. コンポーネント運用ルール」を参照
+> 詳細は `.claude/design_system_rules.md` の「3. コンポーネント運用ルール」を参照
 
 - **既存コンポーネントの活用**: 実装前に `shared/components/` を確認し、既存のコンポーネントを活用する
 - **コンポーネント設計の事前レビュー**: 新規コンポーネント作成前に、既存コンポーネントの variant で対応可能か検討する
@@ -86,7 +86,7 @@ alwaysApply: true
 
 ### 4.3. Storybook運用
 
-> 詳細は `.cursor/rules/design_system_rules.mdc` の「4. Storybook運用ルール」を参照
+> 詳細は `.claude/design_system_rules.md` の「4. Storybook運用ルール」を参照
 
 - **Storybookファースト**: 実装と同時にStorybookを更新する
 - **Storybook登録の義務**: 再利用性が高い汎用コンポーネント（`shared/components/`）は必ずStorybookに登録する

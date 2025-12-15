@@ -223,4 +223,4 @@ PdMは `ui_design.md` をレビューし、以下をチェックする：
 - `docs/rules/jobs/des.md` - Desロールの詳細ルール
 - `docs/rules/jobs/pdm.md` - PdMロールの詳細ルール
 - `docs/rules/development-flow.md` - 開発フロー
-- `.cursor/rules/design_system_rules.mdc` - デザインシステムルール（実体はStorybook参照）
+- `.claude/design_system_rules.md` - デザインシステムルール（実体はStorybook参照）

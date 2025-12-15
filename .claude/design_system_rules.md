@@ -341,8 +341,8 @@ apps/web/src/stories/
 
 ## 9. 関連ドキュメント
 
-- `.cursor/rules/jobs/des.mdc` - Desロールの詳細ルール
-- `.cursor/rules/development-flow.mdc` - 開発フロー
+- `.claude/jobs/des.md` - Desロールの詳細ルール
+- `.claude/development-flow.md` - 開発フロー
 - `apps/web/src/styles/tokens/_colors.scss` - カラートークン定義
 - **Storybook** (`apps/web/src/stories/`) - デザインシステムの実体
   - `components/` - コンポーネントストーリー

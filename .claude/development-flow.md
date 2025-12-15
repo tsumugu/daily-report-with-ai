@@ -17,7 +17,7 @@ alwaysApply: true
 
 Discovery の成果物は、必ずしも直線的にこの開発フロー（Phase 1: 設計）につながるわけではありません。
 
-- **Discovery フロー**: `.cursor/rules/discovery-flow.mdc` を参照
+- **Discovery フロー**: `.claude/discovery-flow.md` を参照
 - **バックログ管理**: PdM が Discovery の成果物を判断し、Adopt したものはバックログに Queue する
 - **ロードマップ管理**: PdM が Discovery の成果物を判断し、Defer したものはロードマップに Queue する（中長期的にやりたいこととして管理）
 - **Development Flow への移行**: PdM がバックログから適切なタイミングで選択することで、この開発フロー（Phase 1: 設計）に進む
@@ -141,7 +141,7 @@ Driverは、開発フローの遵守を監視し、適切なタイミングで�
 - **軽微な違反**: 適切なロールに切り替えて修正を進める
 - **重大な違反**: 人間（human）に報告し、判断を仰ぐ
 
-→ 詳細は `.cursor/rules/jobs/driver.mdc` を参照
+→ 詳細は `.claude/jobs/driver.md` を参照
 
 ---
 
@@ -588,14 +588,14 @@ git push
 
 ### 参照ドキュメント
 
-| ドキュメント                            | 内容                                                     |
-| --------------------------------------- | -------------------------------------------------------- |
-| `.cursor/rules/discovery-flow.mdc`      | Discovery フロー（Phase 0）                              |
-| `.cursor/rules/jobs/pdl.mdc`            | PDLルール（Discovery、問題構造化等）                     |
-| `.cursor/rules/jobs/pdm.mdc`            | PdMルール（PRD作成方法、バックログ・ロードマップ管理等） |
-| `.cursor/rules/jobs/eng.mdc`            | Engルール（TDD、コンポーネント設計等）                   |
-| `.cursor/rules/jobs/des.mdc`            | Desルール（Storybook、デザイントークン等）               |
-| `docs/general/backlog.md`               | バックログ（Adopt されたアイテムの管理）                 |
-| `docs/general/roadmap.md`               | ロードマップ（Defer されたアイテムの管理）               |
-| `docs/general/test_rules.md`            | テストスニペット集                                       |
-| `.cursor/rules/design_system_rules.mdc` | デザインシステムルール（実体はStorybook参照）            |
+| ドキュメント                     | 内容                                                     |
+| -------------------------------- | -------------------------------------------------------- |
+| `.claude/discovery-flow.md`      | Discovery フロー（Phase 0）                              |
+| `.claude/jobs/pdl.md`            | PDLルール（Discovery、問題構造化等）                     |
+| `.claude/jobs/pdm.md`            | PdMルール（PRD作成方法、バックログ・ロードマップ管理等） |
+| `.claude/jobs/eng.md`            | Engルール（TDD、コンポーネント設計等）                   |
+| `.claude/jobs/des.md`            | Desルール（Storybook、デザイントークン等）               |
+| `docs/general/backlog.md`        | バックログ（Adopt されたアイテムの管理）                 |
+| `docs/general/roadmap.md`        | ロードマップ（Defer されたアイテムの管理）               |
+| `docs/general/test_rules.md`     | テストスニペット集                                       |
+| `.claude/design_system_rules.md` | デザインシステムルール（実体はStorybook参照）            |

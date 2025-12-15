@@ -36,7 +36,7 @@ PDL が扱う入力は以下に限定される。
 - `.discovery/inbox/` - Human による生の悩み・違和感・思考ログ
 - `.discovery/archived/` - 過去の生ログ・過去の handoff（文脈把握用）
 - `.discovery/` 内の既存成果物
-- `.cursor/rules/constitution.mdc` - 判断原則・制約条件（最上位ルール）
+- `.claude/constitution.md` - 判断原則・制約条件（最上位ルール）
 
 ## 4. 成果物（Outputs）
 

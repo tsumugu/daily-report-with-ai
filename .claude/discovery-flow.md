@@ -72,9 +72,9 @@ Phase 0: Discovery（PDL）
 
 ## 成果物
 
-| ロール | 成果物                                                                                                | 詳細ルール                     |
-| ------ | ----------------------------------------------------------------------------------------------------- | ------------------------------ |
-| PDL    | `problem_statements.md`, `value_hypotheses.md`, `requirements.md`, `handoff.md`, `critical_review.md` | → `.cursor/rules/jobs/pdl.mdc` |
+| ロール | 成果物                                                                                                | 詳細ルール              |
+| ------ | ----------------------------------------------------------------------------------------------------- | ----------------------- |
+| PDL    | `problem_statements.md`, `value_hypotheses.md`, `requirements.md`, `handoff.md`, `critical_review.md` | → `.claude/jobs/pdl.md` |
 
 ---
 
@@ -298,10 +298,10 @@ Discovery の成果物が Development Flow に進む条件：
 
 ## 関連ドキュメント
 
-| ドキュメント                         | 内容                                              |
-| ------------------------------------ | ------------------------------------------------- |
-| `.cursor/rules/jobs/pdl.mdc`         | PDLルール（Discovery、問題構造化等）              |
-| `.cursor/rules/jobs/pdm.mdc`         | PdMルール（バックログ・ロードマップ管理、判断等） |
-| `.cursor/rules/development-flow.mdc` | 機能開発フロー（Phase 1〜4）                      |
-| `docs/general/backlog.md`            | バックログ（Adopt されたアイテムの管理）          |
-| `docs/general/roadmap.md`            | ロードマップ（Defer されたアイテムの管理）        |
+| ドキュメント                  | 内容                                              |
+| ----------------------------- | ------------------------------------------------- |
+| `.claude/jobs/pdl.md`         | PDLルール（Discovery、問題構造化等）              |
+| `.claude/jobs/pdm.md`         | PdMルール（バックログ・ロードマップ管理、判断等） |
+| `.claude/development-flow.md` | 機能開発フロー（Phase 1〜4）                      |
+| `docs/general/backlog.md`     | バックログ（Adopt されたアイテムの管理）          |
+| `docs/general/roadmap.md`     | ロードマップ（Defer されたアイテムの管理）        |

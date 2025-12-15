@@ -18,24 +18,24 @@ alwaysApply: true
 
 #### Discoveryロール（問題の構造化・仮説立案）
 
-| ロール  | 責務                                                   | 詳細                           |
-| ------- | ------------------------------------------------------ | ------------------------------ |
-| **PDL** | 問題の構造化、仮説立案、Decision-ready artifactsの作成 | → `.cursor/rules/jobs/pdl.mdc` |
+| ロール  | 責務                                                   | 詳細                    |
+| ------- | ------------------------------------------------------ | ----------------------- |
+| **PDL** | 問題の構造化、仮説立案、Decision-ready artifactsの作成 | → `.claude/jobs/pdl.md` |
 
 #### 行政ロール（機能実装を実行）
 
-| ロール     | 責務                               | 詳細                              |
-| ---------- | ---------------------------------- | --------------------------------- |
-| **PdM**    | WhyとWhatを定義する                | → `.cursor/rules/jobs/pdm.mdc`    |
-| **Eng**    | How（論理・構造）を担保する        | → `.cursor/rules/jobs/eng.mdc`    |
-| **Des**    | Usability/Look & Feel/UI実装を担当 | → `.cursor/rules/jobs/des.mdc`    |
-| **Helper** | 判断支援・横断的レビューを担当     | → `.cursor/rules/jobs/helper.mdc` |
+| ロール     | 責務                               | 詳細                       |
+| ---------- | ---------------------------------- | -------------------------- |
+| **PdM**    | WhyとWhatを定義する                | → `.claude/jobs/pdm.md`    |
+| **Eng**    | How（論理・構造）を担保する        | → `.claude/jobs/eng.md`    |
+| **Des**    | Usability/Look & Feel/UI実装を担当 | → `.claude/jobs/des.md`    |
+| **Helper** | 判断支援・横断的レビューを担当     | → `.claude/jobs/helper.md` |
 
 #### 司法ロール（開発フローの監視・推進）
 
-| ロール     | 責務                                               | 詳細                              |
-| ---------- | -------------------------------------------------- | --------------------------------- |
-| **Driver** | 開発フローの監視・推進、機能開発をプッシュまで統括 | → `.cursor/rules/jobs/driver.mdc` |
+| ロール     | 責務                                               | 詳細                       |
+| ---------- | -------------------------------------------------- | -------------------------- |
+| **Driver** | 開発フローの監視・推進、機能開発をプッシュまで統括 | → `.claude/jobs/driver.md` |
 
 ### 1.2. ロールの関係性
 
@@ -164,12 +164,12 @@ docs/
 
 本プロジェクトでは、**Discovery フロー**と**Development フロー**を分離しています。
 
-- **Discovery フロー**: `.cursor/rules/discovery-flow.mdc` を参照
+- **Discovery フロー**: `.claude/discovery-flow.md` を参照
   - PDL が問題を構造化し、仮説を立て、Decision-ready artifacts を作成
   - PdM が判断し、Adopt したものはバックログに Queue、Defer したものはロードマップに Queue
   - バックログを経由し、PdM が適切なタイミングで選択することで、Development Flow に進む
 
-- **Development フロー**: `.cursor/rules/development-flow.mdc` を参照
+- **Development フロー**: `.claude/development-flow.md` を参照
   - 1. **設計**: PdMがPRD作成 → Eng/Desが設計作成 → クロスレビュー
   - 2. **実装**: TDDでBE実装 / Storybookファーストで FE実装
   - 3. **検証**: 結合テスト → E2Eテスト
@@ -261,15 +261,15 @@ docs/
 
 ## 関連ドキュメント
 
-| ドキュメント                            | 内容                                          |
-| --------------------------------------- | --------------------------------------------- |
-| `.cursor/rules/discovery-flow.mdc`      | Discovery フロー詳細                          |
-| `.cursor/rules/development-flow.mdc`    | 開発フロー詳細                                |
-| `.cursor/rules/documentation.mdc`       | ドキュメント作成ルール                        |
-| `.cursor/rules/prototype.mdc`           | プロトタイプレギュレーション                  |
-| `.cursor/rules/jobs/*.mdc`              | ロール別ルール                                |
-| `docs/general/backlog.md`               | バックログ（Adopt されたアイテムの管理）      |
-| `docs/general/roadmap.md`               | ロードマップ（Defer されたアイテムの管理）    |
-| `docs/general/general_prd.md`           | 全体要件定義（憲法と同等）                    |
-| `docs/general/test_rules.md`            | テストルール・スニペット集                    |
-| `.cursor/rules/design_system_rules.mdc` | デザインシステムルール（実体はStorybook参照） |
+| ドキュメント                     | 内容                                          |
+| -------------------------------- | --------------------------------------------- |
+| `.claude/discovery-flow.md`      | Discovery フロー詳細                          |
+| `.claude/development-flow.md`    | 開発フロー詳細                                |
+| `.claude/documentation.md`       | ドキュメント作成ルール                        |
+| `.claude/prototype.md`           | プロトタイプレギュレーション                  |
+| `.claude/jobs/*.md`              | ロール別ルール                                |
+| `docs/general/backlog.md`        | バックログ（Adopt されたアイテムの管理）      |
+| `docs/general/roadmap.md`        | ロードマップ（Defer されたアイテムの管理）    |
+| `docs/general/general_prd.md`    | 全体要件定義（憲法と同等）                    |
+| `docs/general/test_rules.md`     | テストルール・スニペット集                    |
+| `.claude/design_system_rules.md` | デザインシステムルール（実体はStorybook参照） |
