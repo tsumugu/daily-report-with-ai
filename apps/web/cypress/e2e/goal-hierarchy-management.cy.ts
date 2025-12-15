@@ -75,8 +75,8 @@ describe('目標階層管理機能', () => {
       const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
       cy.get('input#goal-end-date').type(endDateStr);
 
-      // 目標の性質を選択（長期目標）
-      cy.get('select#goal-type').select('long');
+      // 目標の性質を選択（任意、スキル習得を選択）
+      cy.get('select#goal-type').select('skill');
 
       // 保存ボタンをクリック
       cy.contains('button', '保存する').click();
@@ -118,7 +118,7 @@ describe('目標階層管理機能', () => {
     it('長期目標から中期目標を作成できること', () => {
       // まず長期目標を作成
       cy.visit(`${baseUrl}/goals/new`);
-      cy.get('input#goal-name').type('長期目標: プロジェクト管理スキル向上');
+      cy.get('input#goal-name').should('be.visible').type('長期目標: プロジェクト管理スキル向上');
       
       const today = new Date();
       const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -128,13 +128,19 @@ describe('目標階層管理機能', () => {
       endDate.setMonth(endDate.getMonth() + 6);
       const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
       cy.get('input#goal-end-date').type(endDateStr);
-      cy.get('select#goal-type').select('long');
+      cy.get('select#goal-type').select('skill');
       cy.contains('button', '保存する').click();
       cy.url().should('include', '/goals', { timeout: 15000 });
 
+      // 目標一覧画面で目標が表示されるまで待機
+      cy.contains('長期目標: プロジェクト管理スキル向上').should('be.visible');
+
       // 中期目標を作成（上位目標として長期目標を選択）
+      // 目標一覧画面から目標作成画面に遷移
       cy.contains('button', '目標を作成').click();
-      cy.get('input#goal-name').type('中期目標: アジャイル手法の習得');
+      cy.url().should('include', '/goals/new');
+      
+      cy.get('input#goal-name').should('be.visible').type('中期目標: アジャイル手法の習得');
       
       const midStartDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
       cy.get('input#goal-start-date').type(midStartDate);
@@ -144,10 +150,14 @@ describe('目標階層管理機能', () => {
       const midEndDateStr = `${midEndDate.getFullYear()}-${String(midEndDate.getMonth() + 1).padStart(2, '0')}-${String(midEndDate.getDate()).padStart(2, '0')}`;
       cy.get('input#goal-end-date').type(midEndDateStr);
 
-      // 上位目標を選択（長期目標）
-      cy.get('select#goal-parent-id').select(1); // 最初のオプション（長期目標）
+      // 上位目標を選択（オプションが読み込まれるまで待機）
+      cy.get('select#goal-parent-id').should('be.visible');
+      // オプションが読み込まれるまで待機（「なし」オプション以外が存在することを確認）
+      cy.get('select#goal-parent-id option').should('have.length.greaterThan', 1);
+      // 最初の目標オプションを選択（「なし」オプションの次）
+      cy.get('select#goal-parent-id').select(1);
 
-      cy.get('select#goal-type').select('medium');
+      cy.get('select#goal-type').select('project');
       cy.contains('button', '保存する').click();
       cy.url().should('include', '/goals', { timeout: 15000 });
     });
@@ -170,7 +180,7 @@ describe('目標階層管理機能', () => {
       // 上位目標を選択（中期目標が存在する場合）
       cy.get('select#goal-parent-id').should('be.visible');
 
-      cy.get('select#goal-type').select('short');
+      cy.get('select#goal-type').select('habit');
       cy.contains('button', '保存する').click();
       cy.url().should('include', '/goals', { timeout: 15000 });
     });
@@ -222,17 +232,20 @@ describe('目標階層管理機能', () => {
       endDate.setDate(endDate.getDate() + 7); // 1週間後
       const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
       cy.get('input#goal-end-date').type(endDateStr);
-      cy.get('select#goal-type').select('short');
+      cy.get('select#goal-type').select('habit');
       cy.contains('button', '保存する').click();
       cy.url().should('include', '/goals', { timeout: 15000 });
 
       // 目標詳細画面に遷移（目標をクリック）
-      // 実装に応じてセレクタを調整
-      cy.get('.goal-list-page').should('be.visible');
+      // 目標一覧画面で目標が表示されるまで待機
+      cy.contains('短期目標: 週次フォーカステスト').should('be.visible');
+      // 目標をクリックして詳細画面に遷移
+      cy.contains('短期目標: 週次フォーカステスト').click();
+      cy.url().should('include', '/goals/', { timeout: 15000 });
 
       // 短期目標の場合、週次フォーカスセクションが表示されることを確認
-      // cy.contains('週次フォーカス').should('be.visible');
-      // cy.contains('週次フォーカスを設定').should('be.visible');
+      cy.contains('週次フォーカス').should('be.visible');
+      cy.contains('button', '週次フォーカスを設定').should('be.visible');
     });
   });
 
@@ -254,19 +267,23 @@ describe('目標階層管理機能', () => {
       endDate.setMonth(endDate.getMonth() + 6);
       const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
       cy.get('input#goal-end-date').type(endDateStr);
-      cy.get('select#goal-type').select('long');
+      cy.get('select#goal-type').select('skill');
       cy.contains('button', '保存する').click();
       cy.url().should('include', '/goals', { timeout: 15000 });
 
       // 目標詳細画面に遷移（目標をクリック）
-      // 実装に応じてセレクタを調整
-      cy.get('.goal-list-page').should('be.visible');
+      // 目標一覧画面で目標が表示されるまで待機
+      cy.contains('編集テスト目標').should('be.visible');
+      // 目標をクリックして詳細画面に遷移
+      cy.contains('編集テスト目標').click();
+      cy.url().should('include', '/goals/', { timeout: 15000 });
 
-      // 編集ボタンをクリック（実装に応じて）
-      // cy.contains('button', '編集').click();
+      // 編集ボタンをクリック
+      cy.contains('button', '編集').click();
+      cy.url().should('include', '/edit', { timeout: 15000 });
 
       // フォームが編集モードで表示されることを確認
-      // cy.contains('h1', '目標を編集').should('be.visible');
+      cy.contains('h1', '目標を編集').should('be.visible');
     });
 
     it('目標を削除できること', () => {
@@ -282,19 +299,28 @@ describe('目標階層管理機能', () => {
       endDate.setMonth(endDate.getMonth() + 6);
       const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
       cy.get('input#goal-end-date').type(endDateStr);
-      cy.get('select#goal-type').select('long');
+      cy.get('select#goal-type').select('skill');
       cy.contains('button', '保存する').click();
       cy.url().should('include', '/goals', { timeout: 15000 });
 
-      // 目標詳細画面に遷移
-      // 削除ボタンをクリック（実装に応じて）
-      // cy.contains('button', '削除').click();
+      // 目標詳細画面に遷移（目標をクリック）
+      // 目標一覧画面で目標が表示されるまで待機
+      cy.contains('削除テスト目標').should('be.visible');
+      // 目標をクリックして詳細画面に遷移
+      cy.contains('削除テスト目標').click();
+      cy.url().should('include', '/goals/', { timeout: 15000 });
 
-      // 確認ダイアログで確認
-      // cy.contains('button', '削除する').click();
+      // 削除ボタンをクリック（確認ダイアログを自動的に確認）
+      cy.window().then((win) => {
+        cy.stub(win, 'confirm').returns(true);
+        cy.contains('button', '削除').click();
+      });
+
+      // 削除が完了するまで待機
+      cy.url().should('include', '/goals', { timeout: 15000 });
 
       // 目標一覧画面に戻り、目標が削除されたことを確認
-      // cy.url().should('include', '/goals');
+      cy.contains('削除テスト目標').should('not.exist');
     });
   });
 });
