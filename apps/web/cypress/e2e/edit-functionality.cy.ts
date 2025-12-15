@@ -256,9 +256,14 @@ describe('編集機能', () => {
 
       // フォローアップページに遷移
       navigateToFollowupPage('goodPoint', goodPointContent);
+      cy.get('.followup-page').should('be.visible', { timeout: 10000 });
 
       // エピソードを追加
       addEpisode('編集前のエピソードメモ');
+
+      // エピソードが追加されるまで待機
+      cy.get('.followup-page__item').should('be.visible', { timeout: 10000 });
+      cy.contains('.followup-page__item-memo', '編集前のエピソードメモ').should('be.visible', { timeout: 10000 });
     });
 
     it('エピソードカードに編集ボタンが表示されている', () => {
@@ -345,9 +350,14 @@ describe('編集機能', () => {
 
       // フォローアップページに遷移
       navigateToFollowupPage('improvement', improvementContent);
+      cy.get('.followup-page').should('be.visible', { timeout: 10000 });
 
       // アクションを追加
       addEpisode('編集前のアクションメモ');
+
+      // アクションが追加されるまで待機
+      cy.get('.followup-page__item').should('be.visible', { timeout: 10000 });
+      cy.contains('.followup-page__item-memo', '編集前のアクションメモ').should('be.visible', { timeout: 10000 });
     });
 
     it('アクションカードに編集ボタンが表示されている', () => {
