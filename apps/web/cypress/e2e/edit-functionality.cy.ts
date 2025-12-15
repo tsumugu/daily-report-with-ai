@@ -66,12 +66,19 @@ describe('編集機能', () => {
 
   const addEpisode = (memo: string) => {
     const today = new Date().toISOString().split('T')[0];
+    cy.get('.followup-page__add-button').should('be.visible', { timeout: 5000 });
     cy.get('.followup-page__add-button').click();
-    cy.get('.followup-page__modal', { timeout: 5000 }).should('be.visible');
-    cy.get('.date-field__input').clear().type(today);
-    cy.get('.textarea-field__textarea').clear().type(memo);
-    cy.get('.followup-page__modal button[type="submit"]').click();
-    cy.get('.followup-page__modal').should('not.exist', { timeout: 5000 });
+    cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
+    cy.get('.followup-page__modal').should('be.visible');
+    cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
+    cy.get('.date-field__input').clear();
+    cy.get('.date-field__input').type(today);
+    cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
+    cy.get('.textarea-field__textarea').clear();
+    cy.get('.textarea-field__textarea').type(memo);
+    cy.contains('追加').should('be.visible').click();
+    cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
+    cy.wait(500); // データの保存を待つ
   };
 
   beforeEach(() => {
@@ -267,20 +274,23 @@ describe('編集機能', () => {
       cy.get('.followup-page__item-edit').first().click();
 
       // モーダルが表示されることを確認
-      cy.get('.followup-page__modal', { timeout: 5000 }).should('be.visible');
+      cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
+      cy.get('.followup-page__modal').should('be.visible');
       cy.get('.followup-page__modal-title').should('contain.text', 'エピソードを編集');
 
       // 既存データがフォームに設定されていることを確認
+      cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
       cy.get('.textarea-field__textarea').should('have.value', '編集前のエピソードメモ');
 
       // 内容を編集
-      cy.get('.textarea-field__textarea').clear().type('編集後のエピソードメモ');
+      cy.get('.textarea-field__textarea').clear();
+      cy.get('.textarea-field__textarea').type('編集後のエピソードメモ');
 
-      // 保存ボタンをクリック
-      cy.get('.followup-page__modal button[type="submit"]').click();
+      // 保存ボタンをクリック（実装では「追加」ボタンを使用）
+      cy.contains('追加').should('be.visible').click();
 
       // モーダルが閉じることを確認
-      cy.get('.followup-page__modal').should('not.exist', { timeout: 5000 });
+      cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
 
       // 編集後の内容が表示されていることを確認
       cy.contains('編集後のエピソードメモ').should('be.visible');
@@ -291,19 +301,22 @@ describe('編集機能', () => {
       cy.get('.followup-page__item-edit').first().click();
 
       // モーダルが表示されることを確認
-      cy.get('.followup-page__modal', { timeout: 5000 }).should('be.visible');
+      cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
+      cy.get('.followup-page__modal').should('be.visible');
 
       // 日付を編集
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split('T')[0];
-      cy.get('.date-field__input').clear().type(yesterdayStr);
+      cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
+      cy.get('.date-field__input').clear();
+      cy.get('.date-field__input').type(yesterdayStr);
 
-      // 保存ボタンをクリック
-      cy.get('.followup-page__modal button[type="submit"]').click();
+      // 保存ボタンをクリック（実装では「追加」ボタンを使用）
+      cy.contains('追加').should('be.visible').click();
 
       // モーダルが閉じることを確認
-      cy.get('.followup-page__modal').should('not.exist', { timeout: 5000 });
+      cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
 
       // 編集後の日付が表示されていることを確認
       cy.contains(yesterdayStr).should('be.visible');
@@ -350,20 +363,23 @@ describe('編集機能', () => {
       cy.get('.followup-page__item-edit').first().click();
 
       // モーダルが表示されることを確認
-      cy.get('.followup-page__modal', { timeout: 5000 }).should('be.visible');
+      cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
+      cy.get('.followup-page__modal').should('be.visible');
       cy.get('.followup-page__modal-title').should('contain.text', 'アクションを編集');
 
       // 既存データがフォームに設定されていることを確認
+      cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
       cy.get('.textarea-field__textarea').should('have.value', '編集前のアクションメモ');
 
       // 内容を編集
-      cy.get('.textarea-field__textarea').clear().type('編集後のアクションメモ');
+      cy.get('.textarea-field__textarea').clear();
+      cy.get('.textarea-field__textarea').type('編集後のアクションメモ');
 
-      // 保存ボタンをクリック
-      cy.get('.followup-page__modal button[type="submit"]').click();
+      // 保存ボタンをクリック（実装では「追加」ボタンを使用）
+      cy.contains('追加').should('be.visible').click();
 
       // モーダルが閉じることを確認
-      cy.get('.followup-page__modal').should('not.exist', { timeout: 5000 });
+      cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
 
       // 編集後の内容が表示されていることを確認
       cy.contains('編集後のアクションメモ').should('be.visible');
@@ -374,19 +390,22 @@ describe('編集機能', () => {
       cy.get('.followup-page__item-edit').first().click();
 
       // モーダルが表示されることを確認
-      cy.get('.followup-page__modal', { timeout: 5000 }).should('be.visible');
+      cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
+      cy.get('.followup-page__modal').should('be.visible');
 
       // 日付を編集
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split('T')[0];
-      cy.get('.date-field__input').clear().type(yesterdayStr);
+      cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
+      cy.get('.date-field__input').clear();
+      cy.get('.date-field__input').type(yesterdayStr);
 
-      // 保存ボタンをクリック
-      cy.get('.followup-page__modal button[type="submit"]').click();
+      // 保存ボタンをクリック（実装では「追加」ボタンを使用）
+      cy.contains('追加').should('be.visible').click();
 
       // モーダルが閉じることを確認
-      cy.get('.followup-page__modal').should('not.exist', { timeout: 5000 });
+      cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
 
       // 編集後の日付が表示されていることを確認
       cy.contains(yesterdayStr).should('be.visible');
