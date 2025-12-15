@@ -234,13 +234,16 @@ describe('目標階層管理機能', () => {
       cy.get('input#goal-end-date').type(endDateStr);
       cy.get('select#goal-type').select('habit');
       cy.contains('button', '保存する').click();
-      cy.url().should('include', '/goals', { timeout: 15000 });
-
-      // 目標詳細画面に遷移（目標をクリック）
+      cy.url().should('include', '/goals/', { timeout: 15000 });
+      
+      // 目標一覧画面に戻る
+      cy.visit(`${baseUrl}/goals`);
+      cy.get('.goal-list-page').should('be.visible', { timeout: 10000 });
+      
       // 目標一覧画面で目標が表示されるまで待機
-      cy.contains('短期目標: 週次フォーカステスト').should('be.visible');
+      cy.contains('.hierarchy-card', '短期目標: 週次フォーカステスト').should('be.visible', { timeout: 10000 });
       // 目標カードをクリックして詳細画面に遷移
-      cy.contains('短期目標: 週次フォーカステスト').parents('.hierarchy-card').click();
+      cy.contains('.hierarchy-card', '短期目標: 週次フォーカステスト').click();
       cy.url().should('include', '/goals/', { timeout: 15000 });
 
       // 目標詳細が読み込まれるまで待機
@@ -273,21 +276,29 @@ describe('目標階層管理機能', () => {
       cy.get('input#goal-end-date').type(endDateStr);
       cy.get('select#goal-type').select('skill');
       cy.contains('button', '保存する').click();
-      cy.url().should('include', '/goals', { timeout: 15000 });
-
-      // 目標詳細画面に遷移（目標をクリック）
+      cy.url().should('include', '/goals/', { timeout: 15000 });
+      
+      // 目標一覧画面に戻る
+      cy.visit(`${baseUrl}/goals`);
+      cy.get('.goal-list-page').should('be.visible', { timeout: 10000 });
+      
       // 目標一覧画面で目標が表示されるまで待機
-      cy.contains('編集テスト目標').should('be.visible');
+      cy.contains('.hierarchy-card', '編集テスト目標').should('be.visible', { timeout: 10000 });
       // 目標カードをクリックして詳細画面に遷移
-      cy.contains('編集テスト目標').parents('.hierarchy-card').click();
+      cy.contains('.hierarchy-card', '編集テスト目標').click();
       cy.url().should('include', '/goals/', { timeout: 15000 });
 
       // 目標詳細が読み込まれるまで待機
       cy.contains('h1', '目標詳細').should('be.visible');
       cy.contains('編集テスト目標').should('be.visible');
 
-      // 編集ボタンをクリック（app-buttonコンポーネント内のテキストを探す）
-      cy.contains('編集').should('be.visible').click();
+      // 編集ボタンをクリック（アクションバー内の編集ボタンを探す）
+      cy.get('.goal-detail-page__actions').within(() => {
+        cy.contains('button', '編集').should('be.visible').click();
+      });
+      
+      // 編集画面に遷移したことを確認
+      cy.url().should('include', '/goals/', { timeout: 15000 });
       cy.url().should('include', '/edit', { timeout: 15000 });
 
       // フォームが編集モードで表示されることを確認
@@ -309,28 +320,34 @@ describe('目標階層管理機能', () => {
       cy.get('input#goal-end-date').type(endDateStr);
       cy.get('select#goal-type').select('skill');
       cy.contains('button', '保存する').click();
-      cy.url().should('include', '/goals', { timeout: 15000 });
-
-      // 目標詳細画面に遷移（目標をクリック）
+      cy.url().should('include', '/goals/', { timeout: 15000 });
+      
+      // 目標一覧画面に戻る
+      cy.visit(`${baseUrl}/goals`);
+      cy.get('.goal-list-page').should('be.visible', { timeout: 10000 });
+      
       // 目標一覧画面で目標が表示されるまで待機
-      cy.contains('削除テスト目標').should('be.visible');
+      cy.contains('.hierarchy-card', '削除テスト目標').should('be.visible', { timeout: 10000 });
       // 目標カードをクリックして詳細画面に遷移
-      cy.contains('削除テスト目標').parents('.hierarchy-card').click();
+      cy.contains('.hierarchy-card', '削除テスト目標').click();
       cy.url().should('include', '/goals/', { timeout: 15000 });
 
       // 目標詳細が読み込まれるまで待機
       cy.contains('h1', '目標詳細').should('be.visible');
       cy.contains('削除テスト目標').should('be.visible');
 
-      // 削除ボタンをクリック（確認ダイアログを自動的に確認）
+      // 確認ダイアログを自動的に確認するように設定
       cy.window().then((win) => {
         cy.stub(win, 'confirm').returns(true);
-        cy.contains('削除').should('be.visible').click();
       });
 
-      // 削除が完了するまで待機（目標一覧画面に戻る）
-      cy.url().should('include', '/goals', { timeout: 15000 });
-      cy.url().should('not.include', '/goals/', { timeout: 5000 });
+      // 削除ボタンをクリック（アクションバー内の削除ボタンを探す）
+      cy.get('.goal-detail-page__actions').within(() => {
+        cy.contains('button', '削除').should('be.visible').click();
+      });
+
+      // 削除が完了し、目標一覧画面に遷移するまで待機
+      cy.url().should('eq', `${baseUrl}/goals`, { timeout: 15000 });
 
       // 目標一覧画面に戻り、目標が削除されたことを確認
       cy.contains('削除テスト目標').should('not.exist');
