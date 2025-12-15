@@ -74,8 +74,18 @@ describe('編集機能', () => {
 
   const addEpisode = (memo: string) => {
     const today = new Date().toISOString().split('T')[0];
-    cy.get('.followup-page__add-button').should('be.visible', { timeout: 5000 });
-    cy.get('.followup-page__add-button').click();
+    // 空状態の場合はempty-stateのアクションボタン、そうでない場合はadd-buttonを使用
+    cy.get('.followup-page').should('be.visible', { timeout: 10000 });
+    // 空状態かどうかを確認
+    cy.get('body').then(($body) => {
+      if ($body.find('.empty-state').length > 0) {
+        // 空状態の場合：empty-stateのアクションボタンをクリック
+        cy.contains('エピソードを追加').should('be.visible', { timeout: 5000 }).click();
+      } else {
+        // 空状態でない場合：add-buttonをクリック
+        cy.get('.followup-page__add-button').should('be.visible', { timeout: 5000 }).click();
+      }
+    });
     cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
     cy.get('.followup-page__modal').should('be.visible');
     cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
