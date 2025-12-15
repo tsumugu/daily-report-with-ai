@@ -57,9 +57,14 @@ describe('編集機能', () => {
 
   const navigateToFollowupPage = (itemType: 'goodPoint' | 'improvement', itemContent: string) => {
     cy.visit(`${baseUrl}/followups`);
+    // フォローアップカードが読み込まれるまで待機
+    cy.get('.followup-list-page', { timeout: 10000 }).should('be.visible');
     cy.get('.followup-card', { timeout: 10000 }).should('exist');
+    // 特定のコンテンツを含むカードを探す
+    cy.contains('.followup-card', itemContent).should('be.visible', { timeout: 10000 });
     cy.contains('.followup-card', itemContent).within(() => {
-      cy.contains('button', 'フォローアップ').click();
+      // app-buttonコンポーネント内のテキストを探す
+      cy.contains('フォローアップ').should('be.visible').click();
     });
     cy.url().should('include', `/followups/${itemType}/`, { timeout: 10000 });
   };
@@ -253,10 +258,13 @@ describe('編集機能', () => {
         .type(goodPointContent);
       cy.get('button[type="submit"]').click();
       cy.url().should('include', '/daily-reports', { timeout: 15000 });
+      // 日報が保存されるまで待機
+      cy.wait(1000);
 
       // フォローアップページに遷移
       navigateToFollowupPage('goodPoint', goodPointContent);
       cy.get('.followup-page').should('be.visible', { timeout: 10000 });
+      cy.get('.followup-page__title').should('be.visible', { timeout: 10000 });
 
       // エピソードを追加
       addEpisode('編集前のエピソードメモ');
@@ -347,10 +355,13 @@ describe('編集機能', () => {
         .type(improvementContent);
       cy.get('button[type="submit"]').click();
       cy.url().should('include', '/daily-reports', { timeout: 15000 });
+      // 日報が保存されるまで待機
+      cy.wait(1000);
 
       // フォローアップページに遷移
       navigateToFollowupPage('improvement', improvementContent);
       cy.get('.followup-page').should('be.visible', { timeout: 10000 });
+      cy.get('.followup-page__title').should('be.visible', { timeout: 10000 });
 
       // アクションを追加
       addEpisode('編集前のアクションメモ');
