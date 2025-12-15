@@ -239,8 +239,8 @@ describe('目標階層管理機能', () => {
       // 目標詳細画面に遷移（目標をクリック）
       // 目標一覧画面で目標が表示されるまで待機
       cy.contains('短期目標: 週次フォーカステスト').should('be.visible');
-      // 目標をクリックして詳細画面に遷移
-      cy.contains('短期目標: 週次フォーカステスト').click();
+      // 目標カードをクリックして詳細画面に遷移
+      cy.contains('短期目標: 週次フォーカステスト').parents('.hierarchy-card').click();
       cy.url().should('include', '/goals/', { timeout: 15000 });
 
       // 短期目標の場合、週次フォーカスセクションが表示されることを確認
@@ -274,8 +274,8 @@ describe('目標階層管理機能', () => {
       // 目標詳細画面に遷移（目標をクリック）
       // 目標一覧画面で目標が表示されるまで待機
       cy.contains('編集テスト目標').should('be.visible');
-      // 目標をクリックして詳細画面に遷移
-      cy.contains('編集テスト目標').click();
+      // 目標カードをクリックして詳細画面に遷移
+      cy.contains('編集テスト目標').parents('.hierarchy-card').click();
       cy.url().should('include', '/goals/', { timeout: 15000 });
 
       // 編集ボタンをクリック
@@ -306,8 +306,8 @@ describe('目標階層管理機能', () => {
       // 目標詳細画面に遷移（目標をクリック）
       // 目標一覧画面で目標が表示されるまで待機
       cy.contains('削除テスト目標').should('be.visible');
-      // 目標をクリックして詳細画面に遷移
-      cy.contains('削除テスト目標').click();
+      // 目標カードをクリックして詳細画面に遷移
+      cy.contains('削除テスト目標').parents('.hierarchy-card').click();
       cy.url().should('include', '/goals/', { timeout: 15000 });
 
       // 削除ボタンをクリック（確認ダイアログを自動的に確認）
