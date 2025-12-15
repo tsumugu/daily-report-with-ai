@@ -79,8 +79,8 @@ describe('編集機能', () => {
     // 空状態かどうかを確認
     cy.get('body').then(($body) => {
       if ($body.find('.empty-state').length > 0) {
-        // 空状態の場合：empty-stateのアクションボタンをクリック
-        cy.contains('エピソードを追加').should('be.visible', { timeout: 5000 }).click();
+        // 空状態の場合：empty-stateのアクションボタンをクリック（「エピソードを追加」または「アクションを追加」）
+        cy.contains('追加').should('be.visible', { timeout: 5000 }).click();
       } else {
         // 空状態でない場合：add-buttonをクリック
         cy.get('.followup-page__add-button').should('be.visible', { timeout: 5000 }).click();
