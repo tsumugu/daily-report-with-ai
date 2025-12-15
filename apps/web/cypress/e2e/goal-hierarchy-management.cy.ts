@@ -243,8 +243,12 @@ describe('目標階層管理機能', () => {
       cy.contains('短期目標: 週次フォーカステスト').parents('.hierarchy-card').click();
       cy.url().should('include', '/goals/', { timeout: 15000 });
 
+      // 目標詳細が読み込まれるまで待機
+      cy.contains('h1', '目標詳細').should('be.visible');
+      cy.contains('短期目標: 週次フォーカステスト').should('be.visible');
+
       // 短期目標の場合、週次フォーカスセクションが表示されることを確認
-      cy.contains('週次フォーカス').should('be.visible');
+      cy.contains('h2', '週次フォーカス').should('be.visible');
       cy.contains('button', '週次フォーカスを設定').should('be.visible');
     });
   });
@@ -278,8 +282,12 @@ describe('目標階層管理機能', () => {
       cy.contains('編集テスト目標').parents('.hierarchy-card').click();
       cy.url().should('include', '/goals/', { timeout: 15000 });
 
-      // 編集ボタンをクリック
-      cy.contains('button', '編集').click();
+      // 目標詳細が読み込まれるまで待機
+      cy.contains('h1', '目標詳細').should('be.visible');
+      cy.contains('編集テスト目標').should('be.visible');
+
+      // 編集ボタンをクリック（app-buttonコンポーネント内のテキストを探す）
+      cy.contains('編集').should('be.visible').click();
       cy.url().should('include', '/edit', { timeout: 15000 });
 
       // フォームが編集モードで表示されることを確認
@@ -310,14 +318,19 @@ describe('目標階層管理機能', () => {
       cy.contains('削除テスト目標').parents('.hierarchy-card').click();
       cy.url().should('include', '/goals/', { timeout: 15000 });
 
+      // 目標詳細が読み込まれるまで待機
+      cy.contains('h1', '目標詳細').should('be.visible');
+      cy.contains('削除テスト目標').should('be.visible');
+
       // 削除ボタンをクリック（確認ダイアログを自動的に確認）
       cy.window().then((win) => {
         cy.stub(win, 'confirm').returns(true);
-        cy.contains('button', '削除').click();
+        cy.contains('削除').should('be.visible').click();
       });
 
-      // 削除が完了するまで待機
+      // 削除が完了するまで待機（目標一覧画面に戻る）
       cy.url().should('include', '/goals', { timeout: 15000 });
+      cy.url().should('not.include', '/goals/', { timeout: 5000 });
 
       // 目標一覧画面に戻り、目標が削除されたことを確認
       cy.contains('削除テスト目標').should('not.exist');
