@@ -37,9 +37,8 @@ describe('日報一覧・詳細画面', () => {
   it('日報がない場合は空状態が表示されること', () => {
     cy.visit('http://localhost:4200/daily-reports');
 
-    // 空状態が表示されることを確認
-    cy.get('.empty-container').should('be.visible');
-    cy.get('.empty-container h2').should('contain.text', 'まだ日報がありません');
+    // 空状態が表示されることを確認（app-empty-stateコンポーネントを使用）
+    cy.contains('まだ日報がありません').should('be.visible', { timeout: 10000 });
   });
 
   it('日報を作成後、一覧に表示されること', () => {
