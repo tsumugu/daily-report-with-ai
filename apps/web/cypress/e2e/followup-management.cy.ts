@@ -42,8 +42,7 @@ describe('フォローアップ管理機能', () => {
       cy.get('.followup-list-page').should('be.visible');
 
       // 空状態が表示されることを確認
-      cy.get('.followup-list-page__empty').should('be.visible');
-      cy.get('.followup-list-page__empty-message').should('contain.text', 'フォローする項目が');
+      cy.contains('フォローする項目がありません').should('be.visible');
     });
 
     it('フォロー項目が一覧に表示されること', () => {
@@ -214,18 +213,21 @@ describe('フォローアップ管理機能', () => {
 
       // 「エピソードを追加」ボタンをクリック
       cy.get('.followup-page__add-button').click();
+      cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
       cy.get('.followup-page__modal').should('be.visible');
 
-      // フォームに入力
-      cy.get('.date-field__input').type('2025-12-10');
+      // フォームに入力（日付フィールドが読み込まれるまで待機）
+      cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
+      cy.get('.date-field__input').clear().type('2025-12-10');
 
-      cy.get('.textarea-field__textarea').type('テストメモ');
+      cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
+      cy.get('.textarea-field__textarea').clear().type('テストメモ');
 
-      // 追加ボタンをクリック
-      cy.get('button[type="submit"]:contains("追加")').click();
+      // 追加ボタンをクリック（app-buttonコンポーネント内のテキストを探す）
+      cy.contains('追加').should('be.visible').click();
 
       // モーダルが閉じることを確認
-      cy.get('.followup-page__modal').should('not.exist');
+      cy.get('.followup-page__overlay').should('not.exist');
     });
 
     it('よかったことのフォローアップページでステータスが自動更新されること', () => {
@@ -247,8 +249,8 @@ describe('フォローアップ管理機能', () => {
 
       cy.get('.textarea-field__textarea').type('テストメモ');
 
-      cy.get('button[type="submit"]:contains("追加")').click();
-      cy.get('.followup-page__modal').should('not.exist');
+      cy.contains('追加').should('be.visible').click();
+      cy.get('.followup-page__overlay').should('not.exist');
       cy.wait(1000);
 
       // ステータスが「進行中」に更新されることを確認
@@ -266,16 +268,19 @@ describe('フォローアップ管理機能', () => {
       // エピソードを3件追加
       for (let i = 1; i <= 3; i++) {
         cy.get('.followup-page__add-button').click();
-        cy.get('.followup-page__modal').should('be.visible', { timeout: 10000 });
+        cy.get('.followup-page__overlay').should('be.visible', { timeout: 10000 });
+        cy.get('.followup-page__modal').should('be.visible');
 
         cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
-        cy.get('.date-field__input').clear().type(`2025-12-${9 + i}`);
+        cy.get('.date-field__input').clear();
+        cy.get('.date-field__input').type(`2025-12-${9 + i}`);
 
         cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
-        cy.get('.textarea-field__textarea').clear().type(`${i}回目のエピソード`);
+        cy.get('.textarea-field__textarea').clear();
+        cy.get('.textarea-field__textarea').type(`${i}回目のエピソード`);
 
-        cy.get('button[type="submit"]:contains("追加")').click();
-        cy.get('.followup-page__modal').should('not.exist');
+        cy.contains('追加').should('be.visible').click();
+        cy.get('.followup-page__overlay').should('not.exist');
         cy.wait(1000);
       }
 
@@ -302,8 +307,8 @@ describe('フォローアップ管理機能', () => {
       cy.get('.textarea-field__textarea').type('テストメモ');
 
       // 追加ボタンが無効になっていることを確認
-      cy.get('button[type="submit"]:contains("追加")').should('be.visible', { timeout: 5000 });
-      cy.get('button[type="submit"]:contains("追加")').should('be.disabled');
+      cy.contains('追加').should('be.visible', { timeout: 5000 });
+      cy.contains('追加').should('be.disabled');
     });
 
     it('再現メモを入力できること（最大500文字）', () => {
@@ -316,9 +321,11 @@ describe('フォローアップ管理機能', () => {
 
       // 「エピソードを追加」ボタンをクリック
       cy.get('.followup-page__add-button').click();
+      cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
       cy.get('.followup-page__modal').should('be.visible');
 
-      cy.get('.textarea-field__textarea').type('テストメモ');
+      cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
+      cy.get('.textarea-field__textarea').clear().type('テストメモ');
 
       cy.get('.textarea-field__textarea').should('have.value', 'テストメモ');
     });
@@ -333,18 +340,21 @@ describe('フォローアップ管理機能', () => {
 
       // 「エピソードを追加」ボタンをクリック
       cy.get('.followup-page__add-button').click();
+      cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
       cy.get('.followup-page__modal').should('be.visible');
 
-      // フォームに入力
-      cy.get('.date-field__input').type('2025-12-10');
+      // フォームに入力（日付フィールドが読み込まれるまで待機）
+      cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
+      cy.get('.date-field__input').clear().type('2025-12-10');
 
-      cy.get('.textarea-field__textarea').type('テストメモ');
+      cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
+      cy.get('.textarea-field__textarea').clear().type('テストメモ');
 
-      // 追加ボタンをクリック
-      cy.get('button[type="submit"]:contains("追加")').click();
+      // 追加ボタンをクリック（app-buttonコンポーネント内のテキストを探す）
+      cy.contains('追加').should('be.visible').click();
 
       // モーダルが閉じることを確認
-      cy.get('.followup-page__modal').should('not.exist');
+      cy.get('.followup-page__overlay').should('not.exist');
     });
 
     it('保存後に一覧が更新されること', () => {
@@ -358,14 +368,15 @@ describe('フォローアップ管理機能', () => {
 
       // 「エピソードを追加」ボタンをクリック
       cy.get('.followup-page__add-button').click();
+      cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
       cy.get('.followup-page__modal').should('be.visible');
 
       cy.get('.date-field__input').type('2025-12-10');
 
       cy.get('.textarea-field__textarea').type('テストメモ');
 
-      cy.get('button[type="submit"]:contains("追加")').click();
-      cy.get('.followup-page__modal').should('not.exist');
+      cy.contains('追加').should('be.visible').click();
+      cy.get('.followup-page__overlay').should('not.exist');
 
       // 一覧ページに戻る
       cy.get('.followup-page__back').click();
@@ -373,6 +384,7 @@ describe('フォローアップ管理機能', () => {
       cy.wait(1000);
 
       // 一覧が更新されていることを確認（成功回数が表示される）
+      cy.get('.followup-card').first().should('be.visible', { timeout: 5000 });
       cy.get('.followup-card__success-count').first().should('be.visible', { timeout: 5000 });
     });
   });
@@ -406,18 +418,21 @@ describe('フォローアップ管理機能', () => {
 
       // 「アクションを追加」ボタンをクリック
       cy.get('.followup-page__add-button').click();
+      cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
       cy.get('.followup-page__modal').should('be.visible');
 
-      // フォームに入力
-      cy.get('.date-field__input').type('2025-12-10');
+      // フォームに入力（日付フィールドが読み込まれるまで待機）
+      cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
+      cy.get('.date-field__input').clear().type('2025-12-10');
 
-      cy.get('.textarea-field__textarea').type('テストメモ');
+      cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
+      cy.get('.textarea-field__textarea').clear().type('テストメモ');
 
-      // 追加ボタンをクリック
-      cy.get('button[type="submit"]:contains("追加")').click();
+      // 追加ボタンをクリック（app-buttonコンポーネント内のテキストを探す）
+      cy.contains('追加').should('be.visible').click();
 
       // モーダルが閉じることを確認
-      cy.get('.followup-page__modal').should('not.exist');
+      cy.get('.followup-page__overlay').should('not.exist');
     });
 
     it('改善点のフォローアップページでアクションを3件追加すると「習慣化」になること', () => {
@@ -434,16 +449,19 @@ describe('フォローアップ管理機能', () => {
       // アクションを3件追加
       for (let i = 1; i <= 3; i++) {
         cy.get('.followup-page__add-button').click();
-        cy.get('.followup-page__modal').should('be.visible', { timeout: 10000 });
+        cy.get('.followup-page__overlay').should('be.visible', { timeout: 10000 });
+        cy.get('.followup-page__modal').should('be.visible');
 
         cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
-        cy.get('.date-field__input').clear().type(`2025-12-${9 + i}`);
+        cy.get('.date-field__input').clear();
+        cy.get('.date-field__input').type(`2025-12-${9 + i}`);
 
         cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
-        cy.get('.textarea-field__textarea').clear().type(`${i}回目のアクション`);
+        cy.get('.textarea-field__textarea').clear();
+        cy.get('.textarea-field__textarea').type(`${i}回目のアクション`);
 
-        cy.get('button[type="submit"]:contains("追加")').click();
-        cy.get('.followup-page__modal').should('not.exist');
+        cy.contains('追加').should('be.visible').click();
+        cy.get('.followup-page__overlay').should('not.exist');
         cy.wait(1000);
       }
 
@@ -473,8 +491,8 @@ describe('フォローアップ管理機能', () => {
       cy.get('.textarea-field__textarea').type('テストメモ');
 
       // 追加ボタンが無効になっていることを確認
-      cy.get('button[type="submit"]:contains("追加")').should('be.visible', { timeout: 5000 });
-      cy.get('button[type="submit"]:contains("追加")').should('be.disabled');
+      cy.contains('追加').should('be.visible', { timeout: 5000 });
+      cy.contains('追加').should('be.disabled');
     });
 
     it('改善点のフォローアップを保存できること', () => {
@@ -490,18 +508,21 @@ describe('フォローアップ管理機能', () => {
 
       // 「アクションを追加」ボタンをクリック
       cy.get('.followup-page__add-button').click();
+      cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
       cy.get('.followup-page__modal').should('be.visible');
 
-      // フォームに入力
-      cy.get('.date-field__input').type('2025-12-10');
+      // フォームに入力（日付フィールドが読み込まれるまで待機）
+      cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
+      cy.get('.date-field__input').clear().type('2025-12-10');
 
-      cy.get('.textarea-field__textarea').type('テストメモ');
+      cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
+      cy.get('.textarea-field__textarea').clear().type('テストメモ');
 
-      // 追加ボタンをクリック
-      cy.get('button[type="submit"]:contains("追加")').click();
+      // 追加ボタンをクリック（app-buttonコンポーネント内のテキストを探す）
+      cy.contains('追加').should('be.visible').click();
 
       // モーダルが閉じることを確認
-      cy.get('.followup-page__modal').should('not.exist');
+      cy.get('.followup-page__overlay').should('not.exist');
     });
   });
 
@@ -533,14 +554,15 @@ describe('フォローアップ管理機能', () => {
 
       // 「エピソードを追加」ボタンをクリック
       cy.get('.followup-page__add-button').click();
+      cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
       cy.get('.followup-page__modal').should('be.visible');
 
       cy.get('.date-field__input').type('2025-12-10');
 
       cy.get('.textarea-field__textarea').type('テストメモ');
 
-      cy.get('button[type="submit"]:contains("追加")').click();
-      cy.get('.followup-page__modal').should('not.exist');
+      cy.contains('追加').should('be.visible').click();
+      cy.get('.followup-page__overlay').should('not.exist');
 
       // 一覧ページに戻る
       cy.get('.followup-page__back').click();
@@ -548,6 +570,7 @@ describe('フォローアップ管理機能', () => {
       cy.wait(1000);
 
       // 成功回数が表示されていることを確認
+      cy.get('.followup-card').first().should('be.visible', { timeout: 5000 });
       cy.get('.followup-card__success-count').first().should('be.visible', { timeout: 5000 });
       cy.get('.followup-card__success-count').first().should('contain.text', 'エピソード: 1回');
     });
@@ -576,7 +599,8 @@ describe('フォローアップ管理機能', () => {
       // エピソードを3回追加
       for (let i = 1; i <= 3; i++) {
         cy.get('.followup-page__add-button').click();
-        cy.get('.followup-page__modal').should('be.visible', { timeout: 10000 });
+        cy.get('.followup-page__overlay').should('be.visible', { timeout: 10000 });
+        cy.get('.followup-page__modal').should('be.visible');
 
         cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
         cy.get('.date-field__input').clear().type(`2025-12-${9 + i}`);
@@ -584,8 +608,8 @@ describe('フォローアップ管理機能', () => {
         cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
         cy.get('.textarea-field__textarea').clear().type(`テストメモ ${i}`);
 
-        cy.get('button[type="submit"]:contains("追加")').click();
-        cy.get('.followup-page__modal').should('not.exist');
+        cy.contains('追加').should('be.visible').click();
+        cy.get('.followup-page__overlay').should('not.exist');
         cy.wait(1000);
       }
 
@@ -697,8 +721,8 @@ describe('フォローアップ管理機能', () => {
       cy.get('.followup-page__modal').should('be.visible', { timeout: 10000 });
 
       // 日付を入力せずに保存ボタンの状態を確認
-      cy.get('button[type="submit"]:contains("追加")').should('be.visible', { timeout: 5000 });
-      cy.get('button[type="submit"]:contains("追加")').should('be.disabled');
+      cy.contains('追加').should('be.visible', { timeout: 5000 });
+      cy.contains('追加').should('be.disabled');
     });
 
     it('同じ項目に複数回フォローアップを追加できること', () => {
@@ -726,23 +750,29 @@ describe('フォローアップ管理機能', () => {
       cy.get('.followup-page__add-button').click();
       cy.get('.followup-page__modal').should('be.visible');
 
-      cy.get('.date-field__input').type('2025-12-09');
+      cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
+      cy.get('.date-field__input').clear().type('2025-12-09');
 
-      cy.get('.textarea-field__textarea').type('1回目のメモ');
+      cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
+      cy.get('.textarea-field__textarea').clear().type('1回目のメモ');
 
-      cy.get('button[type="submit"]:contains("追加")').click();
-      cy.get('.followup-page__modal').should('not.exist');
+      cy.contains('追加').should('be.visible').click();
+      cy.get('.followup-page__overlay').should('not.exist');
       cy.wait(500);
 
       // 2回目のエピソードを追加
       cy.get('.followup-page__add-button').click();
       cy.get('.followup-page__modal').should('be.visible');
 
-      cy.get('.date-field__input').clear().type('2025-12-10');
-      cy.get('.textarea-field__textarea').clear().type('2回目のメモ');
+      cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
+      cy.get('.date-field__input').clear();
+      cy.get('.date-field__input').type('2025-12-10');
+      cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
+      cy.get('.textarea-field__textarea').clear();
+      cy.get('.textarea-field__textarea').type('2回目のメモ');
 
-      cy.get('button[type="submit"]:contains("追加")').click();
-      cy.get('.followup-page__modal').should('not.exist');
+      cy.contains('追加').should('be.visible').click();
+      cy.get('.followup-page__overlay').should('not.exist');
       cy.wait(500);
 
       // 一覧ページに戻る
@@ -751,6 +781,8 @@ describe('フォローアップ管理機能', () => {
       cy.wait(1000);
 
       // 成功回数が2回になっていることを確認
+      cy.get('.followup-card').first().should('be.visible', { timeout: 5000 });
+      cy.get('.followup-card__success-count').first().should('be.visible', { timeout: 5000 });
       cy.get('.followup-card__success-count').first().should('contain.text', 'エピソード: 2回', {
         timeout: 5000,
       });
