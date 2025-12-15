@@ -76,25 +76,56 @@ describe('編集機能', () => {
     const today = new Date().toISOString().split('T')[0];
     // 空状態の場合はempty-stateのアクションボタン、そうでない場合はadd-buttonを使用
     cy.get('.followup-page').should('be.visible', { timeout: 10000 });
-    // 空状態かどうかを確認
+    
+    // モーダルが開いている場合は閉じる
     cy.get('body').then(($body) => {
-      if ($body.find('.empty-state').length > 0) {
-        // 空状態の場合：empty-stateのアクションボタンをクリック（「エピソードを追加」または「アクションを追加」）
-        cy.contains('追加').should('be.visible', { timeout: 5000 }).click();
+      const overlay = $body.find('.followup-page__overlay');
+      if (overlay.length > 0 && overlay.is(':visible')) {
+        cy.get('.followup-page__modal-close').click({ force: true });
+        cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
+        cy.wait(500); // モーダルが閉じるのを待つ
+      }
+    });
+    
+    // 空状態かどうかを確認して、適切なボタンをクリック
+    // モーダルが開いていないことを確認してから判定
+    cy.get('.followup-page__overlay').should('not.exist');
+    
+    // 空状態かどうかを確認
+    cy.get('.followup-page').then(($page) => {
+      // モーダルが開いていない、かつ空状態が表示されている場合のみ空状態と判定
+      const hasOverlay = $page.find('.followup-page__overlay').length > 0;
+      const hasEmptyState = $page.find('.empty-state').length > 0;
+      const isEmptyStateVisible = hasEmptyState && $page.find('.empty-state').is(':visible');
+      const isEmpty = !hasOverlay && isEmptyStateVisible;
+      
+      return isEmpty;
+    }).then((isEmpty) => {
+      if (isEmpty) {
+        // 空状態の場合：empty-state内のアクションボタンをクリック
+        // .empty-state__action内のapp-button内のbutton要素を直接探す
+        cy.get('.empty-state .empty-state__action app-button button', { timeout: 5000 })
+          .should('exist')
+          .click({ force: true });
       } else {
         // 空状態でない場合：add-buttonをクリック
         cy.get('.followup-page__add-button').should('be.visible', { timeout: 5000 }).click();
       }
     });
-    cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
-    cy.get('.followup-page__modal').should('be.visible');
+    
+    // クリック後、モーダルが表示されるまで待機
+    cy.get('.followup-page__overlay').should('be.visible', { timeout: 10000 });
+    cy.get('.followup-page__modal').should('be.visible', { timeout: 10000 });
     cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
     cy.get('.date-field__input').clear();
     cy.get('.date-field__input').type(today);
     cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
     cy.get('.textarea-field__textarea').clear();
     cy.get('.textarea-field__textarea').type(memo);
-    cy.contains('追加').should('be.visible').click();
+    // モーダル内の「追加」ボタンをクリック（モーダルフッター内の最後のapp-buttonを選択）
+    cy.get('.followup-page__modal-footer').within(() => {
+      cy.get('app-button').last().find('button').should('be.visible').click();
+    });
     cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
     cy.wait(500); // データの保存を待つ
   };
@@ -313,7 +344,10 @@ describe('編集機能', () => {
       cy.get('.textarea-field__textarea').type('編集後のエピソードメモ');
 
       // 保存ボタンをクリック（実装では「追加」ボタンを使用）
-      cy.contains('追加').should('be.visible').click();
+      // モーダル内の「追加」ボタンをクリック
+      cy.get('.followup-page__modal-footer').within(() => {
+        cy.get('app-button').last().find('button').should('be.visible').click();
+      });
 
       // モーダルが閉じることを確認
       cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
@@ -339,7 +373,10 @@ describe('編集機能', () => {
       cy.get('.date-field__input').type(yesterdayStr);
 
       // 保存ボタンをクリック（実装では「追加」ボタンを使用）
-      cy.contains('追加').should('be.visible').click();
+      // モーダル内の「追加」ボタンをクリック
+      cy.get('.followup-page__modal-footer').within(() => {
+        cy.get('app-button').last().find('button').should('be.visible').click();
+      });
 
       // モーダルが閉じることを確認
       cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
@@ -410,7 +447,10 @@ describe('編集機能', () => {
       cy.get('.textarea-field__textarea').type('編集後のアクションメモ');
 
       // 保存ボタンをクリック（実装では「追加」ボタンを使用）
-      cy.contains('追加').should('be.visible').click();
+      // モーダル内の「追加」ボタンをクリック
+      cy.get('.followup-page__modal-footer').within(() => {
+        cy.get('app-button').last().find('button').should('be.visible').click();
+      });
 
       // モーダルが閉じることを確認
       cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
@@ -436,7 +476,10 @@ describe('編集機能', () => {
       cy.get('.date-field__input').type(yesterdayStr);
 
       // 保存ボタンをクリック（実装では「追加」ボタンを使用）
-      cy.contains('追加').should('be.visible').click();
+      // モーダル内の「追加」ボタンをクリック
+      cy.get('.followup-page__modal-footer').within(() => {
+        cy.get('app-button').last().find('button').should('be.visible').click();
+      });
 
       // モーダルが閉じることを確認
       cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
@@ -444,6 +487,6 @@ describe('編集機能', () => {
       // 編集後の日付が表示されていることを確認
       cy.contains(yesterdayStr).should('be.visible');
     });
-  });
+});
 });
 

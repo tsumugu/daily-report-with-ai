@@ -65,17 +65,54 @@ describe('フォローアップ機能強化', () => {
 
   const addEpisodeOrAction = (memo: string) => {
     const today = new Date().toISOString().split('T')[0];
-    cy.get('.followup-page__add-button').should('be.visible', { timeout: 5000 });
-    cy.get('.followup-page__add-button').click();
-    cy.get('.followup-page__overlay').should('be.visible', { timeout: 5000 });
-    cy.get('.followup-page__modal').should('be.visible');
+    
+    // モーダルが開いている場合は閉じる
+    cy.get('body').then(($body) => {
+      const overlay = $body.find('.followup-page__overlay');
+      if (overlay.length > 0 && overlay.is(':visible')) {
+        cy.get('.followup-page__modal-close').click({ force: true });
+        cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
+        cy.wait(500); // モーダルが閉じるのを待つ
+      }
+    });
+    
+    // 空状態かどうかを確認して、適切なボタンをクリック
+    // モーダルが開いていないことを確認してから判定
+    cy.get('.followup-page__overlay').should('not.exist');
+    
+    cy.get('.followup-page').then(($page) => {
+      // モーダルが開いていない、かつ空状態が表示されている場合のみ空状態と判定
+      const hasOverlay = $page.find('.followup-page__overlay').length > 0;
+      const hasEmptyState = $page.find('.empty-state').length > 0;
+      const isEmptyStateVisible = hasEmptyState && $page.find('.empty-state').is(':visible');
+      const isEmpty = !hasOverlay && isEmptyStateVisible;
+      
+      return isEmpty;
+    }).then((isEmpty) => {
+      if (isEmpty) {
+        // 空状態の場合：empty-state内のアクションボタンをクリック
+        cy.get('.empty-state .empty-state__action app-button button', { timeout: 5000 })
+          .should('exist')
+          .click({ force: true });
+      } else {
+        // 空状態でない場合：add-buttonをクリック
+        cy.get('.followup-page__add-button').should('be.visible', { timeout: 5000 }).click();
+      }
+    });
+    
+    // クリック後、モーダルが表示されるまで待機
+    cy.get('.followup-page__overlay').should('be.visible', { timeout: 10000 });
+    cy.get('.followup-page__modal').should('be.visible', { timeout: 10000 });
     cy.get('.date-field__input').should('be.visible', { timeout: 5000 });
     cy.get('.date-field__input').clear();
     cy.get('.date-field__input').type(today);
     cy.get('.textarea-field__textarea').should('be.visible', { timeout: 5000 });
     cy.get('.textarea-field__textarea').clear();
     cy.get('.textarea-field__textarea').type(memo);
-    cy.contains('追加').should('be.visible').click();
+    // モーダル内の「追加」ボタンをクリック
+    cy.get('.followup-page__modal-footer').within(() => {
+      cy.get('app-button').last().find('button').should('be.visible').click();
+    });
     cy.get('.followup-page__overlay').should('not.exist', { timeout: 5000 });
     cy.wait(500); // データの保存を待つ
   };
