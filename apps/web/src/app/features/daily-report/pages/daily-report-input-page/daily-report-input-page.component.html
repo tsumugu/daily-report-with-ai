@@ -32,6 +32,14 @@
       [submitted]="isSubmitted()"
     />
 
+    <!-- 関連する目標 -->
+    <app-goal-multi-select-field
+      label="関連する目標"
+      placeholder="目標を選択"
+      [value]="selectedGoalIds()"
+      (valueChange)="selectedGoalIds.set($event)"
+    />
+
     <!-- できごと -->
     <app-textarea-field
       label="できごと"

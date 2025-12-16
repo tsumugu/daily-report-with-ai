@@ -10,6 +10,7 @@ import {
   TextareaFieldComponent,
   FormCardComponent,
   IconComponent,
+  GoalMultiSelectFieldComponent,
 } from '../../../../shared/components';
 
 @Component({
@@ -24,6 +25,7 @@ import {
     TextareaFieldComponent,
     FormCardComponent,
     IconComponent,
+    GoalMultiSelectFieldComponent,
   ],
   templateUrl: './daily-report-input-page.component.html',
   styleUrl: './daily-report-input-page.component.scss',
@@ -38,6 +40,9 @@ export class DailyReportInputPageComponent {
   // よかったこと・改善点の配列（リアクティブ）
   goodPoints = signal<GoodPointForm[]>([]);
   improvements = signal<ImprovementForm[]>([]);
+  
+  // 選択された目標のIDリスト
+  selectedGoalIds = signal<string[]>([]);
 
   // 状態管理
   isLoading = signal(false);
@@ -121,6 +126,7 @@ export class DailyReportInputPageComponent {
       date: this.form.get('date')?.value as string,
       events: this.form.get('events')?.value as string,
       learnings: (this.form.get('learnings')?.value as string) || undefined,
+      goalIds: this.selectedGoalIds().length > 0 ? this.selectedGoalIds() : undefined,
       goodPoints: this.goodPoints()
         .filter((gp) => gp.content.trim())
         .map((gp) => ({

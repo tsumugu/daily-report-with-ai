@@ -9,6 +9,7 @@ import {
   ToastComponent,
   HierarchyCardComponent,
   HierarchyCardData,
+  RelatedDailyReportsListComponent,
 } from '../../../../shared/components';
 
 /**
@@ -24,6 +25,7 @@ import {
     AlertBannerComponent,
     ToastComponent,
     HierarchyCardComponent,
+    RelatedDailyReportsListComponent,
   ],
   templateUrl: './goal-detail-page.component.html',
   styleUrl: './goal-detail-page.component.scss',

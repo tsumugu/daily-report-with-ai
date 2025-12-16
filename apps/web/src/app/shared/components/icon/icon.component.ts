@@ -23,7 +23,8 @@ export type IconName =
   | 'pencil'
   | 'chevron-down'
   | 'chevron-right'
-  | 'plus';
+  | 'plus'
+  | 'x';
 
 @Component({
   selector: 'app-icon',

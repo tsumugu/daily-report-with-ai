@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { of, throwError, Subject } from 'rxjs';
 import { DailyReportEditPageComponent } from './daily-report-edit-page.component';
 import { DailyReportService } from '../../services/daily-report.service';
@@ -21,6 +22,7 @@ describe('DailyReportEditPageComponent', () => {
     date: '2025-12-05',
     events: 'テストイベント',
     learnings: 'テスト学び',
+    goals: [],
     goodPoints: [
       {
         id: 'gp-1',
@@ -55,6 +57,7 @@ describe('DailyReportEditPageComponent', () => {
       imports: [
         DailyReportEditPageComponent,
         ReactiveFormsModule,
+        HttpClientTestingModule,
         RouterTestingModule.withRoutes([
           { path: 'daily-reports/:id', component: DailyReportEditPageComponent },
         ]),

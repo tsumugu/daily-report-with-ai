@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DailyReportService } from '../../services/daily-report.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { DailyReport, GoodPointStatus, ImprovementStatus } from '../../models/daily-report.model';
-import { ButtonComponent, AlertBannerComponent, IconComponent, StatusBadgeComponent, StatusBadgeType } from '../../../../shared/components';
+import { ButtonComponent, AlertBannerComponent, IconComponent, StatusBadgeComponent, StatusBadgeType, GoalChipComponent } from '../../../../shared/components';
 
 @Component({
   selector: 'app-daily-report-detail-page',
@@ -16,6 +16,7 @@ import { ButtonComponent, AlertBannerComponent, IconComponent, StatusBadgeCompon
     AlertBannerComponent,
     IconComponent,
     StatusBadgeComponent,
+    GoalChipComponent,
   ],
   templateUrl: './daily-report-detail-page.component.html',
   styleUrl: './daily-report-detail-page.component.scss',

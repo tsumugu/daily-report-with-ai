@@ -13,6 +13,7 @@ describe('DailyReportService', () => {
     date: '2025-12-05',
     events: 'テストイベント',
     learnings: 'テスト学び',
+    goals: [],
     goodPoints: [
       {
         id: 'gp-1',
@@ -87,6 +88,7 @@ describe('DailyReportService', () => {
             id: 'report-1',
             date: '2025-12-05',
             events: 'テストイベント',
+            goals: [],
             goodPointIds: ['gp-1'],
             improvementIds: ['imp-1'],
             goodPointSummary: {
@@ -126,6 +128,7 @@ describe('DailyReportService', () => {
             id: 'report-1',
             date: '2025-12-05',
             events: 'テストイベント',
+            goals: [],
             goodPointIds: ['gp-1'],
             improvementIds: ['imp-1'],
             goodPointSummary: {

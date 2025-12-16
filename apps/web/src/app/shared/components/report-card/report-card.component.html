@@ -20,6 +20,22 @@
     </div>
   </header>
 
+  <!-- 関連目標 -->
+  @if (report.goals && report.goals.length > 0) {
+    <div class="report-card__goals">
+      @for (goal of report.goals.slice(0, 3); track goal.id) {
+        <app-goal-chip
+          [goalId]="goal.id"
+          [goalName]="goal.name"
+          size="small"
+        />
+      }
+      @if (report.goals.length > 3) {
+        <span class="report-card__goals-more">+{{ report.goals.length - 3 }}</span>
+      }
+    </div>
+  }
+
   <!-- サマリーセクション -->
   @if (shouldShowSummarySection) {
     <section class="report-card__summary" aria-label="よかったことと改善点のサマリー">

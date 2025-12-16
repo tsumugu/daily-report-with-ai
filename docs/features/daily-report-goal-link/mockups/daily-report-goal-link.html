@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日報と目標の関連付け機能 プロトタイプ</title>
+  <link rel="stylesheet" href="daily-report-goal-link.css">
+</head>
+<body>
+  <div class="prototype-container">
+    <h1 class="prototype-title">日報と目標の関連付け機能 プロトタイプ</h1>
+    <p class="prototype-note">※ 各セクションをクリックして表示を切り替えられます</p>
+
+    <!-- 状態1: 日報作成画面（目標選択フィールド） -->
+    <section class="prototype-section active" id="section-1">
+      <h2 class="prototype-section__title">状態1: 日報作成画面（目標選択フィールド）</h2>
+
+      <div class="page-container">
+        <header class="page-header">
+          <button class="page-header__back" aria-label="戻る">←</button>
+          <h1 class="page-header__title">日報を作成</h1>
+        </header>
+
+        <div class="page-content">
+          <form class="form">
+            <!-- 日付フィールド -->
+            <div class="form-field">
+              <label class="form-field__label">日付 *</label>
+              <input type="date" class="form-field__input" value="2025-12-16" />
+            </div>
+
+            <!-- 目標選択フィールド（新規） -->
+            <div class="form-field">
+              <label class="form-field__label">関連する目標</label>
+              <div class="goal-select-field">
+                <input
+                  type="text"
+                  class="goal-select-field__input"
+                  placeholder="目標を検索・選択"
+                  onclick="toggleGoalDropdown()"
+                  readonly
+                />
+                <div class="goal-select-field__dropdown" id="goal-dropdown">
+                  <div class="goal-select-field__option" onclick="selectGoal('goal-1', 'スキル習得 > React基礎を習得')">
+                    <span class="goal-select-field__option-text">React基礎を習得</span>
+                    <span class="goal-select-field__option-parent">スキル習得</span>
+                  </div>
+                  <div class="goal-select-field__option" onclick="selectGoal('goal-2', 'スキル習得 > Next.js実践')">
+                    <span class="goal-select-field__option-text">Next.js実践</span>
+                    <span class="goal-select-field__option-parent">スキル習得</span>
+                  </div>
+                  <div class="goal-select-field__option" onclick="selectGoal('goal-3', 'プロジェクト > サンプルアプリ作成')">
+                    <span class="goal-select-field__option-text">サンプルアプリ作成</span>
+                    <span class="goal-select-field__option-parent">プロジェクト</span>
+                  </div>
+                </div>
+              </div>
+              <p class="form-field__helper">複数選択可能（最大10個）</p>
+
+              <!-- 選択済み目標チップ -->
+              <div class="goal-chips" id="selected-goals">
+                <!-- JSで動的に追加 -->
+              </div>
+            </div>
+
+            <!-- やったこと -->
+            <div class="form-field">
+              <label class="form-field__label">やったこと *</label>
+              <textarea class="form-field__textarea" rows="4" placeholder="今日やったことを入力"></textarea>
+            </div>
+
+            <!-- 学んだこと -->
+            <div class="form-field">
+              <label class="form-field__label">学んだこと</label>
+              <textarea class="form-field__textarea" rows="3" placeholder="今日学んだことを入力"></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="button button--secondary" onclick="showSection(4)">キャンセル</button>
+              <button type="button" class="button button--primary" onclick="showSection(3)">保存する</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 状態2: 日報編集画面（目標チップに削除ボタン） -->
+    <section class="prototype-section" id="section-2">
+      <h2 class="prototype-section__title">状態2: 日報編集画面（目標チップに削除ボタン）</h2>
+
+      <div class="page-container">
+        <header class="page-header">
+          <button class="page-header__back" aria-label="戻る">←</button>
+          <h1 class="page-header__title">日報を編集</h1>
+        </header>
+
+        <div class="page-content">
+          <form class="form">
+            <div class="form-field">
+              <label class="form-field__label">日付 *</label>
+              <input type="date" class="form-field__input" value="2025-12-16" />
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label">関連する目標</label>
+              <div class="goal-select-field">
+                <input
+                  type="text"
+                  class="goal-select-field__input"
+                  placeholder="目標を検索・選択"
+                  readonly
+                />
+              </div>
+
+              <!-- 選択済み目標チップ（削除ボタン付き） -->
+              <div class="goal-chips">
+                <div class="goal-chip goal-chip--removable">
+                  <span class="goal-chip__text">React基礎を習得</span>
+                  <button class="goal-chip__remove" aria-label="削除">×</button>
+                </div>
+                <div class="goal-chip goal-chip--removable">
+                  <span class="goal-chip__text">サンプルアプリ作成</span>
+                  <button class="goal-chip__remove" aria-label="削除">×</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label">やったこと *</label>
+              <textarea class="form-field__textarea" rows="4">Reactの基礎を学習しました</textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="button button--secondary">キャンセル</button>
+              <button type="button" class="button button--primary" onclick="showSection(3)">保存する</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 状態3: 日報一覧画面（目標チップ表示） -->
+    <section class="prototype-section" id="section-3">
+      <h2 class="prototype-section__title">状態3: 日報一覧画面（目標チップ表示）</h2>
+
+      <div class="page-container">
+        <header class="page-header">
+          <button class="page-header__back" aria-label="戻る">←</button>
+          <h1 class="page-header__title">日報一覧</h1>
+        </header>
+
+        <div class="page-content">
+          <!-- 日報カード1 -->
+          <div class="daily-report-card" onclick="showSection(2)">
+            <div class="daily-report-card__header">
+              <span class="daily-report-card__date">2025-12-16（月）</span>
+            </div>
+
+            <!-- 関連目標チップ -->
+            <div class="goal-chips goal-chips--inline">
+              <div class="goal-chip goal-chip--small" onclick="event.stopPropagation(); showSection(5)">
+                <span class="goal-chip__text">React基礎を習得</span>
+              </div>
+              <div class="goal-chip goal-chip--small" onclick="event.stopPropagation(); showSection(5)">
+                <span class="goal-chip__text">サンプルアプリ作成</span>
+              </div>
+            </div>
+
+            <div class="daily-report-card__content">
+              <p class="daily-report-card__events">Reactの基礎を学習しました。コンポーネントの概念を理解し、簡単なTodoアプリを作成しました。</p>
+            </div>
+
+            <div class="daily-report-card__footer">
+              <span class="daily-report-card__summary">よかったこと: 2件 / 改善点: 1件</span>
+            </div>
+          </div>
+
+          <!-- 日報カード2（3つ以上の目標） -->
+          <div class="daily-report-card">
+            <div class="daily-report-card__header">
+              <span class="daily-report-card__date">2025-12-15（日）</span>
+            </div>
+
+            <!-- 関連目標チップ（3つ以上） -->
+            <div class="goal-chips goal-chips--inline">
+              <div class="goal-chip goal-chip--small">
+                <span class="goal-chip__text">React基礎を習得</span>
+              </div>
+              <div class="goal-chip goal-chip--small">
+                <span class="goal-chip__text">Next.js実践</span>
+              </div>
+              <div class="goal-chip goal-chip--small">
+                <span class="goal-chip__text">TypeScript学習</span>
+              </div>
+              <div class="goal-chip goal-chip--small goal-chip--more">
+                <span class="goal-chip__text">+2</span>
+              </div>
+            </div>
+
+            <div class="daily-report-card__content">
+              <p class="daily-report-card__events">複数の目標に取り組みました。</p>
+            </div>
+          </div>
+
+          <!-- 日報カード3（目標なし） -->
+          <div class="daily-report-card">
+            <div class="daily-report-card__header">
+              <span class="daily-report-card__date">2025-12-14（土）</span>
+            </div>
+
+            <div class="daily-report-card__content">
+              <p class="daily-report-card__events">今日はリフレッシュの日でした。</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="fab" aria-label="日報を作成" onclick="showSection(1)">+</button>
+      </div>
+    </section>
+
+    <!-- 状態4: 日報詳細画面（関連目標セクション） -->
+    <section class="prototype-section" id="section-4">
+      <h2 class="prototype-section__title">状態4: 日報詳細画面（関連目標セクション）</h2>
+
+      <div class="page-container">
+        <header class="page-header">
+          <button class="page-header__back" aria-label="戻る" onclick="showSection(3)">←</button>
+          <h1 class="page-header__title">日報詳細</h1>
+        </header>
+
+        <div class="page-content">
+          <div class="detail-card">
+            <div class="detail-card__row">
+              <span class="detail-card__label">日付</span>
+              <span class="detail-card__value">2025-12-16（月）</span>
+            </div>
+
+            <!-- 関連目標セクション -->
+            <div class="detail-card__row detail-card__row--column">
+              <span class="detail-card__label">関連する目標</span>
+              <div class="goal-chips">
+                <div class="goal-chip" onclick="showSection(5)">
+                  <span class="goal-chip__text">React基礎を習得</span>
+                </div>
+                <div class="goal-chip" onclick="showSection(5)">
+                  <span class="goal-chip__text">サンプルアプリ作成</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-card__row detail-card__row--column">
+              <span class="detail-card__label">やったこと</span>
+              <p class="detail-card__text">Reactの基礎を学習しました。コンポーネントの概念を理解し、簡単なTodoアプリを作成しました。</p>
+            </div>
+
+            <div class="detail-card__row detail-card__row--column">
+              <span class="detail-card__label">学んだこと</span>
+              <p class="detail-card__text">状態管理の重要性を実感しました。</p>
+            </div>
+          </div>
+
+          <div class="page-actions">
+            <button class="button button--secondary" onclick="showSection(2)">編集</button>
+            <button class="button button--danger">削除</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 状態5: 目標詳細画面（関連日報セクション） -->
+    <section class="prototype-section" id="section-5">
+      <h2 class="prototype-section__title">状態5: 目標詳細画面（関連日報セクション）</h2>
+
+      <div class="page-container">
+        <header class="page-header">
+          <button class="page-header__back" aria-label="戻る" onclick="showSection(3)">←</button>
+          <h1 class="page-header__title">目標詳細</h1>
+        </header>
+
+        <div class="page-content">
+          <div class="detail-card">
+            <div class="detail-card__row detail-card__row--column">
+              <span class="detail-card__label">目標名</span>
+              <h2 class="detail-card__title">React基礎を習得</h2>
+            </div>
+
+            <div class="detail-card__row">
+              <span class="detail-card__label">階層</span>
+              <span class="goal-badge goal-badge--mid-term">中期目標</span>
+            </div>
+
+            <div class="detail-card__row">
+              <span class="detail-card__label">期間</span>
+              <span class="detail-card__value">2025-01-01 〜 2025-03-31</span>
+            </div>
+          </div>
+
+          <!-- 関連日報セクション（新規） -->
+          <div class="related-section">
+            <div class="related-section__header">
+              <h3 class="related-section__title">関連する日報（15件）</h3>
+              <select class="related-section__sort">
+                <option>新しい順</option>
+                <option>古い順</option>
+              </select>
+            </div>
+
+            <div class="related-daily-reports">
+              <!-- 日報アイテム1 -->
+              <div class="daily-report-item" onclick="showSection(4)">
+                <div class="daily-report-item__header">
+                  <span class="daily-report-item__date">2025-12-16（月）</span>
+                </div>
+                <p class="daily-report-item__events">Reactの基礎を学習しました。コンポーネントの概念を理解し、簡単なTodoアプリを作成しました。</p>
+              </div>
+
+              <!-- 日報アイテム2 -->
+              <div class="daily-report-item" onclick="showSection(4)">
+                <div class="daily-report-item__header">
+                  <span class="daily-report-item__date">2025-12-15（日）</span>
+                </div>
+                <p class="daily-report-item__events">Reactのライフサイクルメソッドについて学びました。useEffectフックの使い方を理解しました。</p>
+              </div>
+
+              <!-- 日報アイテム3 -->
+              <div class="daily-report-item" onclick="showSection(4)">
+                <div class="daily-report-item__header">
+                  <span class="daily-report-item__date">2025-12-14（土）</span>
+                </div>
+                <p class="daily-report-item__events">状態管理ライブラリの調査を開始しました。ReduxとZustandを比較検討しています。</p>
+              </div>
+            </div>
+
+            <button class="button button--secondary button--full-width">もっと見る（残り12件）</button>
+          </div>
+
+          <!-- 空状態の表示例 -->
+          <!-- <div class="related-section">
+            <div class="related-section__header">
+              <h3 class="related-section__title">関連する日報（0件）</h3>
+            </div>
+            <div class="empty-state">
+              <p class="empty-state__message">この目標に関連する日報はまだありません</p>
+            </div>
+          </div> -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ナビゲーションボタン -->
+    <div class="prototype-nav">
+      <button class="prototype-nav__button" onclick="showSection(1)">1. 日報作成</button>
+      <button class="prototype-nav__button" onclick="showSection(2)">2. 日報編集</button>
+      <button class="prototype-nav__button" onclick="showSection(3)">3. 日報一覧</button>
+      <button class="prototype-nav__button" onclick="showSection(4)">4. 日報詳細</button>
+      <button class="prototype-nav__button" onclick="showSection(5)">5. 目標詳細</button>
+    </div>
+  </div>
+
+  <script src="daily-report-goal-link.js"></script>
+</body>
+</html>

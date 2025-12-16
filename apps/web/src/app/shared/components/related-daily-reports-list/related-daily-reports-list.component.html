@@ -1,0 +1,67 @@
+<div class="related-daily-reports-list">
+  <div class="related-daily-reports-list__header">
+    <h3 class="related-daily-reports-list__title">
+      関連する日報
+      @if (totalCount() > 0) {
+        <span class="related-daily-reports-list__count">（{{ totalCount() }}件）</span>
+      }
+    </h3>
+    <select
+      class="related-daily-reports-list__sort"
+      [value]="sort"
+      (change)="onSortChange($any($event.target).value)"
+    >
+      <option value="desc">新しい順</option>
+      <option value="asc">古い順</option>
+    </select>
+  </div>
+
+  @if (isLoading() && dailyReports().length === 0) {
+    <div class="related-daily-reports-list__loading">読み込み中...</div>
+  }
+
+  @if (!isLoading() && dailyReports().length === 0 && !errorMessage()) {
+    <app-empty-state
+      iconName="file-text"
+      message="この目標に関連する日報はまだありません"
+    />
+  }
+
+  @if (errorMessage()) {
+    <div class="related-daily-reports-list__error">{{ errorMessage() }}</div>
+  }
+
+  @if (dailyReports().length > 0) {
+    <div class="related-daily-reports-list__items">
+      @for (report of dailyReports(); track report.id) {
+        <div
+          class="related-daily-reports-list__item"
+          (click)="navigateToReport(report.id)"
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="formatDate(report.date) + 'の日報'"
+        >
+          <div class="related-daily-reports-list__item-date">
+            {{ formatDate(report.date) }}
+          </div>
+          <div class="related-daily-reports-list__item-events">
+            {{ report.events }}
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (hasMore()) {
+      <div class="related-daily-reports-list__load-more">
+        <app-button
+          variant="secondary"
+          [loading]="isLoading()"
+          (clicked)="loadMore()"
+        >
+          もっと見る
+        </app-button>
+      </div>
+    }
+  }
+</div>
+

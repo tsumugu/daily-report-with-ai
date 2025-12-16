@@ -10,6 +10,7 @@ describe('ReportCardComponent', () => {
     id: 'test-id-1',
     date: '2025-12-05',
     events: '今日はミーティングが3件ありました。午後はコードレビューを行いました。',
+    goals: [],
     goodPointIds: ['gp1', 'gp2'],
     improvementIds: ['imp1'],
     goodPointSummary: {

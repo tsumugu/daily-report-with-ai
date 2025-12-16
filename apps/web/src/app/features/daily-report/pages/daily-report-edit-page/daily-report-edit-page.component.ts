@@ -10,6 +10,7 @@ import {
   TextareaFieldComponent,
   FormCardComponent,
   IconComponent,
+  GoalMultiSelectFieldComponent,
 } from '../../../../shared/components';
 
 @Component({
@@ -24,6 +25,7 @@ import {
     TextareaFieldComponent,
     FormCardComponent,
     IconComponent,
+    GoalMultiSelectFieldComponent,
   ],
   templateUrl: './daily-report-edit-page.component.html',
   styleUrl: './daily-report-edit-page.component.scss',
@@ -39,6 +41,9 @@ export class DailyReportEditPageComponent implements OnInit {
   // よかったこと・改善点の配列（リアクティブ）
   goodPoints = signal<GoodPointForm[]>([]);
   improvements = signal<ImprovementForm[]>([]);
+  
+  // 選択された目標のIDリスト
+  selectedGoalIds = signal<string[]>([]);
 
   // 状態管理
   reportId: string | null = null;
@@ -98,6 +103,9 @@ export class DailyReportEditPageComponent implements OnInit {
             action: imp.action || '',
           }))
         );
+        
+        // 関連目標を設定
+        this.selectedGoalIds.set(report.goals.map((g) => g.id));
 
         this.isLoading.set(false);
       },
@@ -192,6 +200,7 @@ export class DailyReportEditPageComponent implements OnInit {
       date: this.form.get('date')?.value as string,
       events: this.form.get('events')?.value as string,
       learnings: (this.form.get('learnings')?.value as string) || undefined,
+      goalIds: this.selectedGoalIds().length > 0 ? this.selectedGoalIds() : undefined,
       goodPoints: this.goodPoints()
         .filter((gp) => gp.content.trim())
         .map((gp) => ({

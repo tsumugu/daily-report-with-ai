@@ -20,4 +20,7 @@ export * from './hierarchy-card';
 export * from './hierarchy-tree-view';
 export * from './entity-select-field';
 export * from './empty-state';
+export * from './goal-chip';
+export * from './goal-multi-select-field';
+export * from './related-daily-reports-list';
 

@@ -3,12 +3,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { goalsDb } from '../db/goals.db.js';
 import { weeklyFocusesDb } from '../db/weekly-focuses.db.js';
+import { dailyReportGoalsDb } from '../db/daily-report-goals.db.js';
+import { dailyReportsDb } from '../db/daily-reports.db.js';
 import {
   Goal,
   CreateGoalRequest,
   UpdateGoalRequest,
   GoalWithChildren,
   GoalDetailResponse,
+  DailyReportSummary,
 } from '../models/daily-report.model.js';
 
 export const goalsRouter = Router();
@@ -243,10 +246,46 @@ goalsRouter.get('/goals/:id', (req: Request, res: Response) => {
     name: child.name,
   }));
 
+  // 関連日報を取得
+  const limit = parseInt(req.query.limit as string) || 10;
+  const offset = parseInt(req.query.offset as string) || 0;
+  const sort = (req.query.sort as 'asc' | 'desc') || 'desc';
+
+  const dailyReportGoals = dailyReportGoalsDb.findByGoalId(goalId);
+  const relatedDailyReportIds = dailyReportGoals.map(drg => drg.dailyReportId);
+  
+  // 日報を取得してフィルタリング（ユーザーの所有物のみ）
+  const relatedDailyReports: DailyReportSummary[] = relatedDailyReportIds
+    .map(id => dailyReportsDb.findById(id))
+    .filter((report): report is NonNullable<typeof report> => 
+      report !== undefined && report.userId === userId
+    )
+    .map(report => ({
+      id: report.id,
+      date: report.date,
+      events: report.events,
+      createdAt: report.createdAt,
+    }));
+
+  // 並び替え
+  relatedDailyReports.sort((a, b) => {
+    if (sort === 'asc') {
+      return a.date.localeCompare(b.date);
+    } else {
+      return b.date.localeCompare(a.date);
+    }
+  });
+
+  // ページネーション
+  const total = relatedDailyReports.length;
+  const paginatedReports = relatedDailyReports.slice(offset, offset + limit);
+
   const response: GoalDetailResponse = {
     ...goal,
     parent,
     children,
+    relatedDailyReports: paginatedReports,
+    relatedDailyReportsCount: total,
   };
 
   res.json(response);

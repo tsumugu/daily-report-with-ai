@@ -28,8 +28,33 @@ export class GoalService {
   /**
    * 目標詳細を取得する
    */
-  getGoal(id: string): Observable<GoalDetailResponse> {
-    return this.http.get<GoalDetailResponse>(`${this.apiUrl}/${id}`);
+  getGoal(
+    id: string,
+    options?: {
+      limit?: number;
+      offset?: number;
+      sort?: 'asc' | 'desc';
+    }
+  ): Observable<GoalDetailResponse> {
+    let url = `${this.apiUrl}/${id}`;
+    const params: Record<string, string> = {};
+    
+    if (options?.limit !== undefined) {
+      params['limit'] = options.limit.toString();
+    }
+    if (options?.offset !== undefined) {
+      params['offset'] = options.offset.toString();
+    }
+    if (options?.sort) {
+      params['sort'] = options.sort;
+    }
+    
+    if (Object.keys(params).length > 0) {
+      const queryString = new URLSearchParams(params).toString();
+      url += `?${queryString}`;
+    }
+    
+    return this.http.get<GoalDetailResponse>(url);
   }
 
   /**

@@ -65,6 +65,21 @@
           </app-button>
         </header>
 
+        <!-- 関連目標 -->
+        @if (report()!.goals && report()!.goals.length > 0) {
+          <section class="section section--goals">
+            <h2 class="section-title">関連する目標</h2>
+            <div class="goals-list">
+              @for (goal of report()!.goals; track goal.id) {
+                <app-goal-chip
+                  [goalId]="goal.id"
+                  [goalName]="goal.name"
+                />
+              }
+            </div>
+          </section>
+        }
+
         <!-- できごと -->
         <section class="section">
           <h2 class="section-title">できごと</h2>

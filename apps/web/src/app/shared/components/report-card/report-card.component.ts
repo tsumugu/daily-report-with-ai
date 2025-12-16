@@ -1,6 +1,8 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IconComponent } from '../icon';
+import { GoalChipComponent } from '../goal-chip';
+import { GoalSummary } from '../../../features/daily-report/models/daily-report.model';
 
 export interface GoodPointSummary {
   count: number;
@@ -22,6 +24,7 @@ export interface ReportCardData {
   id: string;
   date: string;
   events: string;
+  goals: GoalSummary[]; // 関連する目標のサマリー
   goodPointIds: string[];
   improvementIds: string[];
   goodPointSummary: GoodPointSummary;
@@ -31,7 +34,7 @@ export interface ReportCardData {
 @Component({
   selector: 'app-report-card',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, GoalChipComponent],
   templateUrl: './report-card.component.html',
   styleUrl: './report-card.component.scss',
 })

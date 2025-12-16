@@ -113,6 +113,11 @@
           </p>
         </section>
       }
+
+      <!-- 関連日報セクション -->
+      <section class="goal-detail-page__section">
+        <app-related-daily-reports-list [goalId]="goal()!.id" />
+      </section>
     </div>
   }
 

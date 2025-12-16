@@ -1,0 +1,25 @@
+<div
+  class="goal-chip"
+  [class.goal-chip--small]="size === 'small'"
+  [class.goal-chip--medium]="size === 'medium'"
+  [class.goal-chip--clickable]="clickable && !showRemoveButton"
+  [attr.title]="showTooltip ? goalName : null"
+  (click)="onChipClick()"
+  role="button"
+  [attr.tabindex]="clickable && !showRemoveButton ? 0 : -1"
+  [attr.aria-label]="'目標: ' + goalName"
+>
+  <span class="goal-chip__name">{{ displayName }}</span>
+  @if (showRemoveButton) {
+    <button
+      class="goal-chip__remove"
+      type="button"
+      (click)="onRemoveClick($event)"
+      aria-label="削除"
+      title="削除"
+    >
+      <app-icon name="x" [size]="16" color="var(--color-gray-600)" ariaLabel="削除" />
+    </button>
+  }
+</div>
+

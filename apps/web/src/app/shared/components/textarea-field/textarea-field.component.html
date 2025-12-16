@@ -32,7 +32,7 @@
     <span class="textarea-field__error">{{ errorMessage }}</span>
   }
   
-  @if (showCharCount) {
+  @if (showCharCount && isFocused()) {
     <div class="textarea-field__char-count" [class.textarea-field__char-count--over]="isOverLimit()">
       {{ charCount() }}/{{ maxLength }}
     </div>

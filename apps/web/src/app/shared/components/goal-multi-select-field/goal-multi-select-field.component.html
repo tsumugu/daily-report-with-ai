@@ -1,0 +1,103 @@
+<div class="goal-multi-select-field">
+  @if (label) {
+    <label class="goal-multi-select-field__label" [for]="'goal-select-' + label">
+      {{ label }}
+    </label>
+  }
+
+  <div class="goal-multi-select-field__wrapper">
+    <div
+      class="goal-multi-select-field__input-wrapper"
+      [class.goal-multi-select-field__input-wrapper--error]="hasError"
+      [class.goal-multi-select-field__input-wrapper--disabled]="disabled"
+      [class.goal-multi-select-field__input-wrapper--open]="isOpen()"
+    >
+      <input
+        type="text"
+        [id]="label ? 'goal-select-' + label : null"
+        class="goal-multi-select-field__input"
+        [placeholder]="placeholder"
+        [disabled]="disabled || isMaxSelectionReached"
+        [value]="searchQuery()"
+        (input)="onSearchChange($any($event.target).value)"
+        (focus)="toggleDropdown()"
+        [attr.aria-invalid]="hasError"
+        [attr.aria-describedby]="hasError ? 'goal-select-error' : null"
+      />
+      <button
+        type="button"
+        class="goal-multi-select-field__toggle"
+        [disabled]="disabled"
+        (click)="toggleDropdown()"
+        aria-label="ドロップダウンを開く"
+      >
+        <app-icon
+          name="chevron-down"
+          [size]="20"
+          color="var(--color-gray-500)"
+        />
+      </button>
+    </div>
+
+    @if (isOpen()) {
+      <div
+        class="goal-multi-select-field__dropdown"
+        [style.background-color]="'#ffffff'"
+        [style.background]="'#ffffff'"
+        (click)="$event.stopPropagation()"
+        (keyup.enter)="$event.stopPropagation()"
+        (keydown.enter)="$event.stopPropagation()"
+        tabindex="0"
+      >
+        @if (isLoading()) {
+          <div class="goal-multi-select-field__loading">読み込み中...</div>
+        } @else if (filteredGoals().length === 0) {
+          <div class="goal-multi-select-field__empty">目標が見つかりません</div>
+        } @else {
+          @for (goal of filteredGoals(); track goal.id) {
+            <button
+              type="button"
+              class="goal-multi-select-field__option"
+              (click)="selectGoal(goal.id)"
+              (mousedown)="$event.preventDefault()"
+            >
+              {{ getGoalLabel(goal) }}
+            </button>
+          }
+        }
+      </div>
+    }
+  </div>
+
+  <!-- 選択済み目標チップ -->
+  @if (getSelectedGoals().length > 0) {
+    <div class="goal-multi-select-field__chips">
+      @for (goal of getSelectedGoals(); track goal.id) {
+        <app-goal-chip
+          [goalId]="goal.id"
+          [goalName]="goal.name"
+          [showRemoveButton]="true"
+          [clickable]="false"
+          (remove)="removeGoal(goal.id)"
+        />
+      }
+    </div>
+  }
+
+  @if (helperText && !hasError) {
+    <span class="goal-multi-select-field__helper">{{ helperText }}</span>
+  }
+
+  @if (hasError) {
+    <span id="goal-select-error" class="goal-multi-select-field__error" role="alert">
+      {{ error }}
+    </span>
+  }
+
+  @if (isMaxSelectionReached) {
+    <span class="goal-multi-select-field__helper goal-multi-select-field__helper--warning">
+      最大{{ maxSelection }}個まで選択できます
+    </span>
+  }
+</div>
+

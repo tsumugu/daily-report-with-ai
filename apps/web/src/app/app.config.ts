@@ -28,6 +28,7 @@ import {
   ChevronDown,
   ChevronRight,
   Plus,
+  X,
 } from 'lucide-angular';
 
 export const appConfig: ApplicationConfig = {
@@ -59,6 +60,7 @@ export const appConfig: ApplicationConfig = {
         ChevronDown,
         ChevronRight,
         Plus,
+        X,
       })
     ),
   ],

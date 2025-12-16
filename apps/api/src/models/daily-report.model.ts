@@ -62,12 +62,23 @@ export interface Improvement {
 }
 
 /**
+ * 日報と目標の関連付けモデル
+ */
+export interface DailyReportGoal {
+  id: string;
+  dailyReportId: string;
+  goalId: string;
+  createdAt: string;
+}
+
+/**
  * 日報作成リクエスト
  */
 export interface CreateDailyReportRequest {
   date: string;
   events: string;
   learnings?: string;
+  goalIds?: string[]; // 関連する目標のID（最大10個）
   goodPoints?: {
     content: string;
     factors?: string;
@@ -86,6 +97,7 @@ export interface UpdateDailyReportRequest {
   date: string;
   events: string;
   learnings?: string;
+  goalIds?: string[]; // 関連する目標のID（最大10個）
   goodPoints?: {
     id?: string; // 既存のID（編集時）
     content: string;
@@ -136,6 +148,17 @@ export interface UpdateImprovementRequest {
 }
 
 /**
+ * 目標サマリー（日報レスポンス用）
+ */
+export interface GoalSummary {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  parentId: string | null;
+}
+
+/**
  * 日報レスポンス（よかったこと・改善点を含む）
  */
 export interface DailyReportResponse {
@@ -144,6 +167,7 @@ export interface DailyReportResponse {
   date: string;
   events: string;
   learnings: string | null;
+  goals: GoalSummary[]; // 関連する目標のサマリー
   goodPoints: GoodPoint[];
   improvements: Improvement[];
   createdAt: string;
@@ -255,6 +279,7 @@ export interface DailyReportListItem {
   id: string;
   date: string;
   events: string;
+  goals: GoalSummary[]; // 関連する目標のサマリー
   goodPointIds: string[];
   improvementIds: string[];
   goodPointSummary: GoodPointSummary;
@@ -314,6 +339,16 @@ export interface GoalWithChildren extends Goal {
 }
 
 /**
+ * 日報サマリー（目標詳細レスポンスで使用）
+ */
+export interface DailyReportSummary {
+  id: string;
+  date: string;
+  events: string;
+  createdAt: string;
+}
+
+/**
  * 目標詳細レスポンス
  */
 export interface GoalDetailResponse extends Goal {
@@ -325,5 +360,7 @@ export interface GoalDetailResponse extends Goal {
     id: string;
     name: string;
   }[];
+  relatedDailyReports?: DailyReportSummary[]; // 関連する日報のサマリー
+  relatedDailyReportsCount?: number; // 関連日報の総数
 }
 

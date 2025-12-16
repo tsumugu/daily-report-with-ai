@@ -51,6 +51,16 @@ export interface GoalWithChildren extends Goal {
 }
 
 /**
+ * 日報サマリー（目標詳細レスポンスで使用）
+ */
+export interface DailyReportSummary {
+  id: string;
+  date: string;
+  events: string;
+  createdAt: string;
+}
+
+/**
  * 目標詳細レスポンス
  */
 export interface GoalDetailResponse extends Goal {
@@ -62,6 +72,8 @@ export interface GoalDetailResponse extends Goal {
     id: string;
     name: string;
   }[];
+  relatedDailyReports?: DailyReportSummary[]; // 関連する日報のサマリー
+  relatedDailyReportsCount?: number; // 関連日報の総数
 }
 
 /**

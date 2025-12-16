@@ -36,6 +36,7 @@ describe('DailyReportDetailPageComponent', () => {
     date: '2025-12-05',
     events: '今日のできごと',
     learnings: '今日の学び',
+    goals: [],
     goodPoints: [
       {
         id: 'gp1',
@@ -370,6 +371,7 @@ describe('DailyReportDetailPageComponent (IDあり)', () => {
     date: '2025-12-05',
     events: '今日のできごと',
     learnings: '今日の学び',
+    goals: [],
     goodPoints: [],
     improvements: [],
     createdAt: '2025-12-05T10:00:00Z',

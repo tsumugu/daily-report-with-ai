@@ -82,7 +82,8 @@
 
   // 各フィールドコンポーネントに余白を追加
   app-date-field,
-  app-textarea-field {
+  app-textarea-field,
+  app-goal-multi-select-field {
     display: block;
     margin-bottom: 32px;
   }

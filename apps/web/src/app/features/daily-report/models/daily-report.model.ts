@@ -36,6 +36,17 @@ export interface Improvement {
 }
 
 /**
+ * 目標サマリー（日報レスポンス用）
+ */
+export interface GoalSummary {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  parentId: string | null;
+}
+
+/**
  * 日報
  */
 export interface DailyReport {
@@ -44,6 +55,7 @@ export interface DailyReport {
   date: string;
   events: string;
   learnings: string | null;
+  goals: GoalSummary[]; // 関連する目標のサマリー
   goodPoints: GoodPoint[];
   improvements: Improvement[];
   createdAt: string;
@@ -57,6 +69,7 @@ export interface CreateDailyReportRequest {
   date: string;
   events: string;
   learnings?: string;
+  goalIds?: string[]; // 関連する目標のID（最大10個）
   goodPoints?: {
     content: string;
     factors?: string;

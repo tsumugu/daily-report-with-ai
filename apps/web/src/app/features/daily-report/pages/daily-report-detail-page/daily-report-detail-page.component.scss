@@ -188,6 +188,11 @@
   &:last-of-type {
     border-bottom: none;
   }
+
+  // セクション間の間隔を確保
+  & + .section {
+    margin-top: 0;
+  }
 }
 
 .section-title {
@@ -208,6 +213,23 @@
   background: var(--color-gray-50);
   border-radius: 8px;
   padding: 1rem;
+}
+
+.section--goals {
+  .section-title {
+    margin-bottom: 0.75rem;
+  }
+
+  // 次のセクションとの間隔を確保
+  & + .section {
+    padding-top: 2rem;
+  }
+}
+
+.goals-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .content-text {

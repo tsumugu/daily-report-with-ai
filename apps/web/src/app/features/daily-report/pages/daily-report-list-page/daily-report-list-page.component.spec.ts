@@ -20,6 +20,7 @@ describe('DailyReportListPageComponent', () => {
         id: '1',
         date: '2025-12-05',
         events: '今日のできごと1',
+        goals: [],
         goodPointIds: ['gp1'],
         improvementIds: [],
         goodPointSummary: {
@@ -41,6 +42,7 @@ describe('DailyReportListPageComponent', () => {
         id: '2',
         date: '2025-12-04',
         events: '今日のできごと2',
+        goals: [],
         goodPointIds: [],
         improvementIds: ['imp1'],
         goodPointSummary: {
@@ -146,6 +148,7 @@ describe('DailyReportListPageComponent', () => {
             id: '3',
             date: '2025-12-03',
             events: '追加のできごと',
+            goals: [],
             goodPointIds: [],
             improvementIds: [],
             goodPointSummary: {

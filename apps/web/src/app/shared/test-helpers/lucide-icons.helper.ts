@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ChevronRight,
   Plus,
+  X,
 } from 'lucide-angular';
 
 /**
@@ -44,6 +45,7 @@ export function provideLucideIconsForTesting() {
       ChevronDown,
       ChevronRight,
       Plus,
+      X,
     })
   );
 }

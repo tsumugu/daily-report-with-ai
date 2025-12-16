@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { of, throwError, Subject } from 'rxjs';
 import { DailyReportInputPageComponent } from './daily-report-input-page.component';
 import { DailyReportService } from '../../services/daily-report.service';
@@ -20,6 +21,7 @@ describe('DailyReportInputPageComponent', () => {
     date: '2025-12-05',
     events: 'テストイベント',
     learnings: 'テスト学び',
+    goals: [],
     goodPoints: [],
     improvements: [],
     createdAt: '2025-12-05T00:00:00Z',
@@ -30,7 +32,12 @@ describe('DailyReportInputPageComponent', () => {
     dailyReportServiceSpy = jasmine.createSpyObj('DailyReportService', ['create']);
 
     await TestBed.configureTestingModule({
-      imports: [DailyReportInputPageComponent, ReactiveFormsModule, RouterTestingModule.withRoutes([])],
+      imports: [
+        DailyReportInputPageComponent,
+        ReactiveFormsModule,
+        HttpClientTestingModule,
+        RouterTestingModule.withRoutes([]),
+      ],
       providers: [
         { provide: DailyReportService, useValue: dailyReportServiceSpy },
         provideLucideIconsForTesting(),
@@ -241,6 +248,7 @@ describe('DailyReportInputPageComponent', () => {
         date: '2025-12-05',
         events: 'テストイベント',
         learnings: 'テスト学び',
+        goalIds: undefined,
         goodPoints: [{ content: 'よかったこと', factors: '要因' }],
         improvements: [{ content: '改善点', action: 'アクション' }],
       });
@@ -267,6 +275,7 @@ describe('DailyReportInputPageComponent', () => {
         date: '2025-12-05',
         events: 'テストイベント',
         learnings: undefined,
+        goalIds: undefined,
         goodPoints: [{ content: 'よかったこと', factors: undefined }],
         improvements: [{ content: '改善点', action: undefined }],
       });

@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { dailyReportsDb, goodPointsDb, improvementsDb } from '../db/daily-reports.db.js';
+import { dailyReportGoalsDb } from '../db/daily-report-goals.db.js';
+import { goalsDb } from '../db/goals.db.js';
 import {
   DailyReport,
   GoodPoint,
@@ -16,6 +18,9 @@ import {
   DailyReportListItem,
   GoodPointSummary,
   ImprovementSummary,
+  DailyReportGoal,
+  GoalSummary,
+  Goal,
 } from '../models/daily-report.model.js';
 import { followupsDb } from '../db/followups.db.js';
 
@@ -72,12 +77,29 @@ function toDailyReportResponse(report: DailyReport): DailyReportResponse {
   const goodPoints = goodPointsDb.findByIds(report.goodPointIds);
   const improvements = improvementsDb.findByIds(report.improvementIds);
 
+  // 関連する目標を取得
+  const dailyReportGoals = dailyReportGoalsDb.findByDailyReportId(report.id);
+  const goals: GoalSummary[] = dailyReportGoals
+    .map((drg) => {
+      const goal = goalsDb.findById(drg.goalId);
+      if (!goal) return null;
+      return {
+        id: goal.id,
+        name: goal.name,
+        startDate: goal.startDate,
+        endDate: goal.endDate,
+        parentId: goal.parentId,
+      };
+    })
+    .filter((g): g is GoalSummary => g !== null);
+
   return {
     id: report.id,
     userId: report.userId,
     date: report.date,
     events: report.events,
     learnings: report.learnings,
+    goals,
     goodPoints,
     improvements,
     createdAt: report.createdAt,
@@ -103,6 +125,27 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
   if (validationError) {
     res.status(400).json({ message: validationError });
     return;
+  }
+
+  // goalIdsのバリデーション
+  if (body.goalIds && body.goalIds.length > 10) {
+    res.status(400).json({ message: '目標は最大10個まで選択できます' });
+    return;
+  }
+
+  // goalIdsが存在し、ユーザーの所有する目標かチェック
+  if (body.goalIds && body.goalIds.length > 0) {
+    for (const goalId of body.goalIds) {
+      const goal = goalsDb.findById(goalId);
+      if (!goal) {
+        res.status(400).json({ message: `目標ID ${goalId} が見つかりません` });
+        return;
+      }
+      if (goal.userId !== userId) {
+        res.status(403).json({ message: '他のユーザーの目標を関連付けることはできません' });
+        return;
+      }
+    }
   }
 
   // 同日の日報が既に存在するかチェック
@@ -180,6 +223,19 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
   };
   dailyReportsDb.save(report);
 
+  // goalIdsが指定された場合、DailyReportGoal テーブルにレコードを作成
+  if (body.goalIds && body.goalIds.length > 0) {
+    for (const goalId of body.goalIds) {
+      const dailyReportGoal: DailyReportGoal = {
+        id: uuidv4(),
+        dailyReportId: reportId,
+        goalId,
+        createdAt: now,
+      };
+      dailyReportGoalsDb.save(dailyReportGoal);
+    }
+  }
+
   res.status(201).json(toDailyReportResponse(report));
 });
 
@@ -237,7 +293,8 @@ function calculateImprovementSummary(improvements: Improvement[]): ImprovementSu
 function toDailyReportListItem(
   report: DailyReport,
   goodPointsMap: Map<string, GoodPoint>,
-  improvementsMap: Map<string, Improvement>
+  improvementsMap: Map<string, Improvement>,
+  goalsByReportIdMap: Map<string, GoalSummary[]>
 ): DailyReportListItem {
   // よかったことの詳細情報を取得
   const goodPoints = report.goodPointIds
@@ -255,10 +312,14 @@ function toDailyReportListItem(
   // 改善点のサマリーを計算
   const improvementSummary = calculateImprovementSummary(improvements);
 
+  // 関連する目標を取得（N+1問題対策: 事前に一括取得したMapから取得）
+  const goals = goalsByReportIdMap.get(report.id) || [];
+
   return {
     id: report.id,
     date: report.date,
     events: report.events,
+    goals,
     goodPointIds: report.goodPointIds,
     improvementIds: report.improvementIds,
     goodPointSummary,
@@ -320,9 +381,47 @@ dailyReportsRouter.get('/daily-reports', (req: Request, res: Response) => {
     }
   });
 
+  // N+1問題対策: すべての日報の関連目標を一括取得
+  const dailyReportIds = paginatedReports.map((r) => r.id);
+  const dailyReportGoalsMap = dailyReportGoalsDb.findByDailyReportIds(dailyReportIds);
+  
+  // 目標IDを収集
+  const allGoalIds = new Set<string>();
+  dailyReportGoalsMap.forEach((goals) => {
+    goals.forEach((drg) => allGoalIds.add(drg.goalId));
+  });
+
+  // 目標を一括取得
+  const goalsMap = new Map<string, Goal>();
+  allGoalIds.forEach((id) => {
+    const goal = goalsDb.findById(id);
+    if (goal) {
+      goalsMap.set(id, goal);
+    }
+  });
+
+  // 日報IDごとの目標サマリーMapを作成
+  const goalsByReportIdMap = new Map<string, GoalSummary[]>();
+  dailyReportGoalsMap.forEach((goals, reportId) => {
+    const goalSummaries: GoalSummary[] = goals
+      .map((drg) => {
+        const goal = goalsMap.get(drg.goalId);
+        if (!goal) return null;
+        return {
+          id: goal.id,
+          name: goal.name,
+          startDate: goal.startDate,
+          endDate: goal.endDate,
+          parentId: goal.parentId,
+        };
+      })
+      .filter((g): g is GoalSummary => g !== null);
+    goalsByReportIdMap.set(reportId, goalSummaries);
+  });
+
   // レスポンス作成（一覧用の軽量版）
   const data = paginatedReports.map((report) =>
-    toDailyReportListItem(report, goodPointsMap, improvementsMap)
+    toDailyReportListItem(report, goodPointsMap, improvementsMap, goalsByReportIdMap)
   );
 
   res.status(200).json({ data, total });
@@ -385,6 +484,27 @@ dailyReportsRouter.put('/daily-reports/:id', (req: Request, res: Response) => {
   if (validationError) {
     res.status(400).json({ message: validationError });
     return;
+  }
+
+  // goalIdsのバリデーション
+  if (body.goalIds && body.goalIds.length > 10) {
+    res.status(400).json({ message: '目標は最大10個まで選択できます' });
+    return;
+  }
+
+  // goalIdsが存在し、ユーザーの所有する目標かチェック
+  if (body.goalIds && body.goalIds.length > 0) {
+    for (const goalId of body.goalIds) {
+      const goal = goalsDb.findById(goalId);
+      if (!goal) {
+        res.status(400).json({ message: `目標ID ${goalId} が見つかりません` });
+        return;
+      }
+      if (goal.userId !== userId) {
+        res.status(403).json({ message: '他のユーザーの目標を関連付けることはできません' });
+        return;
+      }
+    }
   }
 
   // 日付変更時の同日チェック
@@ -523,6 +643,23 @@ dailyReportsRouter.put('/daily-reports/:id', (req: Request, res: Response) => {
         improvementsDb.delete(improvementId);
       }
       // フォローアップデータが存在する場合は削除しない（PRDの要件）
+    }
+  }
+
+  // goalIdsの更新処理
+  // 既存の関連付けをすべて削除
+  dailyReportGoalsDb.deleteByDailyReportId(reportId);
+
+  // 新しい関連付けを作成
+  if (body.goalIds && body.goalIds.length > 0) {
+    for (const goalId of body.goalIds) {
+      const dailyReportGoal: DailyReportGoal = {
+        id: uuidv4(),
+        dailyReportId: reportId,
+        goalId,
+        createdAt: now,
+      };
+      dailyReportGoalsDb.save(dailyReportGoal);
     }
   }
 
