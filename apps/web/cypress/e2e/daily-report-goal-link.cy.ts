@@ -27,29 +27,23 @@ describe('日報と目標の関連付け機能', () => {
 
     // 目標を作成（テスト用のデータ準備）
     cy.visit('http://localhost:4200/goals/new');
-    cy.get('input#name').should('be.visible');
+    cy.get('input#goal-name').should('be.visible');
     
     // 目標1を作成
-    cy.get('input#name').type('テスト目標1');
-    cy.get('input#startDate').clear().type('2025-01-01');
-    cy.get('input#endDate').clear().type('2025-12-31');
-    cy.get('button[type="submit"]').click();
+    cy.get('input#goal-name').type('テスト目標1');
+    cy.get('input#goal-start-date').clear().type('2025-01-01');
+    cy.get('input#goal-end-date').clear().type('2025-12-31');
+    cy.contains('button', '保存する').click();
     cy.url().should('include', '/goals/', { timeout: 15000 });
-    cy.url().then((url) => {
-      goalId1 = url.split('/goals/')[1];
-    });
 
     // 目標2を作成
     cy.visit('http://localhost:4200/goals/new');
-    cy.get('input#name').should('be.visible');
-    cy.get('input#name').type('テスト目標2');
-    cy.get('input#startDate').clear().type('2025-01-01');
-    cy.get('input#endDate').clear().type('2025-12-31');
-    cy.get('button[type="submit"]').click();
+    cy.get('input#goal-name').should('be.visible');
+    cy.get('input#goal-name').type('テスト目標2');
+    cy.get('input#goal-start-date').clear().type('2025-01-01');
+    cy.get('input#goal-end-date').clear().type('2025-12-31');
+    cy.contains('button', '保存する').click();
     cy.url().should('include', '/goals/', { timeout: 15000 });
-    cy.url().then((url) => {
-      goalId2 = url.split('/goals/')[1];
-    });
   });
 
   describe('US-1: 日報作成時の目標関連付け', () => {
@@ -66,10 +60,10 @@ describe('日報と目標の関連付け機能', () => {
       cy.get('app-goal-multi-select-field').find('input[type="text"]').click();
       
       // ドロップダウンが開くまで待機
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').should('be.visible');
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').should('be.visible');
 
       // 目標を選択（最初の目標）
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').contains('テスト目標1').click();
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').contains('テスト目標1').click();
 
       // 選択した目標がチップとして表示されることを確認
       cy.get('app-goal-multi-select-field').find('app-goal-chip').should('be.visible');
@@ -91,18 +85,18 @@ describe('日報と目標の関連付け機能', () => {
 
       // 目標選択フィールドをクリック
       cy.get('app-goal-multi-select-field').find('input[type="text"]').click();
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').should('be.visible');
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').should('be.visible');
 
       // 目標1を選択
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').contains('テスト目標1').click();
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').contains('テスト目標1').click();
       cy.get('app-goal-multi-select-field').find('app-goal-chip').should('have.length', 1);
 
       // 再度ドロップダウンを開く
       cy.get('app-goal-multi-select-field').find('input[type="text"]').click();
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').should('be.visible');
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').should('be.visible');
 
       // 目標2を選択
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').contains('テスト目標2').click();
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').contains('テスト目標2').click();
 
       // 2つの目標がチップとして表示されることを確認
       cy.get('app-goal-multi-select-field').find('app-goal-chip').should('have.length', 2);
@@ -139,8 +133,8 @@ describe('日報と目標の関連付け機能', () => {
 
       // 目標を選択
       cy.get('app-goal-multi-select-field').find('input[type="text"]').click();
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').should('be.visible');
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').contains('テスト目標1').click();
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').should('be.visible');
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').contains('テスト目標1').click();
 
       // 選択した目標がチップとして表示されることを確認
       cy.get('app-goal-multi-select-field').find('app-goal-chip').should('be.visible');
@@ -156,8 +150,8 @@ describe('日報と目標の関連付け機能', () => {
       
       // 目標を選択
       cy.get('app-goal-multi-select-field').find('input[type="text"]').click();
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').should('be.visible');
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').contains('テスト目標1').click();
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').should('be.visible');
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').contains('テスト目標1').click();
       
       // 日報を保存
       cy.get('textarea#events').type('編集テスト用の日報');
@@ -193,10 +187,10 @@ describe('日報と目標の関連付け機能', () => {
 
       // 目標選択フィールドをクリック
       cy.get('app-goal-multi-select-field').find('input[type="text"]').click();
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').should('be.visible');
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').should('be.visible');
 
       // 目標2を追加
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').contains('テスト目標2').click();
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').contains('テスト目標2').click();
 
       // 2つの目標が表示されることを確認
       cy.get('app-goal-multi-select-field').find('app-goal-chip').should('have.length', 2);
@@ -237,8 +231,8 @@ describe('日報と目標の関連付け機能', () => {
 
       // 目標を追加
       cy.get('app-goal-multi-select-field').find('input[type="text"]').click();
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').should('be.visible');
-      cy.get('app-goal-multi-select-field').find('.dropdown-menu').contains('テスト目標2').click();
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').should('be.visible');
+      cy.get('app-goal-multi-select-field').find('.goal-multi-select-field__dropdown').contains('テスト目標2').click();
 
       // 他のフィールドの値が変更されていないことを確認
       cy.get('textarea#events').should('have.value', '編集テスト用の日報');
