@@ -43,11 +43,11 @@ alwaysApply: true
 ```markdown
 <!-- development-flow.md -->
 
-> カバレッジ100%は必須。詳細は `docs/general/test_rules.md` を参照
+> テストルールの詳細は `.claude/jobs/qa.md` を参照
 
-<!-- test_rules.md -->
+<!-- qa.md -->
 
-## カバレッジ100%必須ルール
+## テストルール
 
 （ここに詳細を記述）
 ```
@@ -72,7 +72,7 @@ alwaysApply: true
 ❌ 悪い例：1ファイルに複数の目的
 
 ```markdown
-<!-- test_rules.md -->
+<!-- qa.md -->
 
 # テストルール
 
@@ -92,7 +92,7 @@ alwaysApply: true
 ```
 docs/
 ├── rules/test-policy.md          # テストに関するルール・原則
-├── general/test_rules.md         # テストの書き方ガイド
+├── jobs/qa.md                    # QAロール定義（テスト戦略・TDD・実装ガイド）
 └── features/auth/tech_spec.md    # 認証機能のテスト設計
 ```
 
