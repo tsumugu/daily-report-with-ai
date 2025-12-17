@@ -168,5 +168,39 @@ export function initializeTables(db: DatabaseType): void {
     CREATE INDEX IF NOT EXISTS idx_improvements_user_id ON improvements(user_id);
     CREATE INDEX IF NOT EXISTS idx_improvements_daily_report_id ON improvements(daily_report_id);
   `);
+  
+  // マイグレーション処理：followupsテーブルにmemoカラムが存在しない場合に追加
+  migrateFollowupsTable(db);
+}
+
+/**
+ * followupsテーブルのマイグレーション
+ * memoカラムとdateカラムが存在しない場合に追加
+ */
+function migrateFollowupsTable(db: DatabaseType): void {
+  try {
+    // テーブルが存在するか確認
+    const tableInfo = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='followups'").get();
+    if (!tableInfo) {
+      return; // テーブルが存在しない場合はスキップ
+    }
+    
+    // カラム一覧を取得
+    const columns = db.prepare("PRAGMA table_info(followups)").all() as { name: string }[];
+    const columnNames = columns.map(col => col.name);
+    
+    // memoカラムが存在しない場合は追加
+    if (!columnNames.includes('memo')) {
+      db.exec('ALTER TABLE followups ADD COLUMN memo TEXT');
+    }
+    
+    // dateカラムが存在しない場合は追加
+    if (!columnNames.includes('date')) {
+      db.exec('ALTER TABLE followups ADD COLUMN date TEXT');
+    }
+  } catch (error) {
+    // エラーが発生した場合はログを出力して続行
+    console.error('Failed to migrate followups table:', error);
+  }
 }
 

@@ -13,20 +13,27 @@ export class DailyReportsDatabase {
   }
 
   save(report: DailyReport): void {
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO daily_reports 
-      (id, user_id, date, events, learnings, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `);
-    stmt.run(
-      report.id,
-      report.userId,
-      report.date,
-      report.events,
-      report.learnings,
-      report.createdAt,
-      report.updatedAt
-    );
+    try {
+      const stmt = this.db.prepare(`
+        INSERT OR REPLACE INTO daily_reports 
+        (id, user_id, date, events, learnings, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      stmt.run(
+        report.id,
+        report.userId,
+        report.date,
+        report.events,
+        report.learnings,
+        report.createdAt,
+        report.updatedAt
+      );
+    } catch (error: any) {
+      if (error.code === 'SQLITE_CONSTRAINT_FOREIGNKEY' || error.message?.includes('FOREIGN KEY constraint failed')) {
+        throw new Error(`ユーザーID ${report.userId} が存在しません`);
+      }
+      throw error;
+    }
   }
 
   findById(id: string): DailyReport | undefined {
@@ -66,19 +73,26 @@ export class DailyReportsDatabase {
   }
 
   update(report: DailyReport): void {
-    const stmt = this.db.prepare(`
-      UPDATE daily_reports 
-      SET user_id = ?, date = ?, events = ?, learnings = ?, updated_at = ?
-      WHERE id = ?
-    `);
-    stmt.run(
-      report.userId,
-      report.date,
-      report.events,
-      report.learnings,
-      report.updatedAt,
-      report.id
-    );
+    try {
+      const stmt = this.db.prepare(`
+        UPDATE daily_reports 
+        SET user_id = ?, date = ?, events = ?, learnings = ?, updated_at = ?
+        WHERE id = ?
+      `);
+      stmt.run(
+        report.userId,
+        report.date,
+        report.events,
+        report.learnings,
+        report.updatedAt,
+        report.id
+      );
+    } catch (error: any) {
+      if (error.code === 'SQLITE_CONSTRAINT_FOREIGNKEY' || error.message?.includes('FOREIGN KEY constraint failed')) {
+        throw new Error(`ユーザーID ${report.userId} が存在しません`);
+      }
+      throw error;
+    }
   }
 
   clear(): void {

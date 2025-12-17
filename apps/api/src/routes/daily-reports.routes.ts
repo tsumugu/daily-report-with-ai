@@ -196,7 +196,12 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
     createdAt: now,
     updatedAt: now,
   };
-  dailyReportsDb.save(report);
+  try {
+    dailyReportsDb.save(report);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message || '日報の保存に失敗しました' });
+    return;
+  }
 
   // よかったことを作成
   const goodPointIds: string[] = [];
@@ -705,7 +710,12 @@ dailyReportsRouter.put('/daily-reports/:id', (req: Request, res: Response) => {
     improvementIds: newImprovementIds,
     updatedAt: now,
   };
-  dailyReportsDb.update(updatedReport);
+  try {
+    dailyReportsDb.update(updatedReport);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message || '日報の更新に失敗しました' });
+    return;
+  }
 
   res.status(200).json(toDailyReportResponse(updatedReport));
 });
