@@ -6,6 +6,7 @@ import { weeklyFocusesDb } from '../db/weekly-focuses.db.js';
 import { goodPointsDb, improvementsDb, dailyReportsDb } from '../db/daily-reports.db.js';
 import { dailyReportGoalsDb } from '../db/daily-report-goals.db.js';
 import { goalsDb } from '../db/goals.db.js';
+import { followupsDb } from '../db/followups.db.js';
 import { usersDb } from '../db/users.db.js';
 import { generateToken } from '../middleware/auth.middleware.js';
 
@@ -54,6 +55,7 @@ describe('weeklyFocusesRouter', () => {
   afterEach(() => {
     // 外部キー制約を考慮して削除順序を調整
     weeklyFocusesDb.clear();
+    followupsDb.clear();
     goodPointsDb.clear();
     improvementsDb.clear();
     dailyReportGoalsDb.clear();
