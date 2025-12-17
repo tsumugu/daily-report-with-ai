@@ -51,6 +51,19 @@ function validateDailyReport(body: CreateDailyReportRequest): string | null {
 }
 
 function validateGoodPoint(body: CreateGoodPointRequest): string | null {
+  if (!body.dailyReportId) {
+    return 'dailyReportId は必須です';
+  }
+  if (!body.content) {
+    return 'content は必須です';
+  }
+  if (body.content.length > MAX_LENGTH) {
+    return `content は${MAX_LENGTH}文字以内で入力してください`;
+  }
+  return null;
+}
+
+function validateGoodPointContent(body: { content: string; factors?: string; tags?: string[] }): string | null {
   if (!body.content) {
     return 'content は必須です';
   }
@@ -61,6 +74,19 @@ function validateGoodPoint(body: CreateGoodPointRequest): string | null {
 }
 
 function validateImprovement(body: CreateImprovementRequest): string | null {
+  if (!body.dailyReportId) {
+    return 'dailyReportId は必須です';
+  }
+  if (!body.content) {
+    return 'content は必須です';
+  }
+  if (body.content.length > MAX_LENGTH) {
+    return `content は${MAX_LENGTH}文字以内で入力してください`;
+  }
+  return null;
+}
+
+function validateImprovementContent(body: { content: string; action?: string }): string | null {
   if (!body.content) {
     return 'content は必須です';
   }
@@ -158,11 +184,25 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
   const now = new Date().toISOString();
   const reportId = uuidv4();
 
+  // 日報を先に作成（外部キー制約を満たすため）
+  const report: DailyReport = {
+    id: reportId,
+    userId,
+    date: body.date,
+    events: body.events,
+    learnings: body.learnings || null,
+    goodPointIds: [],
+    improvementIds: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+  dailyReportsDb.save(report);
+
   // よかったことを作成
   const goodPointIds: string[] = [];
   if (body.goodPoints && body.goodPoints.length > 0) {
     for (const gp of body.goodPoints) {
-      const gpValidation = validateGoodPoint(gp);
+      const gpValidation = validateGoodPointContent(gp);
       if (gpValidation) {
         res.status(400).json({ message: `goodPoints: ${gpValidation}` });
         return;
@@ -179,7 +219,7 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
         createdAt: now,
         updatedAt: now,
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
       goodPointIds.push(goodPoint.id);
     }
   }
@@ -188,7 +228,7 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
   const improvementIds: string[] = [];
   if (body.improvements && body.improvements.length > 0) {
     for (const imp of body.improvements) {
-      const impValidation = validateImprovement(imp);
+      const impValidation = validateImprovementContent(imp);
       if (impValidation) {
         res.status(400).json({ message: `improvements: ${impValidation}` });
         return;
@@ -204,24 +244,10 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
         createdAt: now,
         updatedAt: now,
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
       improvementIds.push(improvement.id);
     }
   }
-
-  // 日報を作成
-  const report: DailyReport = {
-    id: reportId,
-    userId,
-    date: body.date,
-    events: body.events,
-    learnings: body.learnings || null,
-    goodPointIds,
-    improvementIds,
-    createdAt: now,
-    updatedAt: now,
-  };
-  dailyReportsDb.save(report);
 
   // goalIdsが指定された場合、DailyReportGoal テーブルにレコードを作成
   if (body.goalIds && body.goalIds.length > 0) {
@@ -236,7 +262,13 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
     }
   }
 
-  res.status(201).json(toDailyReportResponse(report));
+  // 更新後の日報を取得してレスポンスを返す
+  const updatedReport = dailyReportsDb.findById(reportId);
+  if (!updatedReport) {
+    res.status(500).json({ message: '日報の保存に失敗しました' });
+    return;
+  }
+  res.status(201).json(toDailyReportResponse(updatedReport));
 });
 
 /**
@@ -523,7 +555,7 @@ dailyReportsRouter.put('/daily-reports/:id', (req: Request, res: Response) => {
   // よかったことの処理
   if (body.goodPoints && body.goodPoints.length > 0) {
     for (const gp of body.goodPoints) {
-      const gpValidation = validateGoodPoint(gp);
+      const gpValidation = validateGoodPointContent(gp);
       if (gpValidation) {
         res.status(400).json({ message: `goodPoints: ${gpValidation}` });
         return;
@@ -550,7 +582,7 @@ dailyReportsRouter.put('/daily-reports/:id', (req: Request, res: Response) => {
           tags: gp.tags || [],
           updatedAt: now,
         };
-        goodPointsDb.update(updatedGoodPoint);
+        goodPointsDb.update(updatedGoodPoint, reportId);
         newGoodPointIds.push(gp.id);
       } else {
         // 新規作成
@@ -565,7 +597,7 @@ dailyReportsRouter.put('/daily-reports/:id', (req: Request, res: Response) => {
           createdAt: now,
           updatedAt: now,
         };
-        goodPointsDb.save(goodPoint);
+        goodPointsDb.save(goodPoint, reportId);
         newGoodPointIds.push(goodPoint.id);
       }
     }
@@ -587,7 +619,7 @@ dailyReportsRouter.put('/daily-reports/:id', (req: Request, res: Response) => {
   // 改善点の処理
   if (body.improvements && body.improvements.length > 0) {
     for (const imp of body.improvements) {
-      const impValidation = validateImprovement(imp);
+      const impValidation = validateImprovementContent(imp);
       if (impValidation) {
         res.status(400).json({ message: `improvements: ${impValidation}` });
         return;
@@ -613,7 +645,7 @@ dailyReportsRouter.put('/daily-reports/:id', (req: Request, res: Response) => {
           action: imp.action || null,
           updatedAt: now,
         };
-        improvementsDb.update(updatedImprovement);
+        improvementsDb.update(updatedImprovement, reportId);
         newImprovementIds.push(imp.id);
       } else {
         // 新規作成
@@ -627,7 +659,7 @@ dailyReportsRouter.put('/daily-reports/:id', (req: Request, res: Response) => {
           createdAt: now,
           updatedAt: now,
         };
-        improvementsDb.save(improvement);
+        improvementsDb.save(improvement, reportId);
         newImprovementIds.push(improvement.id);
       }
     }
@@ -710,7 +742,7 @@ dailyReportsRouter.post('/good-points', (req: Request, res: Response) => {
     updatedAt: now,
   };
 
-  goodPointsDb.save(goodPoint);
+  goodPointsDb.save(goodPoint, body.dailyReportId);
   res.status(201).json(goodPoint);
 });
 
@@ -783,7 +815,7 @@ dailyReportsRouter.post('/improvements', (req: Request, res: Response) => {
     updatedAt: now,
   };
 
-  improvementsDb.save(improvement);
+  improvementsDb.save(improvement, body.dailyReportId);
   res.status(201).json(improvement);
 });
 

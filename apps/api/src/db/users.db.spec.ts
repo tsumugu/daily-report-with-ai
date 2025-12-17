@@ -1,10 +1,24 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { usersDb } from './users.db';
-import { User } from '../models/user.model';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import Database, { type Database as DatabaseType } from 'better-sqlite3';
+import { UsersDatabase } from './users.db.js';
+import { User } from '../models/user.model.js';
+import { initializeTables } from './database.js';
 
 describe('UsersDatabase', () => {
+  let db: DatabaseType;
+  let usersDb: UsersDatabase;
+
   beforeEach(() => {
-    usersDb.clear();
+    // インメモリデータベースを作成
+    db = new Database(':memory:');
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initializeTables(db);
+    usersDb = new UsersDatabase(db);
+  });
+
+  afterEach(() => {
+    db.close();
   });
 
   const createMockUser = (overrides: Partial<User> = {}): User => ({

@@ -1,58 +1,80 @@
 import { WeeklyFocus } from '../models/daily-report.model.js';
+import { getDatabase } from './database.js';
+import type { Database as DatabaseType } from 'better-sqlite3';
 
 /**
- * 週次フォーカスインメモリデータベース
+ * SQLiteベースの週次フォーカスデータベース
  */
 export class WeeklyFocusesDatabase {
-  private weeklyFocuses = new Map<string, WeeklyFocus>();
+  private db: DatabaseType;
+
+  constructor(db?: DatabaseType) {
+    this.db = db || getDatabase();
+  }
 
   save(weeklyFocus: WeeklyFocus): void {
-    this.weeklyFocuses.set(weeklyFocus.id, weeklyFocus);
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO weekly_focuses 
+      (id, user_id, item_type, item_id, goal_id, week_start_date, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(
+      weeklyFocus.id,
+      weeklyFocus.userId,
+      weeklyFocus.itemType,
+      weeklyFocus.itemId,
+      weeklyFocus.goalId,
+      weeklyFocus.weekStartDate,
+      weeklyFocus.createdAt
+    );
   }
 
   findById(id: string): WeeklyFocus | undefined {
-    return this.weeklyFocuses.get(id);
+    const stmt = this.db.prepare('SELECT * FROM weekly_focuses WHERE id = ?');
+    const row = stmt.get(id) as any;
+    return row ? this.mapRowToWeeklyFocus(row) : undefined;
   }
 
   findByUserIdAndWeek(userId: string, weekStartDate: string): WeeklyFocus[] {
-    const results: WeeklyFocus[] = [];
-    for (const weeklyFocus of this.weeklyFocuses.values()) {
-      if (weeklyFocus.userId === userId && weeklyFocus.weekStartDate === weekStartDate) {
-        results.push(weeklyFocus);
-      }
-    }
-    return results;
+    const stmt = this.db.prepare(
+      'SELECT * FROM weekly_focuses WHERE user_id = ? AND week_start_date = ?'
+    );
+    const rows = stmt.all(userId, weekStartDate) as any[];
+    return rows.map(row => this.mapRowToWeeklyFocus(row));
   }
 
   findByUserId(userId: string): WeeklyFocus[] {
-    const results: WeeklyFocus[] = [];
-    for (const weeklyFocus of this.weeklyFocuses.values()) {
-      if (weeklyFocus.userId === userId) {
-        results.push(weeklyFocus);
-      }
-    }
-    return results;
+    const stmt = this.db.prepare('SELECT * FROM weekly_focuses WHERE user_id = ? ORDER BY week_start_date DESC');
+    const rows = stmt.all(userId) as any[];
+    return rows.map(row => this.mapRowToWeeklyFocus(row));
   }
 
   findByGoalId(goalId: string): WeeklyFocus[] {
-    const results: WeeklyFocus[] = [];
-    for (const weeklyFocus of this.weeklyFocuses.values()) {
-      if (weeklyFocus.goalId === goalId) {
-        results.push(weeklyFocus);
-      }
-    }
-    return results;
+    const stmt = this.db.prepare('SELECT * FROM weekly_focuses WHERE goal_id = ?');
+    const rows = stmt.all(goalId) as any[];
+    return rows.map(row => this.mapRowToWeeklyFocus(row));
   }
 
   delete(id: string): void {
-    this.weeklyFocuses.delete(id);
+    this.db.prepare('DELETE FROM weekly_focuses WHERE id = ?').run(id);
   }
 
   clear(): void {
-    this.weeklyFocuses.clear();
+    this.db.prepare('DELETE FROM weekly_focuses').run();
+  }
+
+  private mapRowToWeeklyFocus(row: any): WeeklyFocus {
+    return {
+      id: row.id,
+      userId: row.user_id,
+      itemType: row.item_type,
+      itemId: row.item_id,
+      goalId: row.goal_id,
+      weekStartDate: row.week_start_date,
+      createdAt: row.created_at,
+    };
   }
 }
 
 // シングルトンインスタンス
 export const weeklyFocusesDb = new WeeklyFocusesDatabase();
-

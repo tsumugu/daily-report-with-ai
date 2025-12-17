@@ -3,7 +3,9 @@ import express from 'express';
 import request from 'supertest';
 import { weeklyFocusesRouter } from './weekly-focuses.routes.js';
 import { weeklyFocusesDb } from '../db/weekly-focuses.db.js';
-import { goodPointsDb, improvementsDb } from '../db/daily-reports.db.js';
+import { goodPointsDb, improvementsDb, dailyReportsDb } from '../db/daily-reports.db.js';
+import { dailyReportGoalsDb } from '../db/daily-report-goals.db.js';
+import { goalsDb } from '../db/goals.db.js';
 import { usersDb } from '../db/users.db.js';
 import { generateToken } from '../middleware/auth.middleware.js';
 
@@ -12,6 +14,21 @@ describe('weeklyFocusesRouter', () => {
   let authToken: string;
   const testUserId = 'test-user-id';
   const testUserEmail = 'test@example.com';
+
+  // ダミーの日報を作成するヘルパー関数
+  const createDummyReport = (id = 'report-1') => {
+    const dummyReport = {
+      id,
+      userId: testUserId,
+      date: '2025-12-01',
+      events: 'テストイベント',
+      learnings: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    dailyReportsDb.save(dummyReport);
+    return dummyReport.id;
+  };
 
   beforeEach(() => {
     app = express();
@@ -31,13 +48,18 @@ describe('weeklyFocusesRouter', () => {
     weeklyFocusesDb.clear();
     goodPointsDb.clear();
     improvementsDb.clear();
+    dailyReportsDb.clear();
   });
 
   afterEach(() => {
-    usersDb.clear();
+    // 外部キー制約を考慮して削除順序を調整
     weeklyFocusesDb.clear();
     goodPointsDb.clear();
     improvementsDb.clear();
+    dailyReportGoalsDb.clear();
+    dailyReportsDb.clear();
+    goalsDb.clear();
+    usersDb.clear();
   });
 
   describe('GET /api/weekly-focuses', () => {
@@ -54,6 +76,7 @@ describe('weeklyFocusesRouter', () => {
     };
 
     it('今週のフォーカスを取得できること', async () => {
+      const reportId = createDummyReport();
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -65,7 +88,7 @@ describe('weeklyFocusesRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       // 今週のフォーカスを作成
       const weekStartDate = getWeekStartDate();
@@ -103,6 +126,7 @@ describe('weeklyFocusesRouter', () => {
     };
 
     it('週次フォーカスを設定できること', async () => {
+      const reportId = createDummyReport();
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -114,7 +138,7 @@ describe('weeklyFocusesRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       const response = await request(app)
         .post('/api/weekly-focuses')
@@ -136,6 +160,7 @@ describe('weeklyFocusesRouter', () => {
 
       // 5件のフォーカスを作成
       for (let i = 1; i <= 5; i++) {
+        const reportId = createDummyReport(`report-${i}`);
         const goodPoint = {
           id: `gp-${i}`,
           userId: testUserId,
@@ -147,7 +172,7 @@ describe('weeklyFocusesRouter', () => {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        goodPointsDb.save(goodPoint);
+        goodPointsDb.save(goodPoint, reportId);
 
         const weeklyFocus = {
           id: `focus-${i}`,
@@ -161,6 +186,7 @@ describe('weeklyFocusesRouter', () => {
       }
 
       // 6件目を追加しようとする
+      const reportId6 = createDummyReport('report-6');
       const goodPoint6 = {
         id: 'gp-6',
         userId: testUserId,
@@ -172,7 +198,7 @@ describe('weeklyFocusesRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint6);
+      goodPointsDb.save(goodPoint6, reportId6);
 
       const response = await request(app)
         .post('/api/weekly-focuses')
@@ -187,6 +213,7 @@ describe('weeklyFocusesRouter', () => {
     });
 
     it('既に同じ項目が今週のフォーカスに設定されている場合、400エラーを返すこと', async () => {
+      const reportId = createDummyReport();
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -198,7 +225,7 @@ describe('weeklyFocusesRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       const weekStartDate = getWeekStartDate();
       const weeklyFocus = {

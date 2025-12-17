@@ -64,5 +64,14 @@ export default tseslint.config(
       // 空の関数は警告（ControlValueAccessorなど正当な理由がある場合は無効化）
       '@typescript-eslint/no-empty-function': 'warn',
     },
+  },
+
+  // API固有の設定（サーバーサイドでは明示的なanyも許容）
+  {
+    files: ['apps/api/src/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      'no-console': 'off',
+    },
   }
 );

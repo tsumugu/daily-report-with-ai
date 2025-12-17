@@ -1,20 +1,53 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import express, { Express } from 'express';
 import request from 'supertest';
-import { authRouter } from './auth.routes';
-import { usersDb } from '../db/users.db';
+import Database, { type Database as DatabaseType } from 'better-sqlite3';
+import { authRouter } from './auth.routes.js';
+import { UsersDatabase } from '../db/users.db.js';
+import { initializeTables } from '../db/database.js';
 
-// supertestをインストールする必要があるため、コメントアウト
-// 以下はテスト実装のサンプル
+// モジュールをモック（実際のインスタンスを返すようにする）
+const mockDbInstances = {
+  usersDb: null as UsersDatabase | null,
+};
+
+vi.mock('../db/users.db.js', async () => {
+  const actual = await vi.importActual('../db/users.db.js');
+  return {
+    ...actual,
+    get usersDb() {
+      return mockDbInstances.usersDb || (actual as any).usersDb;
+    },
+  };
+});
 
 describe('Auth Routes', () => {
   let app: Express;
+  let db: DatabaseType;
+  let usersDb: UsersDatabase;
 
   beforeEach(() => {
-    usersDb.clear();
+    // インメモリデータベースを作成
+    db = new Database(':memory:');
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initializeTables(db);
+
+    // UsersDatabase インスタンスを作成
+    usersDb = new UsersDatabase(db);
+
+    // モックインスタンスを設定
+    mockDbInstances.usersDb = usersDb;
+
     app = express();
     app.use(express.json());
     app.use('/api/auth', authRouter);
+  });
+
+  afterEach(() => {
+    // モックインスタンスをクリア
+    mockDbInstances.usersDb = null;
+    db.close();
   });
 
   describe('POST /api/auth/signup', () => {

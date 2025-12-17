@@ -1,15 +1,108 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import { followupsRouter } from './followups.routes.js';
-import { followupsDb } from '../db/followups.db.js';
-import { goodPointsDb, improvementsDb, dailyReportsDb } from '../db/daily-reports.db.js';
-import { usersDb } from '../db/users.db.js';
+import Database, { type Database as DatabaseType } from 'better-sqlite3';
+import { FollowupsDatabase } from '../db/followups.db.js';
+import { DailyReportsDatabase, GoodPointsDatabase, ImprovementsDatabase } from '../db/daily-reports.db.js';
+import { DailyReportGoalsDatabase } from '../db/daily-report-goals.db.js';
+import { WeeklyFocusesDatabase } from '../db/weekly-focuses.db.js';
+import { GoalsDatabase } from '../db/goals.db.js';
+import { UsersDatabase } from '../db/users.db.js';
+import { initializeTables } from '../db/database.js';
 import { generateToken } from '../middleware/auth.middleware.js';
+
+// モジュールをモック（実際のインスタンスを返すようにする）
+const mockDbInstances = {
+  followupsDb: null as FollowupsDatabase | null,
+  goodPointsDb: null as GoodPointsDatabase | null,
+  improvementsDb: null as ImprovementsDatabase | null,
+  dailyReportsDb: null as DailyReportsDatabase | null,
+  dailyReportGoalsDb: null as DailyReportGoalsDatabase | null,
+  weeklyFocusesDb: null as WeeklyFocusesDatabase | null,
+  goalsDb: null as GoalsDatabase | null,
+  usersDb: null as UsersDatabase | null,
+};
+
+vi.mock('../db/followups.db.js', async () => {
+  const actual = await vi.importActual('../db/followups.db.js');
+  return {
+    ...actual,
+    get followupsDb() {
+      return mockDbInstances.followupsDb || (actual as any).followupsDb;
+    },
+  };
+});
+
+vi.mock('../db/daily-reports.db.js', async () => {
+  const actual = await vi.importActual('../db/daily-reports.db.js');
+  return {
+    ...actual,
+    get dailyReportsDb() {
+      return mockDbInstances.dailyReportsDb || (actual as any).dailyReportsDb;
+    },
+    get goodPointsDb() {
+      return mockDbInstances.goodPointsDb || (actual as any).goodPointsDb;
+    },
+    get improvementsDb() {
+      return mockDbInstances.improvementsDb || (actual as any).improvementsDb;
+    },
+  };
+});
+
+vi.mock('../db/daily-report-goals.db.js', async () => {
+  const actual = await vi.importActual('../db/daily-report-goals.db.js');
+  return {
+    ...actual,
+    get dailyReportGoalsDb() {
+      return mockDbInstances.dailyReportGoalsDb || (actual as any).dailyReportGoalsDb;
+    },
+  };
+});
+
+vi.mock('../db/weekly-focuses.db.js', async () => {
+  const actual = await vi.importActual('../db/weekly-focuses.db.js');
+  return {
+    ...actual,
+    get weeklyFocusesDb() {
+      return mockDbInstances.weeklyFocusesDb || (actual as any).weeklyFocusesDb;
+    },
+  };
+});
+
+vi.mock('../db/goals.db.js', async () => {
+  const actual = await vi.importActual('../db/goals.db.js');
+  return {
+    ...actual,
+    get goalsDb() {
+      return mockDbInstances.goalsDb || (actual as any).goalsDb;
+    },
+  };
+});
+
+vi.mock('../db/users.db.js', async () => {
+  const actual = await vi.importActual('../db/users.db.js');
+  return {
+    ...actual,
+    get usersDb() {
+      return mockDbInstances.usersDb || (actual as any).usersDb;
+    },
+  };
+});
+
+import { followupsRouter } from './followups.routes.js';
 
 describe('followupsRouter', () => {
   let app: express.Application;
   let authToken: string;
+  let db: DatabaseType;
+  let followupsDb: FollowupsDatabase;
+  let goodPointsDb: GoodPointsDatabase;
+  let improvementsDb: ImprovementsDatabase;
+  let dailyReportsDb: DailyReportsDatabase;
+  let dailyReportGoalsDb: DailyReportGoalsDatabase;
+  let weeklyFocusesDb: WeeklyFocusesDatabase;
+  let goalsDb: GoalsDatabase;
+  let usersDb: UsersDatabase;
   const testUserId = 'test-user-id';
   const testUserEmail = 'test@example.com';
 
@@ -20,7 +113,48 @@ describe('followupsRouter', () => {
     return date.toISOString().split('T')[0];
   };
 
+  // ダミーの日報を作成するヘルパー関数
+  const createDummyReport = (id = 'report-1') => {
+    const dummyReport = {
+      id,
+      userId: testUserId,
+      date: '2025-12-01',
+      events: 'テストイベント',
+      learnings: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    dailyReportsDb.save(dummyReport);
+    return dummyReport.id;
+  };
+
   beforeEach(() => {
+    // インメモリデータベースを作成
+    db = new Database(':memory:');
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initializeTables(db);
+    
+    // 各データベースクラスのインスタンスを作成
+    usersDb = new UsersDatabase(db);
+    dailyReportsDb = new DailyReportsDatabase(db);
+    goodPointsDb = new GoodPointsDatabase(db);
+    improvementsDb = new ImprovementsDatabase(db);
+    followupsDb = new FollowupsDatabase(db);
+    goalsDb = new GoalsDatabase(db);
+    weeklyFocusesDb = new WeeklyFocusesDatabase(db);
+    dailyReportGoalsDb = new DailyReportGoalsDatabase(db);
+
+    // モックインスタンスを設定
+    mockDbInstances.followupsDb = followupsDb;
+    mockDbInstances.goodPointsDb = goodPointsDb;
+    mockDbInstances.improvementsDb = improvementsDb;
+    mockDbInstances.dailyReportsDb = dailyReportsDb;
+    mockDbInstances.dailyReportGoalsDb = dailyReportGoalsDb;
+    mockDbInstances.weeklyFocusesDb = weeklyFocusesDb;
+    mockDbInstances.goalsDb = goalsDb;
+    mockDbInstances.usersDb = usersDb;
+
     app = express();
     app.use(express.json());
     app.use('/api', followupsRouter);
@@ -34,25 +168,37 @@ describe('followupsRouter', () => {
     });
 
     authToken = generateToken(testUserId);
-
-    followupsDb.clear();
-    goodPointsDb.clear();
-    improvementsDb.clear();
-    dailyReportsDb.clear();
   });
 
   afterEach(() => {
-    usersDb.clear();
-    followupsDb.clear();
-    goodPointsDb.clear();
-    improvementsDb.clear();
-    dailyReportsDb.clear();
+    // モックインスタンスをクリア
+    mockDbInstances.followupsDb = null;
+    mockDbInstances.goodPointsDb = null;
+    mockDbInstances.improvementsDb = null;
+    mockDbInstances.dailyReportsDb = null;
+    mockDbInstances.dailyReportGoalsDb = null;
+    mockDbInstances.weeklyFocusesDb = null;
+    mockDbInstances.goalsDb = null;
+    mockDbInstances.usersDb = null;
+    db.close();
   });
 
   describe('POST /api/good-points/:id/followups', () => {
     it(
       'よかったことにエピソードを追加できること（status任意、自動設定）',
       async () => {
+      // ダミーの日報を作成
+      const dummyReport = {
+        id: 'report-1',
+        userId: testUserId,
+        date: '2025-12-01',
+        events: 'テストイベント',
+        learnings: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      dailyReportsDb.save(dummyReport);
+
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -64,7 +210,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, dummyReport.id);
 
       const pastDate = getPastDate();
 
@@ -97,6 +243,18 @@ describe('followupsRouter', () => {
     );
 
     it('statusが指定されている場合も動作すること（後方互換性）', async () => {
+      // ダミーの日報を作成
+      const dummyReport = {
+        id: 'report-1',
+        userId: testUserId,
+        date: '2025-12-01',
+        events: 'テストイベント',
+        learnings: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      dailyReportsDb.save(dummyReport);
+
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -108,7 +266,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, dummyReport.id);
 
       const response = await request(app)
         .post('/api/good-points/gp-1/followups')
@@ -124,6 +282,18 @@ describe('followupsRouter', () => {
     });
 
     it('dateが必須であること', async () => {
+      // ダミーの日報を作成
+      const dummyReport = {
+        id: 'report-1',
+        userId: testUserId,
+        date: '2025-12-01',
+        events: 'テストイベント',
+        learnings: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      dailyReportsDb.save(dummyReport);
+
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -135,7 +305,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, dummyReport.id);
 
       const response = await request(app)
         .post('/api/good-points/gp-1/followups')
@@ -150,6 +320,18 @@ describe('followupsRouter', () => {
     });
 
     it('今日の日付は許可すること', async () => {
+      // ダミーの日報を作成
+      const dummyReport = {
+        id: 'report-1',
+        userId: testUserId,
+        date: '2025-12-01',
+        events: 'テストイベント',
+        learnings: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      dailyReportsDb.save(dummyReport);
+
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -161,7 +343,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, dummyReport.id);
 
       const today = new Date();
       const todayStr = today.toISOString().split('T')[0];
@@ -179,6 +361,18 @@ describe('followupsRouter', () => {
     });
 
     it('未来日付は許可しないこと', async () => {
+      // ダミーの日報を作成
+      const dummyReport = {
+        id: 'report-1',
+        userId: testUserId,
+        date: '2025-12-01',
+        events: 'テストイベント',
+        learnings: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      dailyReportsDb.save(dummyReport);
+
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -190,7 +384,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, dummyReport.id);
 
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
@@ -209,6 +403,7 @@ describe('followupsRouter', () => {
     });
 
     it('エピソード数が3件以上の場合、statusが「定着」に自動更新されること', async () => {
+      const reportId = createDummyReport();
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -220,7 +415,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       // 既存のエピソードを2件追加
       const followup1 = {
@@ -288,6 +483,7 @@ describe('followupsRouter', () => {
 
   describe('POST /api/improvements/:id/followups', () => {
     it('改善点にアクションを追加できること（status任意、自動設定）', async () => {
+      const reportId = createDummyReport();
       const improvement = {
         id: 'imp-1',
         userId: testUserId,
@@ -298,7 +494,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
 
       const response = await request(app)
         .post('/api/improvements/imp-1/followups')
@@ -320,6 +516,7 @@ describe('followupsRouter', () => {
     });
 
     it('statusが指定されている場合も動作すること（後方互換性）', async () => {
+      const reportId = createDummyReport();
       const improvement = {
         id: 'imp-1',
         userId: testUserId,
@@ -330,7 +527,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
 
       const response = await request(app)
         .post('/api/improvements/imp-1/followups')
@@ -346,6 +543,7 @@ describe('followupsRouter', () => {
     });
 
     it('dateが必須であること', async () => {
+      const reportId = createDummyReport();
       const improvement = {
         id: 'imp-1',
         userId: testUserId,
@@ -356,7 +554,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
 
       const response = await request(app)
         .post('/api/improvements/imp-1/followups')
@@ -371,6 +569,7 @@ describe('followupsRouter', () => {
     });
 
     it('アクション数が3件以上の場合、statusが「習慣化」に自動更新されること', async () => {
+      const reportId = createDummyReport();
       const improvement = {
         id: 'imp-1',
         userId: testUserId,
@@ -381,7 +580,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
 
       // 既存のアクションを2件追加
       const followup1 = {
@@ -424,6 +623,7 @@ describe('followupsRouter', () => {
 
   describe('GET /api/good-points/:id/followups', () => {
     it('よかったことのエピソード一覧を取得できること（countとstatusを含む）', async () => {
+      const reportId = createDummyReport();
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -435,7 +635,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       const followup1 = {
         id: 'followup-1',
@@ -477,6 +677,7 @@ describe('followupsRouter', () => {
     });
 
     it('エピソードが0件の場合、count=0、status=未着手を返すこと', async () => {
+      const reportId = createDummyReport();
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -488,7 +689,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       const response = await request(app)
         .get('/api/good-points/gp-1/followups')
@@ -501,6 +702,7 @@ describe('followupsRouter', () => {
     });
 
     it('既存のフォローアップでstatusが「再現成功」以外の場合はカウントされないこと', async () => {
+      const reportId = createDummyReport();
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -512,7 +714,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       // 「再現成功」のエピソード
       const followup1 = {
@@ -553,6 +755,7 @@ describe('followupsRouter', () => {
 
   describe('DELETE /api/good-points/:id/followups/:followupId', () => {
     it('エピソードを削除できること', async () => {
+      const reportId = createDummyReport();
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -564,7 +767,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       const followup1 = {
         id: 'followup-1',
@@ -609,6 +812,7 @@ describe('followupsRouter', () => {
     });
 
     it('存在しないエピソードを削除しようとした場合、404エラーを返すこと', async () => {
+      const reportId = createDummyReport();
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -620,7 +824,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       const response = await request(app)
         .delete('/api/good-points/gp-1/followups/not-exist')
@@ -632,6 +836,26 @@ describe('followupsRouter', () => {
 
     it('他のユーザーのエピソードを削除しようとした場合、403エラーを返すこと', async () => {
       const otherUserId = 'other-user-id';
+      // 他のユーザーを作成
+      usersDb.save({
+        id: otherUserId,
+        email: 'other@example.com',
+        passwordHash: 'hashed',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      // 他のユーザーの日報を作成
+      const otherReport = {
+        id: 'report-other',
+        userId: otherUserId,
+        date: '2025-12-01',
+        events: 'テストイベント',
+        learnings: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      dailyReportsDb.save(otherReport);
+      const reportId = otherReport.id;
       const goodPoint = {
         id: 'gp-1',
         userId: otherUserId,
@@ -643,7 +867,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       const followup = {
         id: 'followup-1',
@@ -668,6 +892,7 @@ describe('followupsRouter', () => {
 
   describe('DELETE /api/improvements/:id/followups/:followupId', () => {
     it('アクションを削除できること', async () => {
+      const reportId = createDummyReport();
       const improvement = {
         id: 'imp-1',
         userId: testUserId,
@@ -678,7 +903,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
 
       const followup1 = {
         id: 'followup-1',
@@ -723,6 +948,7 @@ describe('followupsRouter', () => {
     });
 
     it('存在しないアクションを削除しようとした場合、404エラーを返すこと', async () => {
+      const reportId = createDummyReport();
       const improvement = {
         id: 'imp-1',
         userId: testUserId,
@@ -733,7 +959,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
 
       const response = await request(app)
         .delete('/api/improvements/imp-1/followups/not-exist')
@@ -746,6 +972,7 @@ describe('followupsRouter', () => {
 
   describe('GET /api/improvements/:id/followups', () => {
     it('改善点のアクション一覧を取得できること（countとstatusを含む）', async () => {
+      const reportId = createDummyReport();
       const improvement = {
         id: 'imp-1',
         userId: testUserId,
@@ -756,7 +983,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
 
       const followup1 = {
         id: 'followup-1',
@@ -798,6 +1025,7 @@ describe('followupsRouter', () => {
     });
 
     it('アクションが0件の場合、count=0、status=未着手を返すこと', async () => {
+      const reportId = createDummyReport();
       const improvement = {
         id: 'imp-1',
         userId: testUserId,
@@ -808,7 +1036,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
 
       const response = await request(app)
         .get('/api/improvements/imp-1/followups')
@@ -847,7 +1075,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, report.id);
 
       const improvement = {
         id: 'imp-1',
@@ -859,7 +1087,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, report.id);
 
       const response = await request(app)
         .get('/api/followups?status=未着手,進行中')
@@ -895,7 +1123,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, report.id);
 
       const response = await request(app)
         .get('/api/followups?status=進行中&itemType=goodPoint')
@@ -910,6 +1138,7 @@ describe('followupsRouter', () => {
   describe('PUT /api/good-points/:id/followups/:followupId', () => {
     it('認証済みユーザーがエピソードを更新できること', async () => {
       // よかったことを作成
+      const reportId = createDummyReport();
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -921,7 +1150,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       // エピソードを作成
       const followup = {
@@ -953,6 +1182,7 @@ describe('followupsRouter', () => {
 
     it('エピソード更新後にステータスが自動再計算されること', async () => {
       // よかったことを作成
+      const reportId = createDummyReport();
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -964,7 +1194,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       // エピソードを2件作成（進行中になる）
       const followup1 = {
@@ -1009,6 +1239,7 @@ describe('followupsRouter', () => {
     });
 
     it('存在しないエピソードを更新しようとした場合、404エラーを返すこと', async () => {
+      const reportId = createDummyReport();
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -1020,7 +1251,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       const response = await request(app)
         .put(`/api/good-points/gp-1/followups/non-existent-id`)
@@ -1045,6 +1276,7 @@ describe('followupsRouter', () => {
       });
       const _otherAuthToken = generateToken(otherUserId);
 
+      const reportId = createDummyReport('report-other');
       const goodPoint = {
         id: 'gp-1',
         userId: otherUserId,
@@ -1056,7 +1288,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       const followup = {
         id: 'followup-1',
@@ -1083,6 +1315,7 @@ describe('followupsRouter', () => {
     });
 
     it('バリデーションエラーの場合、400エラーを返すこと', async () => {
+      const reportId = createDummyReport();
       const goodPoint = {
         id: 'gp-1',
         userId: testUserId,
@@ -1094,7 +1327,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      goodPointsDb.save(goodPoint);
+      goodPointsDb.save(goodPoint, reportId);
 
       const followup = {
         id: 'followup-1',
@@ -1125,6 +1358,7 @@ describe('followupsRouter', () => {
   describe('PUT /api/improvements/:id/followups/:followupId', () => {
     it('認証済みユーザーがアクションを更新できること', async () => {
       // 改善点を作成
+      const reportId = createDummyReport();
       const improvement = {
         id: 'imp-1',
         userId: testUserId,
@@ -1135,7 +1369,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
 
       // アクションを作成
       const followup = {
@@ -1167,6 +1401,7 @@ describe('followupsRouter', () => {
 
     it('アクション更新後にステータスが自動再計算されること', async () => {
       // 改善点を作成
+      const reportId = createDummyReport();
       const improvement = {
         id: 'imp-1',
         userId: testUserId,
@@ -1177,7 +1412,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
 
       // アクションを2件作成（進行中になる）
       const followup1 = {
@@ -1222,6 +1457,7 @@ describe('followupsRouter', () => {
     });
 
     it('存在しないアクションを更新しようとした場合、404エラーを返すこと', async () => {
+      const reportId = createDummyReport();
       const improvement = {
         id: 'imp-1',
         userId: testUserId,
@@ -1232,7 +1468,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
 
       const response = await request(app)
         .put(`/api/improvements/imp-1/followups/non-existent-id`)
@@ -1257,6 +1493,7 @@ describe('followupsRouter', () => {
       });
       const _otherAuthToken = generateToken(otherUserId);
 
+      const reportId = createDummyReport('report-other');
       const improvement = {
         id: 'imp-1',
         userId: otherUserId,
@@ -1267,7 +1504,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
 
       const followup = {
         id: 'followup-1',
@@ -1294,6 +1531,7 @@ describe('followupsRouter', () => {
     });
 
     it('バリデーションエラーの場合、400エラーを返すこと', async () => {
+      const reportId = createDummyReport();
       const improvement = {
         id: 'imp-1',
         userId: testUserId,
@@ -1304,7 +1542,7 @@ describe('followupsRouter', () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      improvementsDb.save(improvement);
+      improvementsDb.save(improvement, reportId);
 
       const followup = {
         id: 'followup-1',

@@ -1,19 +1,65 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import { goalsRouter } from './goals.routes.js';
-import { goalsDb } from '../db/goals.db.js';
-import { usersDb } from '../db/users.db.js';
+import Database, { type Database as DatabaseType } from 'better-sqlite3';
+import { GoalsDatabase } from '../db/goals.db.js';
+import { UsersDatabase } from '../db/users.db.js';
+import { initializeTables } from '../db/database.js';
 import { generateToken } from '../middleware/auth.middleware.js';
 import { Goal } from '../models/daily-report.model.js';
+
+// モジュールをモック（実際のインスタンスを返すようにする）
+const mockDbInstances = {
+  goalsDb: null as GoalsDatabase | null,
+  usersDb: null as UsersDatabase | null,
+};
+
+vi.mock('../db/goals.db.js', async () => {
+  const actual = await vi.importActual('../db/goals.db.js');
+  return {
+    ...actual,
+    get goalsDb() {
+      return mockDbInstances.goalsDb || (actual as any).goalsDb;
+    },
+  };
+});
+
+vi.mock('../db/users.db.js', async () => {
+  const actual = await vi.importActual('../db/users.db.js');
+  return {
+    ...actual,
+    get usersDb() {
+      return mockDbInstances.usersDb || (actual as any).usersDb;
+    },
+  };
+});
+
+import { goalsRouter } from './goals.routes.js';
 
 describe('goalsRouter', () => {
   let app: express.Application;
   let authToken: string;
+  let db: DatabaseType;
+  let goalsDb: GoalsDatabase;
+  let usersDb: UsersDatabase;
   const testUserId = 'test-user-id';
   const testUserEmail = 'test@example.com';
 
   beforeEach(() => {
+    // インメモリデータベースを作成
+    db = new Database(':memory:');
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initializeTables(db);
+    
+    // 各データベースクラスのインスタンスを作成
+    usersDb = new UsersDatabase(db);
+    goalsDb = new GoalsDatabase(db);
+
+    // モックインスタンスを設定
+    mockDbInstances.goalsDb = goalsDb;
+    mockDbInstances.usersDb = usersDb;
+
     // テスト用アプリケーション設定
     app = express();
     app.use(express.json());
@@ -30,14 +76,13 @@ describe('goalsRouter', () => {
 
     // 認証トークン生成
     authToken = generateToken(testUserId);
-
-    // DBクリア
-    goalsDb.clear();
   });
 
   afterEach(() => {
-    usersDb.clear();
-    goalsDb.clear();
+    // モックインスタンスをクリア
+    mockDbInstances.goalsDb = null;
+    mockDbInstances.usersDb = null;
+    db.close();
   });
 
   describe('POST /api/goals', () => {
@@ -264,6 +309,14 @@ describe('goalsRouter', () => {
 
     it('他のユーザーの目標にアクセスできないこと', async () => {
       const otherUserId = 'other-user-id';
+      // 他のユーザーを作成
+      usersDb.save({
+        id: otherUserId,
+        email: 'other@example.com',
+        passwordHash: 'hashed',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
       const goal: Goal = {
         id: 'goal-1',
         userId: otherUserId,
@@ -399,4 +452,3 @@ describe('goalsRouter', () => {
     });
   });
 });
-

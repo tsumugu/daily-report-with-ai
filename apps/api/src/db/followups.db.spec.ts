@@ -1,13 +1,42 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import Database, { type Database as DatabaseType } from 'better-sqlite3';
 import { FollowupsDatabase } from './followups.db.js';
+import { UsersDatabase } from './users.db.js';
 import { Followup } from '../models/daily-report.model.js';
+import { initializeTables } from './database.js';
 
 describe('FollowupsDatabase', () => {
-  let db: FollowupsDatabase;
+  let db: DatabaseType;
+  let followupsDb: FollowupsDatabase;
+  let usersDb: UsersDatabase;
 
   beforeEach(() => {
-    db = new FollowupsDatabase();
-    db.clear();
+    db = new Database(':memory:');
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initializeTables(db);
+    usersDb = new UsersDatabase(db);
+    followupsDb = new FollowupsDatabase(db);
+
+    // テスト用ユーザーを作成
+    usersDb.save({
+      id: 'user-1',
+      email: 'test@example.com',
+      passwordHash: 'hash',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    usersDb.save({
+      id: 'user-2',
+      email: 'test2@example.com',
+      passwordHash: 'hash',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  });
+
+  afterEach(() => {
+    db.close();
   });
 
   describe('save', () => {
@@ -24,8 +53,8 @@ describe('FollowupsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(followup);
-      const found = db.findById('followup-1');
+      followupsDb.save(followup);
+      const found = followupsDb.findById('followup-1');
 
       expect(found).toEqual(followup);
     });
@@ -45,14 +74,14 @@ describe('FollowupsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(followup);
-      const found = db.findById('followup-1');
+      followupsDb.save(followup);
+      const found = followupsDb.findById('followup-1');
 
       expect(found).toEqual(followup);
     });
 
     it('存在しないIDの場合、undefinedを返すこと', () => {
-      const found = db.findById('not-exist');
+      const found = followupsDb.findById('not-exist');
       expect(found).toBeUndefined();
     });
   });
@@ -95,11 +124,11 @@ describe('FollowupsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(followup1);
-      db.save(followup2);
-      db.save(followup3);
+      followupsDb.save(followup1);
+      followupsDb.save(followup2);
+      followupsDb.save(followup3);
 
-      const found = db.findByItemId('goodPoint', 'gp-1');
+      const found = followupsDb.findByItemId('goodPoint', 'gp-1');
 
       expect(found).toHaveLength(2);
       expect(found).toContainEqual(followup1);
@@ -107,7 +136,7 @@ describe('FollowupsDatabase', () => {
     });
 
     it('存在しないitemIdの場合、空配列を返すこと', () => {
-      const found = db.findByItemId('goodPoint', 'not-exist');
+      const found = followupsDb.findByItemId('goodPoint', 'not-exist');
       expect(found).toEqual([]);
     });
   });
@@ -150,11 +179,11 @@ describe('FollowupsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(followup1);
-      db.save(followup2);
-      db.save(followup3);
+      followupsDb.save(followup1);
+      followupsDb.save(followup2);
+      followupsDb.save(followup3);
 
-      const found = db.findAllByUserId('user-1');
+      const found = followupsDb.findAllByUserId('user-1');
 
       expect(found).toHaveLength(2);
       expect(found).toContainEqual(followup1);
@@ -162,7 +191,7 @@ describe('FollowupsDatabase', () => {
     });
 
     it('存在しないuserIdの場合、空配列を返すこと', () => {
-      const found = db.findAllByUserId('not-exist');
+      const found = followupsDb.findAllByUserId('not-exist');
       expect(found).toEqual([]);
     });
   });
@@ -181,7 +210,7 @@ describe('FollowupsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(followup);
+      followupsDb.save(followup);
 
       const updated: Followup = {
         ...followup,
@@ -190,8 +219,8 @@ describe('FollowupsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.update(updated);
-      const found = db.findById('followup-1');
+      followupsDb.update(updated);
+      const found = followupsDb.findById('followup-1');
 
       expect(found?.memo).toBe('更新後のメモ');
       expect(found?.date).toBe('2025-12-11');
@@ -210,7 +239,7 @@ describe('FollowupsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      expect(() => db.update(followup)).not.toThrow();
+      expect(() => followupsDb.update(followup)).not.toThrow();
     });
   });
 
@@ -228,15 +257,15 @@ describe('FollowupsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(followup);
-      db.delete('followup-1');
+      followupsDb.save(followup);
+      followupsDb.delete('followup-1');
 
-      const found = db.findById('followup-1');
+      const found = followupsDb.findById('followup-1');
       expect(found).toBeUndefined();
     });
 
     it('存在しないIDを削除してもエラーにならないこと', () => {
-      expect(() => db.delete('not-exist')).not.toThrow();
+      expect(() => followupsDb.delete('not-exist')).not.toThrow();
     });
   });
 
@@ -254,10 +283,10 @@ describe('FollowupsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(followup);
-      db.clear();
+      followupsDb.save(followup);
+      followupsDb.clear();
 
-      const found = db.findById('followup-1');
+      const found = followupsDb.findById('followup-1');
       expect(found).toBeUndefined();
     });
   });

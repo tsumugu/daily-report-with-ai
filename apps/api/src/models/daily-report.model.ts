@@ -115,6 +115,7 @@ export interface UpdateDailyReportRequest {
  * よかったこと作成リクエスト
  */
 export interface CreateGoodPointRequest {
+  dailyReportId: string;
   content: string;
   factors?: string;
   tags?: string[];
@@ -134,6 +135,7 @@ export interface UpdateGoodPointRequest {
  * 改善点作成リクエスト
  */
 export interface CreateImprovementRequest {
+  dailyReportId: string;
   content: string;
   action?: string;
 }

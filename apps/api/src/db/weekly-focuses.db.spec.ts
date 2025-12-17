@@ -1,13 +1,42 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import Database, { type Database as DatabaseType } from 'better-sqlite3';
 import { WeeklyFocusesDatabase } from './weekly-focuses.db.js';
+import { UsersDatabase } from './users.db.js';
 import { WeeklyFocus } from '../models/daily-report.model.js';
+import { initializeTables } from './database.js';
 
 describe('WeeklyFocusesDatabase', () => {
-  let db: WeeklyFocusesDatabase;
+  let db: DatabaseType;
+  let weeklyFocusesDb: WeeklyFocusesDatabase;
+  let usersDb: UsersDatabase;
 
   beforeEach(() => {
-    db = new WeeklyFocusesDatabase();
-    db.clear();
+    db = new Database(':memory:');
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initializeTables(db);
+    usersDb = new UsersDatabase(db);
+    weeklyFocusesDb = new WeeklyFocusesDatabase(db);
+
+    // テスト用ユーザーを作成
+    usersDb.save({
+      id: 'user-1',
+      email: 'test@example.com',
+      passwordHash: 'hash',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    usersDb.save({
+      id: 'user-2',
+      email: 'test2@example.com',
+      passwordHash: 'hash',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  });
+
+  afterEach(() => {
+    db.close();
   });
 
   describe('save', () => {
@@ -17,12 +46,13 @@ describe('WeeklyFocusesDatabase', () => {
         userId: 'user-1',
         itemType: 'goodPoint',
         itemId: 'gp-1',
+        goalId: null,
         weekStartDate: '2025-12-09',
         createdAt: new Date().toISOString(),
       };
 
-      db.save(weeklyFocus);
-      const found = db.findById('focus-1');
+      weeklyFocusesDb.save(weeklyFocus);
+      const found = weeklyFocusesDb.findById('focus-1');
 
       expect(found).toEqual(weeklyFocus);
     });
@@ -35,18 +65,19 @@ describe('WeeklyFocusesDatabase', () => {
         userId: 'user-1',
         itemType: 'goodPoint',
         itemId: 'gp-1',
+        goalId: null,
         weekStartDate: '2025-12-09',
         createdAt: new Date().toISOString(),
       };
 
-      db.save(weeklyFocus);
-      const found = db.findById('focus-1');
+      weeklyFocusesDb.save(weeklyFocus);
+      const found = weeklyFocusesDb.findById('focus-1');
 
       expect(found).toEqual(weeklyFocus);
     });
 
     it('存在しないIDの場合、undefinedを返すこと', () => {
-      const found = db.findById('not-exist');
+      const found = weeklyFocusesDb.findById('not-exist');
       expect(found).toBeUndefined();
     });
   });
@@ -58,6 +89,7 @@ describe('WeeklyFocusesDatabase', () => {
         userId: 'user-1',
         itemType: 'goodPoint',
         itemId: 'gp-1',
+        goalId: null,
         weekStartDate: '2025-12-09',
         createdAt: new Date().toISOString(),
       };
@@ -67,6 +99,7 @@ describe('WeeklyFocusesDatabase', () => {
         userId: 'user-1',
         itemType: 'improvement',
         itemId: 'imp-1',
+        goalId: null,
         weekStartDate: '2025-12-09',
         createdAt: new Date().toISOString(),
       };
@@ -76,15 +109,16 @@ describe('WeeklyFocusesDatabase', () => {
         userId: 'user-1',
         itemType: 'goodPoint',
         itemId: 'gp-2',
+        goalId: null,
         weekStartDate: '2025-12-16',
         createdAt: new Date().toISOString(),
       };
 
-      db.save(weeklyFocus1);
-      db.save(weeklyFocus2);
-      db.save(weeklyFocus3);
+      weeklyFocusesDb.save(weeklyFocus1);
+      weeklyFocusesDb.save(weeklyFocus2);
+      weeklyFocusesDb.save(weeklyFocus3);
 
-      const found = db.findByUserIdAndWeek('user-1', '2025-12-09');
+      const found = weeklyFocusesDb.findByUserIdAndWeek('user-1', '2025-12-09');
 
       expect(found).toHaveLength(2);
       expect(found).toContainEqual(weeklyFocus1);
@@ -92,7 +126,7 @@ describe('WeeklyFocusesDatabase', () => {
     });
 
     it('存在しないuserId/週の場合、空配列を返すこと', () => {
-      const found = db.findByUserIdAndWeek('not-exist', '2025-12-09');
+      const found = weeklyFocusesDb.findByUserIdAndWeek('not-exist', '2025-12-09');
       expect(found).toEqual([]);
     });
   });
@@ -104,6 +138,7 @@ describe('WeeklyFocusesDatabase', () => {
         userId: 'user-1',
         itemType: 'goodPoint',
         itemId: 'gp-1',
+        goalId: null,
         weekStartDate: '2025-12-09',
         createdAt: new Date().toISOString(),
       };
@@ -113,6 +148,7 @@ describe('WeeklyFocusesDatabase', () => {
         userId: 'user-1',
         itemType: 'improvement',
         itemId: 'imp-1',
+        goalId: null,
         weekStartDate: '2025-12-16',
         createdAt: new Date().toISOString(),
       };
@@ -122,15 +158,16 @@ describe('WeeklyFocusesDatabase', () => {
         userId: 'user-2',
         itemType: 'goodPoint',
         itemId: 'gp-2',
+        goalId: null,
         weekStartDate: '2025-12-09',
         createdAt: new Date().toISOString(),
       };
 
-      db.save(weeklyFocus1);
-      db.save(weeklyFocus2);
-      db.save(weeklyFocus3);
+      weeklyFocusesDb.save(weeklyFocus1);
+      weeklyFocusesDb.save(weeklyFocus2);
+      weeklyFocusesDb.save(weeklyFocus3);
 
-      const found = db.findByUserId('user-1');
+      const found = weeklyFocusesDb.findByUserId('user-1');
 
       expect(found).toHaveLength(2);
       expect(found).toContainEqual(weeklyFocus1);
@@ -138,7 +175,7 @@ describe('WeeklyFocusesDatabase', () => {
     });
 
     it('存在しないuserIdの場合、空配列を返すこと', () => {
-      const found = db.findByUserId('not-exist');
+      const found = weeklyFocusesDb.findByUserId('not-exist');
       expect(found).toEqual([]);
     });
   });
@@ -150,19 +187,20 @@ describe('WeeklyFocusesDatabase', () => {
         userId: 'user-1',
         itemType: 'goodPoint',
         itemId: 'gp-1',
+        goalId: null,
         weekStartDate: '2025-12-09',
         createdAt: new Date().toISOString(),
       };
 
-      db.save(weeklyFocus);
-      db.delete('focus-1');
+      weeklyFocusesDb.save(weeklyFocus);
+      weeklyFocusesDb.delete('focus-1');
 
-      const found = db.findById('focus-1');
+      const found = weeklyFocusesDb.findById('focus-1');
       expect(found).toBeUndefined();
     });
 
     it('存在しないIDを削除しようとしてもエラーにならないこと', () => {
-      expect(() => db.delete('not-exist')).not.toThrow();
+      expect(() => weeklyFocusesDb.delete('not-exist')).not.toThrow();
     });
   });
 
@@ -173,14 +211,15 @@ describe('WeeklyFocusesDatabase', () => {
         userId: 'user-1',
         itemType: 'goodPoint',
         itemId: 'gp-1',
+        goalId: null,
         weekStartDate: '2025-12-09',
         createdAt: new Date().toISOString(),
       };
 
-      db.save(weeklyFocus);
-      db.clear();
+      weeklyFocusesDb.save(weeklyFocus);
+      weeklyFocusesDb.clear();
 
-      const found = db.findById('focus-1');
+      const found = weeklyFocusesDb.findById('focus-1');
       expect(found).toBeUndefined();
     });
   });

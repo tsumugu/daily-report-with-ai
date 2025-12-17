@@ -1,23 +1,130 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import { dailyReportsRouter } from './daily-reports.routes.js';
-import { dailyReportsDb, goodPointsDb, improvementsDb } from '../db/daily-reports.db.js';
-import { usersDb } from '../db/users.db.js';
+import Database, { type Database as DatabaseType } from 'better-sqlite3';
+import { DailyReportsDatabase, GoodPointsDatabase, ImprovementsDatabase } from '../db/daily-reports.db.js';
+import { DailyReportGoalsDatabase } from '../db/daily-report-goals.db.js';
+import { GoalsDatabase } from '../db/goals.db.js';
+import { FollowupsDatabase } from '../db/followups.db.js';
+import { UsersDatabase } from '../db/users.db.js';
+import { initializeTables } from '../db/database.js';
 import { generateToken } from '../middleware/auth.middleware.js';
 import { DailyReportListItem } from '../models/daily-report.model.js';
+
+// モジュールをモック（実際のインスタンスを返すようにする）
+const mockDbInstances = {
+  dailyReportsDb: null as DailyReportsDatabase | null,
+  goodPointsDb: null as GoodPointsDatabase | null,
+  improvementsDb: null as ImprovementsDatabase | null,
+  dailyReportGoalsDb: null as DailyReportGoalsDatabase | null,
+  goalsDb: null as GoalsDatabase | null,
+  followupsDb: null as FollowupsDatabase | null,
+  usersDb: null as UsersDatabase | null,
+};
+
+vi.mock('../db/daily-reports.db.js', async () => {
+  const actual = await vi.importActual('../db/daily-reports.db.js');
+  return {
+    ...actual,
+    get dailyReportsDb() {
+      return mockDbInstances.dailyReportsDb || (actual as any).dailyReportsDb;
+    },
+    get goodPointsDb() {
+      return mockDbInstances.goodPointsDb || (actual as any).goodPointsDb;
+    },
+    get improvementsDb() {
+      return mockDbInstances.improvementsDb || (actual as any).improvementsDb;
+    },
+  };
+});
+
+vi.mock('../db/daily-report-goals.db.js', async () => {
+  const actual = await vi.importActual('../db/daily-report-goals.db.js');
+  return {
+    ...actual,
+    get dailyReportGoalsDb() {
+      return mockDbInstances.dailyReportGoalsDb || (actual as any).dailyReportGoalsDb;
+    },
+  };
+});
+
+vi.mock('../db/goals.db.js', async () => {
+  const actual = await vi.importActual('../db/goals.db.js');
+  return {
+    ...actual,
+    get goalsDb() {
+      return mockDbInstances.goalsDb || (actual as any).goalsDb;
+    },
+  };
+});
+
+vi.mock('../db/followups.db.js', async () => {
+  const actual = await vi.importActual('../db/followups.db.js');
+  return {
+    ...actual,
+    get followupsDb() {
+      return mockDbInstances.followupsDb || (actual as any).followupsDb;
+    },
+  };
+});
+
+vi.mock('../db/users.db.js', async () => {
+  const actual = await vi.importActual('../db/users.db.js');
+  return {
+    ...actual,
+    get usersDb() {
+      return mockDbInstances.usersDb || (actual as any).usersDb;
+    },
+  };
+});
+
+import { dailyReportsRouter } from './daily-reports.routes.js';
 
 describe('dailyReportsRouter', () => {
   let app: express.Application;
   let authToken: string;
+  let db: DatabaseType;
+  let dailyReportsDb: DailyReportsDatabase;
+  let goodPointsDb: GoodPointsDatabase;
+  let improvementsDb: ImprovementsDatabase;
+  let usersDb: UsersDatabase;
   const testUserId = 'test-user-id';
   const testUserEmail = 'test@example.com';
 
   beforeEach(() => {
+    // インメモリデータベースを作成
+    db = new Database(':memory:');
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initializeTables(db);
+    
+    // 各データベースクラスのインスタンスを作成
+    usersDb = new UsersDatabase(db);
+    dailyReportsDb = new DailyReportsDatabase(db);
+    goodPointsDb = new GoodPointsDatabase(db);
+    improvementsDb = new ImprovementsDatabase(db);
+    const dailyReportGoalsDb = new DailyReportGoalsDatabase(db);
+    const goalsDb = new GoalsDatabase(db);
+    const followupsDb = new FollowupsDatabase(db);
+
+    // モックインスタンスを設定
+    mockDbInstances.dailyReportsDb = dailyReportsDb;
+    mockDbInstances.goodPointsDb = goodPointsDb;
+    mockDbInstances.improvementsDb = improvementsDb;
+    mockDbInstances.dailyReportGoalsDb = dailyReportGoalsDb;
+    mockDbInstances.goalsDb = goalsDb;
+    mockDbInstances.followupsDb = followupsDb;
+    mockDbInstances.usersDb = usersDb;
+
     // テスト用アプリケーション設定
     app = express();
     app.use(express.json());
     app.use('/api', dailyReportsRouter);
+    // エラーハンドラーを追加（テスト用）
+    app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+      console.error('Error in route:', err);
+      res.status(500).json({ message: err.message, stack: err.stack });
+    });
 
     // テストユーザー作成
     usersDb.save({
@@ -30,18 +137,18 @@ describe('dailyReportsRouter', () => {
 
     // 認証トークン生成
     authToken = generateToken(testUserId);
-
-    // DBクリア
-    dailyReportsDb.clear();
-    goodPointsDb.clear();
-    improvementsDb.clear();
   });
 
   afterEach(() => {
-    usersDb.clear();
-    dailyReportsDb.clear();
-    goodPointsDb.clear();
-    improvementsDb.clear();
+    // モックインスタンスをクリア
+    mockDbInstances.dailyReportsDb = null;
+    mockDbInstances.goodPointsDb = null;
+    mockDbInstances.improvementsDb = null;
+    mockDbInstances.dailyReportGoalsDb = null;
+    mockDbInstances.goalsDb = null;
+    mockDbInstances.followupsDb = null;
+    mockDbInstances.usersDb = null;
+    db.close();
   });
 
   describe('POST /api/daily-reports', () => {
@@ -61,11 +168,20 @@ describe('dailyReportsRouter', () => {
           ],
         });
 
+      if (response.status !== 201) {
+        console.error('Error response:', JSON.stringify(response.body, null, 2));
+        console.error('Response status:', response.status);
+      }
       expect(response.status).toBe(201);
       expect(response.body.id).toBeDefined();
       expect(response.body.date).toBe('2025-12-05');
       expect(response.body.events).toBe('今日のできごと');
+      if (!response.body.goodPoints) {
+        console.error('Response body:', JSON.stringify(response.body, null, 2));
+      }
+      expect(response.body.goodPoints).toBeDefined();
       expect(response.body.goodPoints).toHaveLength(1);
+      expect(response.body.improvements).toBeDefined();
       expect(response.body.improvements).toHaveLength(1);
     });
 
@@ -133,10 +249,22 @@ describe('dailyReportsRouter', () => {
 
   describe('POST /api/good-points', () => {
     it('よかったことを単独で作成できること', async () => {
+      // 先に日報を作成
+      const reportResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: 'テストイベント',
+        });
+
+      const dailyReportId = reportResponse.body.id;
+
       const response = await request(app)
         .post('/api/good-points')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
+          dailyReportId,
           content: 'よかったこと',
           factors: '要因',
           tags: ['タグ1', 'タグ2'],
@@ -150,24 +278,60 @@ describe('dailyReportsRouter', () => {
     });
 
     it('contentが不足している場合、400エラーを返すこと', async () => {
+      // 先に日報を作成
+      const reportResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-05',
+          events: 'テストイベント',
+        });
+
+      const dailyReportId = reportResponse.body.id;
+
       const response = await request(app)
         .post('/api/good-points')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
+          dailyReportId,
           factors: '要因のみ',
         });
 
       expect(response.status).toBe(400);
     });
+
+    it('dailyReportIdが不足している場合、400エラーを返すこと', async () => {
+      const response = await request(app)
+        .post('/api/good-points')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          content: 'よかったこと',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('dailyReportId');
+    });
   });
 
   describe('PATCH /api/good-points/:id', () => {
     it('よかったことのステータスを更新できること', async () => {
-      // 先によかったことを作成
+      // 先に日報を作成
+      const reportResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-06',
+          events: 'テストイベント',
+        });
+
+      const dailyReportId = reportResponse.body.id;
+
+      // よかったことを作成
       const createResponse = await request(app)
         .post('/api/good-points')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
+          dailyReportId,
           content: 'よかったこと',
         });
 
@@ -201,10 +365,22 @@ describe('dailyReportsRouter', () => {
 
   describe('POST /api/improvements', () => {
     it('改善点を単独で作成できること', async () => {
+      // 先に日報を作成
+      const reportResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-07',
+          events: 'テストイベント',
+        });
+
+      const dailyReportId = reportResponse.body.id;
+
       const response = await request(app)
         .post('/api/improvements')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
+          dailyReportId,
           content: '改善点',
           action: 'アクション',
         });
@@ -216,24 +392,60 @@ describe('dailyReportsRouter', () => {
     });
 
     it('contentが不足している場合、400エラーを返すこと', async () => {
+      // 先に日報を作成
+      const reportResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-07',
+          events: 'テストイベント',
+        });
+
+      const dailyReportId = reportResponse.body.id;
+
       const response = await request(app)
         .post('/api/improvements')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
+          dailyReportId,
           action: 'アクションのみ',
         });
 
       expect(response.status).toBe(400);
     });
+
+    it('dailyReportIdが不足している場合、400エラーを返すこと', async () => {
+      const response = await request(app)
+        .post('/api/improvements')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          content: '改善点',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('dailyReportId');
+    });
   });
 
   describe('PATCH /api/improvements/:id', () => {
     it('改善点のステータスを更新できること', async () => {
-      // 先に改善点を作成
+      // 先に日報を作成
+      const reportResponse = await request(app)
+        .post('/api/daily-reports')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          date: '2025-12-08',
+          events: 'テストイベント',
+        });
+
+      const dailyReportId = reportResponse.body.id;
+
+      // 改善点を作成
       const createResponse = await request(app)
         .post('/api/improvements')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
+          dailyReportId,
           content: '改善点',
         });
 
@@ -562,7 +774,16 @@ describe('dailyReportsRouter', () => {
           ],
         });
 
+      if (createResponse.status !== 201) {
+        console.error('Create response:', JSON.stringify(createResponse.body, null, 2));
+      }
+      expect(createResponse.status).toBe(201);
       const reportId = createResponse.body.id;
+      if (!createResponse.body.goodPoints || createResponse.body.goodPoints.length === 0) {
+        console.error('Create response body:', JSON.stringify(createResponse.body, null, 2));
+      }
+      expect(createResponse.body.goodPoints).toBeDefined();
+      expect(createResponse.body.goodPoints.length).toBeGreaterThan(0);
       const goodPointId = createResponse.body.goodPoints[0].id;
 
       // よかったこと・改善点を追加

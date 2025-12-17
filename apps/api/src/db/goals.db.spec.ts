@@ -1,13 +1,42 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import Database, { type Database as DatabaseType } from 'better-sqlite3';
 import { GoalsDatabase } from './goals.db.js';
+import { UsersDatabase } from './users.db.js';
 import { Goal } from '../models/daily-report.model.js';
+import { initializeTables } from './database.js';
 
 describe('GoalsDatabase', () => {
-  let db: GoalsDatabase;
+  let db: DatabaseType;
+  let goalsDb: GoalsDatabase;
+  let usersDb: UsersDatabase;
 
   beforeEach(() => {
-    db = new GoalsDatabase();
-    db.clear();
+    db = new Database(':memory:');
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initializeTables(db);
+    usersDb = new UsersDatabase(db);
+    goalsDb = new GoalsDatabase(db);
+
+    // テスト用ユーザーを作成
+    usersDb.save({
+      id: 'user-1',
+      email: 'test@example.com',
+      passwordHash: 'hash',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    usersDb.save({
+      id: 'user-2',
+      email: 'test2@example.com',
+      passwordHash: 'hash',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  });
+
+  afterEach(() => {
+    db.close();
   });
 
   describe('save', () => {
@@ -26,8 +55,8 @@ describe('GoalsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(goal);
-      const found = db.findById('goal-1');
+      goalsDb.save(goal);
+      const found = goalsDb.findById('goal-1');
 
       expect(found).toEqual(goal);
     });
@@ -49,14 +78,14 @@ describe('GoalsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(goal);
-      const found = db.findById('goal-1');
+      goalsDb.save(goal);
+      const found = goalsDb.findById('goal-1');
 
       expect(found).toEqual(goal);
     });
 
     it('存在しないIDの場合、undefinedを返すこと', () => {
-      const found = db.findById('non-existent');
+      const found = goalsDb.findById('non-existent');
       expect(found).toBeUndefined();
     });
   });
@@ -105,11 +134,11 @@ describe('GoalsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(goal1);
-      db.save(goal2);
-      db.save(goal3);
+      goalsDb.save(goal1);
+      goalsDb.save(goal2);
+      goalsDb.save(goal3);
 
-      const found = db.findAllByUserId('user-1');
+      const found = goalsDb.findAllByUserId('user-1');
 
       expect(found).toHaveLength(2);
       expect(found).toContainEqual(goal1);
@@ -162,11 +191,11 @@ describe('GoalsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(parentGoal);
-      db.save(childGoal1);
-      db.save(childGoal2);
+      goalsDb.save(parentGoal);
+      goalsDb.save(childGoal1);
+      goalsDb.save(childGoal2);
 
-      const found = db.findByParentId('goal-parent');
+      const found = goalsDb.findByParentId('goal-parent');
 
       expect(found).toHaveLength(2);
       expect(found).toContainEqual(childGoal1);
@@ -216,11 +245,11 @@ describe('GoalsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(rootGoal1);
-      db.save(rootGoal2);
-      db.save(childGoal);
+      goalsDb.save(rootGoal1);
+      goalsDb.save(rootGoal2);
+      goalsDb.save(childGoal);
 
-      const found = db.findByParentId(null);
+      const found = goalsDb.findByParentId(null);
 
       expect(found).toHaveLength(2);
       expect(found).toContainEqual(rootGoal1);
@@ -245,7 +274,7 @@ describe('GoalsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(goal);
+      goalsDb.save(goal);
 
       const updatedGoal: Goal = {
         ...goal,
@@ -253,8 +282,8 @@ describe('GoalsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.update(updatedGoal);
-      const found = db.findById('goal-1');
+      goalsDb.update(updatedGoal);
+      const found = goalsDb.findById('goal-1');
 
       expect(found?.name).toBe('更新された目標');
     });
@@ -276,9 +305,9 @@ describe('GoalsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(goal);
-      db.delete('goal-1');
-      const found = db.findById('goal-1');
+      goalsDb.save(goal);
+      goalsDb.delete('goal-1');
+      const found = goalsDb.findById('goal-1');
 
       expect(found).toBeUndefined();
     });
@@ -314,11 +343,11 @@ describe('GoalsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(goal1);
-      db.save(goal2);
-      db.clear();
+      goalsDb.save(goal1);
+      goalsDb.save(goal2);
+      goalsDb.clear();
 
-      expect(db.findAllByUserId('user-1')).toHaveLength(0);
+      expect(goalsDb.findAllByUserId('user-1')).toHaveLength(0);
     });
   });
 });

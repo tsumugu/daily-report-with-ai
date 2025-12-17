@@ -1,54 +1,106 @@
 import { Goal } from '../models/daily-report.model.js';
+import { getDatabase } from './database.js';
+import type { Database as DatabaseType } from 'better-sqlite3';
 
 /**
- * 目標インメモリデータベース
+ * SQLiteベースの目標データベース
  */
 export class GoalsDatabase {
-  private goals = new Map<string, Goal>();
+  private db: DatabaseType;
+
+  constructor(db?: DatabaseType) {
+    this.db = db || getDatabase();
+  }
 
   save(goal: Goal): void {
-    this.goals.set(goal.id, goal);
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO goals 
+      (id, user_id, name, description, start_date, end_date, parent_id, goal_type, success_criteria, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(
+      goal.id,
+      goal.userId,
+      goal.name,
+      goal.description,
+      goal.startDate,
+      goal.endDate,
+      goal.parentId,
+      goal.goalType,
+      goal.successCriteria,
+      goal.createdAt,
+      goal.updatedAt
+    );
   }
 
   findById(id: string): Goal | undefined {
-    return this.goals.get(id);
+    const stmt = this.db.prepare('SELECT * FROM goals WHERE id = ?');
+    const row = stmt.get(id) as any;
+    return row ? this.mapRowToGoal(row) : undefined;
   }
 
   findAllByUserId(userId: string): Goal[] {
-    const results: Goal[] = [];
-    for (const goal of this.goals.values()) {
-      if (goal.userId === userId) {
-        results.push(goal);
-      }
-    }
-    return results;
+    const stmt = this.db.prepare('SELECT * FROM goals WHERE user_id = ? ORDER BY created_at DESC');
+    const rows = stmt.all(userId) as any[];
+    return rows.map(row => this.mapRowToGoal(row));
   }
 
   findByParentId(parentId: string | null): Goal[] {
-    const results: Goal[] = [];
-    for (const goal of this.goals.values()) {
-      if (goal.parentId === parentId) {
-        results.push(goal);
-      }
+    if (parentId === null) {
+      const stmt = this.db.prepare('SELECT * FROM goals WHERE parent_id IS NULL');
+      const rows = stmt.all() as any[];
+      return rows.map(row => this.mapRowToGoal(row));
+    } else {
+      const stmt = this.db.prepare('SELECT * FROM goals WHERE parent_id = ?');
+      const rows = stmt.all(parentId) as any[];
+      return rows.map(row => this.mapRowToGoal(row));
     }
-    return results;
   }
 
   update(goal: Goal): void {
-    if (this.goals.has(goal.id)) {
-      this.goals.set(goal.id, goal);
-    }
+    const stmt = this.db.prepare(`
+      UPDATE goals 
+      SET user_id = ?, name = ?, description = ?, start_date = ?, end_date = ?, parent_id = ?, goal_type = ?, success_criteria = ?, updated_at = ?
+      WHERE id = ?
+    `);
+    stmt.run(
+      goal.userId,
+      goal.name,
+      goal.description,
+      goal.startDate,
+      goal.endDate,
+      goal.parentId,
+      goal.goalType,
+      goal.successCriteria,
+      goal.updatedAt,
+      goal.id
+    );
   }
 
   delete(id: string): void {
-    this.goals.delete(id);
+    this.db.prepare('DELETE FROM goals WHERE id = ?').run(id);
   }
 
   clear(): void {
-    this.goals.clear();
+    this.db.prepare('DELETE FROM goals').run();
+  }
+
+  private mapRowToGoal(row: any): Goal {
+    return {
+      id: row.id,
+      userId: row.user_id,
+      name: row.name,
+      description: row.description,
+      startDate: row.start_date,
+      endDate: row.end_date,
+      parentId: row.parent_id,
+      goalType: row.goal_type,
+      successCriteria: row.success_criteria,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
   }
 }
 
 // シングルトンインスタンス
 export const goalsDb = new GoalsDatabase();
-

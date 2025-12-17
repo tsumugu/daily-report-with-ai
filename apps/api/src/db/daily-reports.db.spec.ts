@@ -1,36 +1,98 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import Database, { type Database as DatabaseType } from 'better-sqlite3';
 import {
   DailyReportsDatabase,
   GoodPointsDatabase,
   ImprovementsDatabase,
 } from './daily-reports.db.js';
+import { UsersDatabase } from './users.db.js';
+import { initializeTables } from './database.js';
 
 describe('DailyReportsDatabase', () => {
-  let db: DailyReportsDatabase;
+  let db: DatabaseType;
+  let dailyReportsDb: DailyReportsDatabase;
+  let goodPointsDb: GoodPointsDatabase;
+  let improvementsDb: ImprovementsDatabase;
+  let usersDb: UsersDatabase;
 
   beforeEach(() => {
-    db = new DailyReportsDatabase();
-    db.clear();
+    db = new Database(':memory:');
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initializeTables(db);
+    usersDb = new UsersDatabase(db);
+    dailyReportsDb = new DailyReportsDatabase(db);
+    goodPointsDb = new GoodPointsDatabase(db);
+    improvementsDb = new ImprovementsDatabase(db);
+
+    // テスト用ユーザーを作成
+    usersDb.save({
+      id: 'user-1',
+      email: 'test@example.com',
+      passwordHash: 'hash',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    usersDb.save({
+      id: 'user-2',
+      email: 'test2@example.com',
+      passwordHash: 'hash',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  });
+
+  afterEach(() => {
+    db.close();
   });
 
   describe('save', () => {
     it('日報を保存できること', () => {
+      // まず日報を作成
       const report = {
         id: 'report-1',
         userId: 'user-1',
         date: '2025-12-05',
         events: 'テストイベント',
         learnings: 'テスト学び',
-        goodPointIds: ['gp-1'],
-        improvementIds: ['imp-1'],
+        goodPointIds: [],
+        improvementIds: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
+      dailyReportsDb.save(report);
 
-      db.save(report);
-      const found = db.findById('report-1');
+      // その後、good_pointsとimprovementsを作成
+      const goodPoint = {
+        id: 'gp-1',
+        userId: 'user-1',
+        content: 'テスト内容',
+        factors: null,
+        tags: [],
+        status: '未着手' as const,
+        success_count: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      goodPointsDb.save(goodPoint, 'report-1');
 
-      expect(found).toEqual(report);
+      const improvement = {
+        id: 'imp-1',
+        userId: 'user-1',
+        content: 'テスト内容',
+        action: null,
+        status: '未着手' as const,
+        success_count: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      improvementsDb.save(improvement, 'report-1');
+
+      // 日報を再取得してgoodPointIdsとimprovementIdsが含まれていることを確認
+      const found = dailyReportsDb.findById('report-1');
+      expect(found).toBeDefined();
+      expect(found?.goodPointIds).toContain('gp-1');
+      expect(found?.improvementIds).toContain('imp-1');
     });
   });
 
@@ -48,14 +110,14 @@ describe('DailyReportsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(report);
-      const found = db.findById('report-1');
+      dailyReportsDb.save(report);
+      const found = dailyReportsDb.findById('report-1');
 
       expect(found).toEqual(report);
     });
 
     it('存在しないIDの場合、undefinedを返すこと', () => {
-      const found = db.findById('non-existent');
+      const found = dailyReportsDb.findById('non-existent');
       expect(found).toBeUndefined();
     });
   });
@@ -74,14 +136,14 @@ describe('DailyReportsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(report);
-      const found = db.findByUserIdAndDate('user-1', '2025-12-05');
+      dailyReportsDb.save(report);
+      const found = dailyReportsDb.findByUserIdAndDate('user-1', '2025-12-05');
 
       expect(found).toEqual(report);
     });
 
     it('該当なしの場合、undefinedを返すこと', () => {
-      const found = db.findByUserIdAndDate('user-1', '2025-12-06');
+      const found = dailyReportsDb.findByUserIdAndDate('user-1', '2025-12-06');
       expect(found).toBeUndefined();
     });
   });
@@ -122,11 +184,11 @@ describe('DailyReportsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(report1);
-      db.save(report2);
-      db.save(report3);
+      dailyReportsDb.save(report1);
+      dailyReportsDb.save(report2);
+      dailyReportsDb.save(report3);
 
-      const reports = db.findAllByUserId('user-1');
+      const reports = dailyReportsDb.findAllByUserId('user-1');
 
       expect(reports).toHaveLength(2);
       expect(reports).toContainEqual(report1);
@@ -148,7 +210,7 @@ describe('DailyReportsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(report);
+      dailyReportsDb.save(report);
 
       const updated = {
         ...report,
@@ -156,8 +218,8 @@ describe('DailyReportsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.update(updated);
-      const found = db.findById('report-1');
+      dailyReportsDb.update(updated);
+      const found = dailyReportsDb.findById('report-1');
 
       expect(found?.events).toBe('更新後のイベント');
     });
@@ -165,7 +227,7 @@ describe('DailyReportsDatabase', () => {
 
   describe('clear', () => {
     it('全データを削除できること', () => {
-      db.save({
+      dailyReportsDb.save({
         id: 'report-1',
         userId: 'user-1',
         date: '2025-12-05',
@@ -177,8 +239,8 @@ describe('DailyReportsDatabase', () => {
         updatedAt: new Date().toISOString(),
       });
 
-      db.clear();
-      const found = db.findById('report-1');
+      dailyReportsDb.clear();
+      const found = dailyReportsDb.findById('report-1');
 
       expect(found).toBeUndefined();
     });
@@ -186,11 +248,45 @@ describe('DailyReportsDatabase', () => {
 });
 
 describe('GoodPointsDatabase', () => {
-  let db: GoodPointsDatabase;
+  let db: DatabaseType;
+  let goodPointsDb: GoodPointsDatabase;
+  let usersDb: UsersDatabase;
+  let dailyReportsDb: DailyReportsDatabase;
 
   beforeEach(() => {
-    db = new GoodPointsDatabase();
-    db.clear();
+    db = new Database(':memory:');
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initializeTables(db);
+    usersDb = new UsersDatabase(db);
+    dailyReportsDb = new DailyReportsDatabase(db);
+    goodPointsDb = new GoodPointsDatabase(db);
+
+    // テスト用ユーザーを作成
+    usersDb.save({
+      id: 'user-1',
+      email: 'test@example.com',
+      passwordHash: 'hash',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    // テスト用日報を作成
+    dailyReportsDb.save({
+      id: 'report-1',
+      userId: 'user-1',
+      date: '2025-12-05',
+      events: 'テスト',
+      learnings: null,
+      goodPointIds: [],
+      improvementIds: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  });
+
+  afterEach(() => {
+    db.close();
   });
 
   describe('save', () => {
@@ -202,12 +298,13 @@ describe('GoodPointsDatabase', () => {
         factors: 'テスト要因',
         tags: ['タグ1', 'タグ2'],
         status: '未対応' as const,
+        success_count: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(goodPoint);
-      const found = db.findById('gp-1');
+      goodPointsDb.save(goodPoint, 'report-1');
+      const found = goodPointsDb.findById('gp-1');
 
       expect(found).toEqual(goodPoint);
     });
@@ -222,6 +319,7 @@ describe('GoodPointsDatabase', () => {
         factors: null,
         tags: [],
         status: '未対応' as const,
+        success_count: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -232,14 +330,15 @@ describe('GoodPointsDatabase', () => {
         factors: null,
         tags: [],
         status: '未対応' as const,
+        success_count: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(gp1);
-      db.save(gp2);
+      goodPointsDb.save(gp1, 'report-1');
+      goodPointsDb.save(gp2, 'report-1');
 
-      const found = db.findByIds(['gp-1', 'gp-2']);
+      const found = goodPointsDb.findByIds(['gp-1', 'gp-2']);
 
       expect(found).toHaveLength(2);
     });
@@ -254,11 +353,12 @@ describe('GoodPointsDatabase', () => {
         factors: null,
         tags: [],
         status: '未対応' as const,
+        success_count: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(goodPoint);
+      goodPointsDb.save(goodPoint, 'report-1');
 
       const updated = {
         ...goodPoint,
@@ -266,8 +366,8 @@ describe('GoodPointsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.update(updated);
-      const found = db.findById('gp-1');
+      goodPointsDb.update(updated, 'report-1');
+      const found = goodPointsDb.findById('gp-1');
 
       expect(found?.status).toBe('再現成功');
     });
@@ -286,25 +386,59 @@ describe('GoodPointsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(goodPoint);
-      db.delete('gp-1');
+      goodPointsDb.save(goodPoint, 'report-1');
+      goodPointsDb.delete('gp-1');
 
-      const found = db.findById('gp-1');
+      const found = goodPointsDb.findById('gp-1');
       expect(found).toBeUndefined();
     });
 
     it('存在しないIDを削除してもエラーにならないこと', () => {
-      expect(() => db.delete('not-exist')).not.toThrow();
+      expect(() => goodPointsDb.delete('not-exist')).not.toThrow();
     });
   });
 });
 
 describe('ImprovementsDatabase', () => {
-  let db: ImprovementsDatabase;
+  let db: DatabaseType;
+  let improvementsDb: ImprovementsDatabase;
+  let usersDb: UsersDatabase;
+  let dailyReportsDb: DailyReportsDatabase;
 
   beforeEach(() => {
-    db = new ImprovementsDatabase();
-    db.clear();
+    db = new Database(':memory:');
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initializeTables(db);
+    usersDb = new UsersDatabase(db);
+    dailyReportsDb = new DailyReportsDatabase(db);
+    improvementsDb = new ImprovementsDatabase(db);
+
+    // テスト用ユーザーを作成
+    usersDb.save({
+      id: 'user-1',
+      email: 'test@example.com',
+      passwordHash: 'hash',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    // テスト用日報を作成
+    dailyReportsDb.save({
+      id: 'report-1',
+      userId: 'user-1',
+      date: '2025-12-05',
+      events: 'テスト',
+      learnings: null,
+      goodPointIds: [],
+      improvementIds: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  });
+
+  afterEach(() => {
+    db.close();
   });
 
   describe('save', () => {
@@ -315,12 +449,13 @@ describe('ImprovementsDatabase', () => {
         content: 'テスト内容',
         action: 'テストアクション',
         status: '未着手' as const,
+        success_count: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(improvement);
-      const found = db.findById('imp-1');
+      improvementsDb.save(improvement, 'report-1');
+      const found = improvementsDb.findById('imp-1');
 
       expect(found).toEqual(improvement);
     });
@@ -334,6 +469,7 @@ describe('ImprovementsDatabase', () => {
         content: '内容1',
         action: null,
         status: '未着手' as const,
+        success_count: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -343,14 +479,15 @@ describe('ImprovementsDatabase', () => {
         content: '内容2',
         action: null,
         status: '未着手' as const,
+        success_count: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(imp1);
-      db.save(imp2);
+      improvementsDb.save(imp1, 'report-1');
+      improvementsDb.save(imp2, 'report-1');
 
-      const found = db.findByIds(['imp-1', 'imp-2']);
+      const found = improvementsDb.findByIds(['imp-1', 'imp-2']);
 
       expect(found).toHaveLength(2);
     });
@@ -364,11 +501,12 @@ describe('ImprovementsDatabase', () => {
         content: '元の内容',
         action: null,
         status: '未着手' as const,
+        success_count: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(improvement);
+      improvementsDb.save(improvement, 'report-1');
 
       const updated = {
         ...improvement,
@@ -376,8 +514,8 @@ describe('ImprovementsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.update(updated);
-      const found = db.findById('imp-1');
+      improvementsDb.update(updated, 'report-1');
+      const found = improvementsDb.findById('imp-1');
 
       expect(found?.status).toBe('完了');
     });
@@ -395,15 +533,15 @@ describe('ImprovementsDatabase', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      db.save(improvement);
-      db.delete('imp-1');
+      improvementsDb.save(improvement, 'report-1');
+      improvementsDb.delete('imp-1');
 
-      const found = db.findById('imp-1');
+      const found = improvementsDb.findById('imp-1');
       expect(found).toBeUndefined();
     });
 
     it('存在しないIDを削除してもエラーにならないこと', () => {
-      expect(() => db.delete('not-exist')).not.toThrow();
+      expect(() => improvementsDb.delete('not-exist')).not.toThrow();
     });
   });
 });

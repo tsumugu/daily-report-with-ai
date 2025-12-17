@@ -1,17 +1,26 @@
 import { User } from '../models/user.model.js';
+import { getDatabase } from './database.js';
+import type { Database as DatabaseType } from 'better-sqlite3';
 
 /**
- * インメモリユーザーデータベース（MVP用）
- * 本番環境では PostgreSQL/Firestore 等に置き換え
+ * SQLiteベースのユーザーデータベース
  */
-class UsersDatabase {
-  private users = new Map<string, User>();
+export class UsersDatabase {
+  private db: DatabaseType;
+
+  constructor(db?: DatabaseType) {
+    this.db = db || getDatabase();
+  }
 
   /**
    * ユーザーを保存
    */
   save(user: User): User {
-    this.users.set(user.id, user);
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO users (id, email, password_hash, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    stmt.run(user.id, user.email, user.passwordHash, user.createdAt, user.updatedAt);
     return user;
   }
 
@@ -19,43 +28,58 @@ class UsersDatabase {
    * IDでユーザーを取得
    */
   findById(id: string): User | undefined {
-    return this.users.get(id);
+    const stmt = this.db.prepare('SELECT * FROM users WHERE id = ?');
+    const row = stmt.get(id) as any;
+    return row ? this.mapRowToUser(row) : undefined;
   }
 
   /**
    * メールアドレスでユーザーを取得
    */
   findByEmail(email: string): User | undefined {
-    for (const user of this.users.values()) {
-      if (user.email === email) {
-        return user;
-      }
-    }
-    return undefined;
+    const stmt = this.db.prepare('SELECT * FROM users WHERE email = ?');
+    const row = stmt.get(email) as any;
+    return row ? this.mapRowToUser(row) : undefined;
   }
 
   /**
    * メールアドレスの重複チェック
    */
   existsByEmail(email: string): boolean {
-    return this.findByEmail(email) !== undefined;
+    const stmt = this.db.prepare('SELECT COUNT(*) as count FROM users WHERE email = ?');
+    const row = stmt.get(email) as any;
+    return row.count > 0;
   }
 
   /**
    * 全ユーザーを取得（デバッグ用）
    */
   findAll(): User[] {
-    return Array.from(this.users.values());
+    const stmt = this.db.prepare('SELECT * FROM users');
+    const rows = stmt.all() as any[];
+    return rows.map(row => this.mapRowToUser(row));
   }
 
   /**
    * データベースをクリア（テスト用）
    */
   clear(): void {
-    this.users.clear();
+    this.db.prepare('DELETE FROM users').run();
+  }
+
+  /**
+   * 行データをUserモデルにマッピング
+   */
+  private mapRowToUser(row: any): User {
+    return {
+      id: row.id,
+      email: row.email,
+      passwordHash: row.password_hash,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
   }
 }
 
 // シングルトンインスタンス
 export const usersDb = new UsersDatabase();
-
