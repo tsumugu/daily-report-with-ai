@@ -46,13 +46,41 @@ ng test
 
 ## Running end-to-end tests
 
-For end-to-end (e2e) testing, run:
+**重要**: E2Eテストを実行する前に、APIサーバーとフロントエンドサーバーが起動している必要があります。
+
+### 1. サーバーを起動
+
+別のターミナルで以下を実行してください：
 
 ```bash
-ng e2e
+# ターミナル1: APIサーバーを起動
+cd ../api
+npm run dev
+
+# ターミナル2: フロントエンドサーバーを起動
+cd ../web
+npm run dev
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### 2. E2Eテストを実行
+
+サーバーが起動したら、別のターミナルで：
+
+```bash
+npm run e2e
+```
+
+または、UIモードで実行：
+
+```bash
+npm run e2e:ui
+```
+
+**注意**:
+
+- APIサーバーは `http://localhost:3000` で起動する必要があります
+- フロントエンドサーバーは `http://localhost:4200` で起動する必要があります
+- 両方のサーバーが起動していることを確認してからテストを実行してください
 
 ## Additional Resources
 

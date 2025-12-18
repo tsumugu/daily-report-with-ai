@@ -47,8 +47,10 @@ app.get('/api/health', (_, res) => {
 });
 
 // Start server
+// 0.0.0.0でリッスンすることで、すべてのネットワークインターフェースでアクセス可能
+// localhostでも127.0.0.1でもアクセスできる
 app.listen(PORT, '0.0.0.0', () => {
-  console.info(`🚀 Server running on http://0.0.0.0:${PORT}`);
+  console.info(`🚀 Server running on http://localhost:${PORT}`);
 });
 
 export default app;
