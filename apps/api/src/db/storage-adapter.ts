@@ -439,17 +439,43 @@ async function initializeDatabase(): Promise<DatabaseType> {
 
   // シグナルハンドラーの登録（1回のみ）
   if (!signalHandlersRegistered) {
-    process.on("SIGTERM", async () => {
-      console.log("SIGTERM received. Syncing database...");
-      await syncDatabasePeriodically();
-      process.exit(0);
-    });
+    // Cloud Runの停止処理を改善
+    // SIGTERM受信時に、猶予時間内（デフォルト10秒）にアップロードを完了させる
+    const gracefulShutdown = async (signal: string) => {
+      console.log(`[DB] ${signal} received. Starting graceful shutdown...`);
+      
+      // タイムアウトを設定（8秒、猶予時間10秒のうち）
+      // Cloud Runのデフォルト猶予時間は10秒なので、8秒でタイムアウトして安全に終了
+      const timeout = setTimeout(() => {
+        console.error(`[DB] Upload timeout after ${signal}. Forcing exit...`);
+        process.exit(1);
+      }, 8000);
+      
+      try {
+        // 変更がある場合は確実にアップロード
+        if (hasChanges) {
+          console.log("[DB] Changes detected. Syncing database before shutdown...");
+          await syncDatabase();
+          console.log("[DB] Database synced successfully before shutdown.");
+        } else {
+          console.log("[DB] No changes detected. Skipping sync.");
+        }
+        
+        clearTimeout(timeout);
+        console.log(`[DB] Graceful shutdown completed for ${signal}.`);
+      } catch (error) {
+        clearTimeout(timeout);
+        console.error(`[DB] Failed to sync database before shutdown (${signal}):`, error);
+        // エラーが発生しても、ログを残してから終了
+        process.exit(1);
+      } finally {
+        // 確実に終了
+        process.exit(0);
+      }
+    };
 
-    process.on("SIGINT", async () => {
-      console.log("SIGINT received. Syncing database...");
-      await syncDatabasePeriodically();
-      process.exit(0);
-    });
+    process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+    process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
     signalHandlersRegistered = true;
   }
