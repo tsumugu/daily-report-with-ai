@@ -36,7 +36,9 @@ jobs:
       - name: Build Frontend
         run: |
           cd apps/web
-          API_URL=${{ secrets.API_URL }} npm run build -- --configuration=production --base-href=${{ secrets.BASE_HREF || '/' }}
+          npm run build -- --configuration=production --base-href=${{ secrets.BASE_HREF || '/' }}
+        env:
+          API_URL: ${{ secrets.API_URL }}
 
       - name: Create 404.html for SPA routing
         run: |
