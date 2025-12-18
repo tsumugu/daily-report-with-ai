@@ -8,13 +8,14 @@ import {
   UpdateGoalRequest,
   GoalsResponse,
 } from '../models/goal.model';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GoalService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = '/api/goals';
+  private readonly apiUrl = `${environment.apiUrl}/goals`;
 
   /**
    * 目標一覧を取得する

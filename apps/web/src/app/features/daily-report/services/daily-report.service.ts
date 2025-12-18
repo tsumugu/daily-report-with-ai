@@ -10,13 +10,14 @@ import {
   ImprovementStatus,
 } from '../models/daily-report.model';
 import { ReportCardData } from '../../../shared/components/report-card/report-card.component';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DailyReportService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api';
+  private readonly baseUrl = environment.apiUrl;
 
   /**
    * 日報を作成

@@ -10,13 +10,14 @@ import {
   EpisodesResponse,
   ActionsResponse,
 } from '../models/followup.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FollowupService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api';
+  private readonly baseUrl = environment.apiUrl;
 
   /**
    * フォロー項目一覧を取得
