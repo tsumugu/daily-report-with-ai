@@ -173,19 +173,27 @@ async function uploadDatabase(): Promise<void> {
     const localFileSize = localStats.size;
     console.log(`[DB] Database file size before WAL merge: ${localFileSize} bytes`);
 
-    // ファイルサイズが空（最小サイズ以下）の場合はアップロードしない
-    if (localFileSize <= MIN_DB_SIZE) {
-      console.log(
-        `[DB] Database file is too small (${localFileSize} bytes). ` +
-        `Skipping upload to prevent overwriting existing data with empty database.`
-      );
-      return;
-    }
-
-    // データベースが空の場合はアップロードしない（既存のDBを上書きしない）
-    if (dbInstance && isDatabaseEmpty(dbInstance)) {
-      console.log("[DB] Database is empty. Skipping upload to prevent overwriting existing data.");
-      return;
+    // WALファイルの存在を確認
+    const walPath = `${TEMP_DB_PATH}-wal`;
+    const walExists = existsSync(walPath);
+    
+    // WALファイルが存在しない場合、メインファイルの内容を確認
+    // WALファイルが存在する場合は、checkpoint後に再確認する
+    if (!walExists) {
+      // ファイルサイズが最小サイズ以下の場合、空DBと判断
+      if (localFileSize <= MIN_DB_SIZE) {
+        console.log(
+          `[DB] Database file is too small (${localFileSize} bytes) and no WAL file exists. ` +
+          `Skipping upload to prevent overwriting existing data with empty database.`
+        );
+        return;
+      }
+      
+      // データベースが空の場合もアップロードしない
+      if (dbInstance && isDatabaseEmpty(dbInstance)) {
+        console.log("[DB] Database is empty and no WAL file exists. Skipping upload to prevent overwriting existing data.");
+        return;
+      }
     }
 
     const storageClient = initializeStorage();
@@ -205,8 +213,9 @@ async function uploadDatabase(): Promise<void> {
       console.warn("[DB] Failed to get existing file metadata:", error);
     }
 
-    // ローカルのファイルがCloud Storageのファイルより小さい場合はアップロードしない
-    if (existingFileSize > 0 && localFileSize < existingFileSize) {
+    // WALファイルが存在しない場合のみ、マージ前のサイズで比較
+    // WALファイルが存在する場合は、マージ後に比較する
+    if (!walExists && existingFileSize > 0 && localFileSize < existingFileSize) {
       console.log(
         `[DB] Local database file (${localFileSize} bytes) is smaller than Cloud Storage file (${existingFileSize} bytes). ` +
         `Skipping upload to prevent data loss.`
@@ -215,30 +224,67 @@ async function uploadDatabase(): Promise<void> {
     }
 
     // WALファイルをマージしてからアップロード（データの整合性を保証）
-    if (dbInstance) {
+    if (dbInstance && walExists) {
       try {
-        console.log("[DB] Merging WAL file into main database before upload...");
+        console.log("[DB] WAL file exists. Merging WAL file into main database before upload...");
+        
+        // WALファイルのサイズを確認
+        const walStats = statSync(walPath);
+        console.log(`[DB] WAL file size: ${walStats.size} bytes`);
+        
         // WALファイルの内容をメインファイルにマージ
-        const checkpointResult = dbInstance.pragma("wal_checkpoint(FULL)", { simple: true }) as number;
-        if (checkpointResult === 0) {
-          console.log("[DB] WAL checkpoint completed successfully.");
-        } else if (checkpointResult === 1) {
-          console.log("[DB] WAL checkpoint completed, but some frames may still be in WAL.");
-        } else {
-          console.warn("[DB] WAL checkpoint returned error code:", checkpointResult);
+        // better-sqlite3では、pragmaの戻り値は配列またはオブジェクトになる可能性がある
+        const checkpointResult = dbInstance.pragma("wal_checkpoint(FULL)", { simple: true });
+        console.log(`[DB] WAL checkpoint result:`, checkpointResult);
+        
+        // checkpointの結果を確認（戻り値の形式に応じて処理）
+        let checkpointSuccess = false;
+        if (typeof checkpointResult === 'number') {
+          if (checkpointResult === 0) {
+            console.log("[DB] WAL checkpoint completed successfully.");
+            checkpointSuccess = true;
+          } else if (checkpointResult === 1) {
+            console.log("[DB] WAL checkpoint completed, but some frames may still be in WAL.");
+            checkpointSuccess = true;
+          } else {
+            console.warn("[DB] WAL checkpoint returned error code:", checkpointResult);
+          }
+        } else if (checkpointResult && typeof checkpointResult === 'object') {
+          // オブジェクト形式の戻り値の場合
+          const result = checkpointResult as { busy?: number; log?: number; checkpointed?: number };
+          console.log(`[DB] WAL checkpoint details:`, result);
+          checkpointSuccess = true;
+        }
+        
+        // データベースを明示的に同期して、変更をディスクに書き込む
+        if (checkpointSuccess) {
+          dbInstance.pragma("synchronous = FULL");
+          // ファイルシステムの同期を待つため、少し待機
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
       } catch (error) {
         console.error("[DB] Failed to checkpoint WAL file:", error);
-        // checkpointに失敗しても続行（WALファイルがない場合など）
+        // checkpointに失敗しても続行
       }
+    } else if (!walExists) {
+      console.log("[DB] No WAL file found. Skipping checkpoint (data is already in main database).");
     }
 
     // WALマージ後のファイルサイズを再取得（マージによりファイルサイズが変わる可能性がある）
     const updatedStats = statSync(TEMP_DB_PATH);
     const updatedFileSize = updatedStats.size;
     console.log(`[DB] Database file size after WAL merge: ${updatedFileSize} bytes (was ${localFileSize} bytes)`);
+    
+    // WALファイルが存在した場合、マージ後のサイズが増加しているか確認
+    if (walExists && updatedFileSize === localFileSize) {
+      console.warn(
+        `[DB] WARNING: File size did not change after WAL checkpoint. ` +
+        `WAL file may not have been merged properly. ` +
+        `Proceeding with upload anyway.`
+      );
+    }
 
-    // マージ後のファイルサイズで空DBチェックを再実行
+    // マージ後のファイルサイズで空DBチェック（ファイルサイズベース）
     if (updatedFileSize <= MIN_DB_SIZE) {
       console.log(
         `[DB] Database file is too small after WAL merge (${updatedFileSize} bytes). ` +
@@ -247,7 +293,7 @@ async function uploadDatabase(): Promise<void> {
       return;
     }
 
-    // マージ後のファイルサイズで空DBチェックを再実行
+    // マージ後のデータベース内容で空DBチェック（データベース内容ベース）
     if (dbInstance && isDatabaseEmpty(dbInstance)) {
       console.log("[DB] Database is empty after WAL merge. Skipping upload to prevent overwriting existing data.");
       return;
@@ -280,8 +326,8 @@ async function uploadDatabase(): Promise<void> {
     const shmFile = bucket.file(`${GCS_DB_PATH}-shm`);
     
     try {
-      const [walExists] = await walFile.exists();
-      if (walExists) {
+      const [walFileExists] = await walFile.exists();
+      if (walFileExists) {
         await walFile.delete();
         console.log("[DB] Removed old WAL file from Cloud Storage (merged into main database).");
       }
@@ -290,8 +336,8 @@ async function uploadDatabase(): Promise<void> {
     }
 
     try {
-      const [shmExists] = await shmFile.exists();
-      if (shmExists) {
+      const [shmFileExists] = await shmFile.exists();
+      if (shmFileExists) {
         await shmFile.delete();
         console.log("[DB] Removed old SHM file from Cloud Storage (no longer needed).");
       }
