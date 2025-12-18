@@ -65,6 +65,8 @@ async function downloadDatabase(): Promise<void> {
   const maxRetries = 3;
   let retries = 0;
 
+  console.log(`[DB] Attempting to download database from bucket: ${BUCKET_NAME}`);
+
   while (retries < maxRetries) {
     try {
       const storageClient = initializeStorage();
@@ -75,7 +77,7 @@ async function downloadDatabase(): Promise<void> {
       const [exists] = await file.exists();
       if (!exists) {
         console.log(
-          "Database file does not exist in Cloud Storage. Creating new database.",
+          "[DB] Database file does not exist in Cloud Storage. Creating new database.",
         );
         return; // 新しいデータベースファイルを作成
       }
@@ -83,7 +85,7 @@ async function downloadDatabase(): Promise<void> {
       // ダウンロード
       const [contents] = await file.download();
       writeFileSync(TEMP_DB_PATH, contents);
-      console.log("Database downloaded from Cloud Storage successfully.");
+      console.log(`[DB] Database downloaded from Cloud Storage successfully. Size: ${contents.length} bytes`);
 
       return;
     } catch (error) {
@@ -104,7 +106,7 @@ async function downloadDatabase(): Promise<void> {
 async function uploadDatabase(): Promise<void> {
   try {
     if (!existsSync(TEMP_DB_PATH)) {
-      console.warn("Database file does not exist locally. Skipping upload.");
+      console.warn("[DB] Database file does not exist locally. Skipping upload.");
       return;
     }
 
@@ -114,6 +116,7 @@ async function uploadDatabase(): Promise<void> {
 
     // メインデータベースファイルのアップロード
     const dbContents = readFileSync(TEMP_DB_PATH);
+    console.log(`[DB] Uploading database to Cloud Storage. Size: ${dbContents.length} bytes`);
     await file.save(dbContents, {
       contentType: "application/x-sqlite3",
       metadata: {
@@ -121,7 +124,7 @@ async function uploadDatabase(): Promise<void> {
       },
     });
 
-    console.log("Database uploaded to Cloud Storage successfully.");
+    console.log("[DB] Database uploaded to Cloud Storage successfully.");
 
     // WALファイルとSHMファイルのアップロード（存在する場合）
     const walPath = `${TEMP_DB_PATH}-wal`;

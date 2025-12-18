@@ -61,7 +61,9 @@ authRouter.post('/signup', async (req: Request, res: Response) => {
       updatedAt: now,
     };
 
+    console.log(`[SIGNUP] Creating user: ${user.id}, email: ${email}`);
     usersDb.save(user);
+    console.log(`[SIGNUP] User saved to database`);
 
     // トークン生成（自動ログイン）
     const token = generateToken(user.id, user.email);
@@ -93,12 +95,20 @@ authRouter.post('/login', async (req: Request, res: Response) => {
     // データベースインスタンスを取得
     const usersDb = await getUsersDatabase();
 
+    // デバッグ: 全ユーザー数を確認
+    const allUsers = usersDb.findAll();
+    console.log(`[LOGIN] Total users in database: ${allUsers.length}`);
+    console.log(`[LOGIN] Attempting login for email: ${email}`);
+
     // ユーザー検索
     const user = usersDb.findByEmail(email);
     if (!user) {
+      console.log(`[LOGIN] User not found for email: ${email}`);
       res.status(401).json({ message: 'メールアドレスまたはパスワードが正しくありません' });
       return;
     }
+
+    console.log(`[LOGIN] User found: ${user.id}`);
 
     // パスワード検証
     const isValid = await bcrypt.compare(password, user.passwordHash);
