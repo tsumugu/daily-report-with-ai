@@ -1,5 +1,5 @@
 import { Storage } from "@google-cloud/storage";
-import { readFileSync, existsSync, writeFileSync } from "fs";
+import { readFileSync, existsSync, writeFileSync, statSync } from "fs";
 import { join } from "path";
 import Database, { type Database as DatabaseType } from "better-sqlite3";
 import { initializeTables } from "./database.js";
@@ -59,9 +59,16 @@ function initializeStorage(): Storage {
 }
 
 /**
- * データベースファイルをCloud Storageからダウンロード
+ * SQLiteの最小ファイルサイズ（空のDBのサイズ）
+ * SQLiteの最小ページサイズは通常4096 bytes
  */
-async function downloadDatabase(): Promise<void> {
+const MIN_DB_SIZE = 4096;
+
+/**
+ * データベースファイルをCloud Storageからダウンロード
+ * @returns ダウンロードに成功した場合はtrue、新規作成の場合はfalse
+ */
+async function downloadDatabase(): Promise<boolean> {
   const maxRetries = 3;
   let retries = 0;
 
@@ -79,7 +86,41 @@ async function downloadDatabase(): Promise<void> {
         console.log(
           "[DB] Database file does not exist in Cloud Storage. Creating new database.",
         );
-        return; // 新しいデータベースファイルを作成
+        return false; // 新しいデータベースファイルを作成
+      }
+
+      // Cloud Storageのファイルメタデータを取得してサイズを確認
+      const [metadata] = await file.getMetadata();
+      const gcsFileSize = parseInt(String(metadata.size || "0"), 10);
+
+      // ローカルのファイルが存在する場合、サイズを比較
+      let localFileSize = 0;
+      if (existsSync(TEMP_DB_PATH)) {
+        const localStats = statSync(TEMP_DB_PATH);
+        localFileSize = localStats.size;
+      }
+
+      // Cloud Storageのファイルが空（最小サイズ以下）の場合はダウンロードしない
+      if (gcsFileSize <= MIN_DB_SIZE) {
+        console.log(
+          `[DB] Cloud Storage database file is empty or too small (${gcsFileSize} bytes). ` +
+          `Skipping download to prevent overwriting local data.`
+        );
+        // ローカルのファイルが存在する場合はそれを使用
+        if (existsSync(TEMP_DB_PATH)) {
+          console.log(`[DB] Using existing local database file (${localFileSize} bytes).`);
+          return true; // ローカルのファイルを使用
+        }
+        return false; // 新規作成
+      }
+
+      // Cloud Storageのファイルがローカルのファイルより小さい場合はダウンロードしない
+      if (localFileSize > 0 && gcsFileSize < localFileSize) {
+        console.log(
+          `[DB] Cloud Storage database file (${gcsFileSize} bytes) is smaller than local file (${localFileSize} bytes). ` +
+          `Skipping download to prevent data loss.`
+        );
+        return true; // ローカルのファイルを使用
       }
 
       // ダウンロード
@@ -87,7 +128,7 @@ async function downloadDatabase(): Promise<void> {
       writeFileSync(TEMP_DB_PATH, contents);
       console.log(`[DB] Database downloaded from Cloud Storage successfully. Size: ${contents.length} bytes`);
 
-      return;
+      return true; // ダウンロード成功
     } catch (error) {
       retries++;
       if (retries >= maxRetries) {
@@ -97,6 +138,21 @@ async function downloadDatabase(): Promise<void> {
       console.log(`Retrying download (attempt ${retries}/${maxRetries})...`);
       await new Promise((resolve) => setTimeout(resolve, 1000 * retries));
     }
+  }
+  return false;
+}
+
+/**
+ * データベースが空かどうかを確認
+ */
+function isDatabaseEmpty(db: DatabaseType): boolean {
+  try {
+    // usersテーブルにデータが存在するか確認
+    const userCount = db.prepare("SELECT COUNT(*) as count FROM users").get() as { count: number };
+    return userCount.count === 0;
+  } catch (_error) {
+    // テーブルが存在しない場合も空とみなす
+    return true;
   }
 }
 
@@ -110,11 +166,71 @@ async function uploadDatabase(): Promise<void> {
       return;
     }
 
+    // ファイルサイズを確認
+    const localStats = statSync(TEMP_DB_PATH);
+    const localFileSize = localStats.size;
+
+    // ファイルサイズが空（最小サイズ以下）の場合はアップロードしない
+    if (localFileSize <= MIN_DB_SIZE) {
+      console.log(
+        `[DB] Database file is too small (${localFileSize} bytes). ` +
+        `Skipping upload to prevent overwriting existing data with empty database.`
+      );
+      return;
+    }
+
+    // データベースが空の場合はアップロードしない（既存のDBを上書きしない）
+    if (dbInstance && isDatabaseEmpty(dbInstance)) {
+      console.log("[DB] Database is empty. Skipping upload to prevent overwriting existing data.");
+      return;
+    }
+
     const storageClient = initializeStorage();
     const bucket = storageClient.bucket(BUCKET_NAME);
     const file = bucket.file(GCS_DB_PATH);
 
-    // メインデータベースファイルのアップロード
+    // Cloud Storageの既存ファイルサイズを確認
+    let existingFileSize = 0;
+    try {
+      const [exists] = await file.exists();
+      if (exists) {
+        const [metadata] = await file.getMetadata();
+        existingFileSize = parseInt(String(metadata.size || "0"), 10);
+      }
+    } catch (error) {
+      // メタデータ取得に失敗しても続行
+      console.warn("[DB] Failed to get existing file metadata:", error);
+    }
+
+    // ローカルのファイルがCloud Storageのファイルより小さい場合はアップロードしない
+    if (existingFileSize > 0 && localFileSize < existingFileSize) {
+      console.log(
+        `[DB] Local database file (${localFileSize} bytes) is smaller than Cloud Storage file (${existingFileSize} bytes). ` +
+        `Skipping upload to prevent data loss.`
+      );
+      return;
+    }
+
+    // WALファイルをマージしてからアップロード（データの整合性を保証）
+    if (dbInstance) {
+      try {
+        console.log("[DB] Merging WAL file into main database before upload...");
+        // WALファイルの内容をメインファイルにマージ
+        const checkpointResult = dbInstance.pragma("wal_checkpoint(FULL)", { simple: true }) as number;
+        if (checkpointResult === 0) {
+          console.log("[DB] WAL checkpoint completed successfully.");
+        } else if (checkpointResult === 1) {
+          console.log("[DB] WAL checkpoint completed, but some frames may still be in WAL.");
+        } else {
+          console.warn("[DB] WAL checkpoint returned error code:", checkpointResult);
+        }
+      } catch (error) {
+        console.error("[DB] Failed to checkpoint WAL file:", error);
+        // checkpointに失敗しても続行（WALファイルがない場合など）
+      }
+    }
+
+    // メインデータベースファイルのアップロード（WALファイルはマージ済み）
     const dbContents = readFileSync(TEMP_DB_PATH);
     console.log(`[DB] Uploading database to Cloud Storage. Size: ${dbContents.length} bytes`);
     await file.save(dbContents, {
@@ -126,32 +242,29 @@ async function uploadDatabase(): Promise<void> {
 
     console.log("[DB] Database uploaded to Cloud Storage successfully.");
 
-    // WALファイルとSHMファイルのアップロード（存在する場合）
-    const walPath = `${TEMP_DB_PATH}-wal`;
-    const shmPath = `${TEMP_DB_PATH}-shm`;
-
-    if (existsSync(walPath)) {
-      const walContents = readFileSync(walPath);
-      const walFile = bucket.file(`${GCS_DB_PATH}-wal`);
-      await walFile.save(walContents, {
-        contentType: "application/octet-stream",
-        metadata: {
-          cacheControl: "no-cache",
-        },
-      });
-      console.log("WAL file uploaded to Cloud Storage successfully.");
+    // WALファイルとSHMファイルはマージ済みのため、アップロード不要
+    // 既存のWALファイルとSHMファイルをCloud Storageから削除（存在する場合）
+    const walFile = bucket.file(`${GCS_DB_PATH}-wal`);
+    const shmFile = bucket.file(`${GCS_DB_PATH}-shm`);
+    
+    try {
+      const [walExists] = await walFile.exists();
+      if (walExists) {
+        await walFile.delete();
+        console.log("[DB] Removed old WAL file from Cloud Storage (merged into main database).");
+      }
+    } catch (error) {
+      console.warn("[DB] Failed to delete old WAL file from Cloud Storage:", error);
     }
 
-    if (existsSync(shmPath)) {
-      const shmContents = readFileSync(shmPath);
-      const shmFile = bucket.file(`${GCS_DB_PATH}-shm`);
-      await shmFile.save(shmContents, {
-        contentType: "application/octet-stream",
-        metadata: {
-          cacheControl: "no-cache",
-        },
-      });
-      console.log("SHM file uploaded to Cloud Storage successfully.");
+    try {
+      const [shmExists] = await shmFile.exists();
+      if (shmExists) {
+        await shmFile.delete();
+        console.log("[DB] Removed old SHM file from Cloud Storage (no longer needed).");
+      }
+    } catch (error) {
+      console.warn("[DB] Failed to delete old SHM file from Cloud Storage:", error);
     }
   } catch (error) {
     console.error("Failed to upload database to Cloud Storage:", error);
@@ -217,7 +330,7 @@ export async function getDatabase(): Promise<DatabaseType> {
  */
 async function initializeDatabase(): Promise<DatabaseType> {
   // Cloud Storageからダウンロード
-  await downloadDatabase();
+  const downloaded = await downloadDatabase();
 
   // データベースインスタンスを作成
   dbInstance = new Database(TEMP_DB_PATH);
@@ -230,6 +343,14 @@ async function initializeDatabase(): Promise<DatabaseType> {
 
   // テーブル初期化
   initializeTables(dbInstance);
+
+  // ダウンロードしたDBが空の場合、警告を出力
+  if (downloaded && isDatabaseEmpty(dbInstance)) {
+    console.warn(
+      "[DB] WARNING: Downloaded database appears to be empty. " +
+      "If this is unexpected, check Cloud Storage bucket for existing database file."
+    );
+  }
 
   // シグナルハンドラーの登録（1回のみ）
   if (!signalHandlersRegistered) {
