@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
-import { usersDb } from '../db/users.db.js';
+import { getUsersDatabase } from '../db/users.db.js';
 import { User, toUserResponse } from '../models/user.model.js';
 import {
   generateToken,
@@ -38,6 +38,9 @@ authRouter.post('/signup', async (req: Request, res: Response) => {
       res.status(400).json({ message: '有効なメールアドレスを入力してください' });
       return;
     }
+
+    // データベースインスタンスを取得
+    const usersDb = await getUsersDatabase();
 
     // 重複チェック
     if (usersDb.existsByEmail(email)) {
@@ -87,6 +90,9 @@ authRouter.post('/login', async (req: Request, res: Response) => {
       return;
     }
 
+    // データベースインスタンスを取得
+    const usersDb = await getUsersDatabase();
+
     // ユーザー検索
     const user = usersDb.findByEmail(email);
     if (!user) {
@@ -128,12 +134,15 @@ authRouter.post('/logout', (_req: Request, res: Response) => {
  * GET /api/auth/me
  * ログイン中のユーザー情報を取得
  */
-authRouter.get('/me', authMiddleware, (req: AuthenticatedRequest, res: Response) => {
+authRouter.get('/me', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!req.user) {
       res.status(401).json({ message: '認証が必要です' });
       return;
     }
+
+    // データベースインスタンスを取得
+    const usersDb = await getUsersDatabase();
 
     const user = usersDb.findById(req.user.id!);
     if (!user) {

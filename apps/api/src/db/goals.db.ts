@@ -1,6 +1,7 @@
 import { Goal } from '../models/daily-report.model.js';
 import { getDatabase } from './database.js';
 import type { Database as DatabaseType } from 'better-sqlite3';
+import { markAsChanged } from './storage-adapter.js';
 
 /**
  * SQLiteベースの目標データベース
@@ -8,8 +9,8 @@ import type { Database as DatabaseType } from 'better-sqlite3';
 export class GoalsDatabase {
   private db: DatabaseType;
 
-  constructor(db?: DatabaseType) {
-    this.db = db || getDatabase();
+  constructor(db: DatabaseType) {
+    this.db = db;
   }
 
   save(goal: Goal): void {
@@ -31,6 +32,7 @@ export class GoalsDatabase {
       goal.createdAt,
       goal.updatedAt
     );
+    markAsChanged();
   }
 
   findById(id: string): Goal | undefined {
@@ -75,14 +77,17 @@ export class GoalsDatabase {
       goal.updatedAt,
       goal.id
     );
+    markAsChanged();
   }
 
   delete(id: string): void {
     this.db.prepare('DELETE FROM goals WHERE id = ?').run(id);
+    markAsChanged();
   }
 
   clear(): void {
     this.db.prepare('DELETE FROM goals').run();
+    markAsChanged();
   }
 
   private mapRowToGoal(row: any): Goal {
@@ -102,5 +107,24 @@ export class GoalsDatabase {
   }
 }
 
-// シングルトンインスタンス
-export const goalsDb = new GoalsDatabase();
+// ファクトリーパターンで非同期初期化
+let goalsDbPromise: Promise<GoalsDatabase> | null = null;
+
+export async function getGoalsDatabase(): Promise<GoalsDatabase> {
+  if (!goalsDbPromise) {
+    goalsDbPromise = (async () => {
+      const db = await getDatabase();
+      return new GoalsDatabase(db);
+    })();
+  }
+  return await goalsDbPromise;
+}
+
+// 後方互換性のため、既存のシングルトンも維持（非推奨）
+export const goalsDb = new Proxy({} as GoalsDatabase, {
+  get: () => {
+    throw new Error(
+      "goalsDb is no longer available synchronously. Use getGoalsDatabase() instead.",
+    );
+  },
+});

@@ -27,7 +27,7 @@ vi.mock('../db/followups.db.js', async () => {
   const actual = await vi.importActual('../db/followups.db.js');
   return {
     ...actual,
-    get followupsDb() {
+    getFollowupsDatabase: async () => {
       return mockDbInstances.followupsDb || (actual as any).followupsDb;
     },
   };
@@ -37,13 +37,13 @@ vi.mock('../db/daily-reports.db.js', async () => {
   const actual = await vi.importActual('../db/daily-reports.db.js');
   return {
     ...actual,
-    get dailyReportsDb() {
+    getDailyReportsDatabase: async () => {
       return mockDbInstances.dailyReportsDb || (actual as any).dailyReportsDb;
     },
-    get goodPointsDb() {
+    getGoodPointsDatabase: async () => {
       return mockDbInstances.goodPointsDb || (actual as any).goodPointsDb;
     },
-    get improvementsDb() {
+    getImprovementsDatabase: async () => {
       return mockDbInstances.improvementsDb || (actual as any).improvementsDb;
     },
   };
@@ -53,7 +53,7 @@ vi.mock('../db/daily-report-goals.db.js', async () => {
   const actual = await vi.importActual('../db/daily-report-goals.db.js');
   return {
     ...actual,
-    get dailyReportGoalsDb() {
+    getDailyReportGoalsDatabase: async () => {
       return mockDbInstances.dailyReportGoalsDb || (actual as any).dailyReportGoalsDb;
     },
   };
@@ -63,7 +63,7 @@ vi.mock('../db/weekly-focuses.db.js', async () => {
   const actual = await vi.importActual('../db/weekly-focuses.db.js');
   return {
     ...actual,
-    get weeklyFocusesDb() {
+    getWeeklyFocusesDatabase: async () => {
       return mockDbInstances.weeklyFocusesDb || (actual as any).weeklyFocusesDb;
     },
   };
@@ -73,7 +73,7 @@ vi.mock('../db/goals.db.js', async () => {
   const actual = await vi.importActual('../db/goals.db.js');
   return {
     ...actual,
-    get goalsDb() {
+    getGoalsDatabase: async () => {
       return mockDbInstances.goalsDb || (actual as any).goalsDb;
     },
   };
@@ -83,7 +83,7 @@ vi.mock('../db/users.db.js', async () => {
   const actual = await vi.importActual('../db/users.db.js');
   return {
     ...actual,
-    get usersDb() {
+    getUsersDatabase: async () => {
       return mockDbInstances.usersDb || (actual as any).usersDb;
     },
   };

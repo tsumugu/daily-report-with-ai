@@ -1,13 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { authMiddleware } from '../middleware/auth.middleware.js';
-import { weeklyFocusesDb } from '../db/weekly-focuses.db.js';
-import { goodPointsDb, improvementsDb, dailyReportsDb } from '../db/daily-reports.db.js';
-import { goalsDb } from '../db/goals.db.js';
+import { getWeeklyFocusesDatabase } from '../db/weekly-focuses.db.js';
+import { getGoodPointsDatabase, getImprovementsDatabase, getDailyReportsDatabase } from '../db/daily-reports.db.js';
+import { getGoalsDatabase } from '../db/goals.db.js';
 import {
   WeeklyFocus,
   CreateWeeklyFocusRequest,
-  ConnectWeeklyFocusToGoalRequest,
 } from '../models/daily-report.model.js';
 
 export const weeklyFocusesRouter = Router();
@@ -33,12 +32,17 @@ function getWeekStartDate(date: Date = new Date()): string {
  * GET /api/weekly-focuses
  * 今週のフォーカスを取得
  */
-weeklyFocusesRouter.get('/weekly-focuses', (req: Request, res: Response) => {
+weeklyFocusesRouter.get('/weekly-focuses', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const weeklyFocusesDb = await getWeeklyFocusesDatabase();
+  const goodPointsDb = await getGoodPointsDatabase();
+  const improvementsDb = await getImprovementsDatabase();
+  const dailyReportsDb = await getDailyReportsDatabase();
 
   const weekStartDate = getWeekStartDate();
   const weeklyFocuses = weeklyFocusesDb.findByUserIdAndWeek(userId, weekStartDate);
@@ -88,12 +92,17 @@ weeklyFocusesRouter.get('/weekly-focuses', (req: Request, res: Response) => {
  * POST /api/weekly-focuses
  * 週次フォーカスを設定
  */
-weeklyFocusesRouter.post('/weekly-focuses', (req: Request, res: Response) => {
+weeklyFocusesRouter.post('/weekly-focuses', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const weeklyFocusesDb = await getWeeklyFocusesDatabase();
+  const goodPointsDb = await getGoodPointsDatabase();
+  const improvementsDb = await getImprovementsDatabase();
+  const dailyReportsDb = await getDailyReportsDatabase();
 
   const body: CreateWeeklyFocusRequest = req.body;
 
@@ -174,12 +183,14 @@ weeklyFocusesRouter.post('/weekly-focuses', (req: Request, res: Response) => {
  * DELETE /api/weekly-focuses/:id
  * 週次フォーカスを削除
  */
-weeklyFocusesRouter.delete('/weekly-focuses/:id', (req: Request, res: Response) => {
+weeklyFocusesRouter.delete('/weekly-focuses/:id', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const weeklyFocusesDb = await getWeeklyFocusesDatabase();
 
   const weeklyFocus = weeklyFocusesDb.findById(req.params.id);
 
@@ -201,12 +212,15 @@ weeklyFocusesRouter.delete('/weekly-focuses/:id', (req: Request, res: Response) 
  * PUT /api/weekly-focuses/:id/goal
  * 週次フォーカスと短期目標を接続する。
  */
-weeklyFocusesRouter.put('/weekly-focuses/:id/goal', (req: Request, res: Response) => {
+weeklyFocusesRouter.put('/weekly-focuses/:id/goal', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const weeklyFocusesDb = await getWeeklyFocusesDatabase();
+  const goalsDb = await getGoalsDatabase();
 
   const weeklyFocusId = req.params.id;
   const weeklyFocus = weeklyFocusesDb.findById(weeklyFocusId);
@@ -221,7 +235,7 @@ weeklyFocusesRouter.put('/weekly-focuses/:id/goal', (req: Request, res: Response
     return;
   }
 
-  const body: ConnectWeeklyFocusToGoalRequest = req.body;
+  const body: { goalId?: string } = req.body;
 
   if (!body.goalId) {
     res.status(400).json({ message: 'goalId は必須です' });
@@ -262,12 +276,14 @@ weeklyFocusesRouter.put('/weekly-focuses/:id/goal', (req: Request, res: Response
  * DELETE /api/weekly-focuses/:id/goal
  * 週次フォーカスと短期目標の接続を解除する。
  */
-weeklyFocusesRouter.delete('/weekly-focuses/:id/goal', (req: Request, res: Response) => {
+weeklyFocusesRouter.delete('/weekly-focuses/:id/goal', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const weeklyFocusesDb = await getWeeklyFocusesDatabase();
 
   const weeklyFocusId = req.params.id;
   const weeklyFocus = weeklyFocusesDb.findById(weeklyFocusId);

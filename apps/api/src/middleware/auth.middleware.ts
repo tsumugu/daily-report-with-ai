@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-key';
+if (!process.env.JWT_SECRET) {
+  console.warn("JWT_SECRET environment variable is not set, using default key");
+}
 
 /**
  * JWTペイロード型

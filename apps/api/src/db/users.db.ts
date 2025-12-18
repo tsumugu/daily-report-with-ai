@@ -1,6 +1,7 @@
 import { User } from '../models/user.model.js';
 import { getDatabase } from './database.js';
 import type { Database as DatabaseType } from 'better-sqlite3';
+import { markAsChanged } from './storage-adapter.js';
 
 /**
  * SQLiteベースのユーザーデータベース
@@ -8,8 +9,8 @@ import type { Database as DatabaseType } from 'better-sqlite3';
 export class UsersDatabase {
   private db: DatabaseType;
 
-  constructor(db?: DatabaseType) {
-    this.db = db || getDatabase();
+  constructor(db: DatabaseType) {
+    this.db = db;
   }
 
   /**
@@ -21,6 +22,7 @@ export class UsersDatabase {
       VALUES (?, ?, ?, ?, ?)
     `);
     stmt.run(user.id, user.email, user.passwordHash, user.createdAt, user.updatedAt);
+    markAsChanged();
     return user;
   }
 
@@ -65,6 +67,7 @@ export class UsersDatabase {
    */
   clear(): void {
     this.db.prepare('DELETE FROM users').run();
+    markAsChanged();
   }
 
   /**
@@ -81,5 +84,24 @@ export class UsersDatabase {
   }
 }
 
-// シングルトンインスタンス
-export const usersDb = new UsersDatabase();
+// ファクトリーパターンで非同期初期化
+let usersDbPromise: Promise<UsersDatabase> | null = null;
+
+export async function getUsersDatabase(): Promise<UsersDatabase> {
+  if (!usersDbPromise) {
+    usersDbPromise = (async () => {
+      const db = await getDatabase();
+      return new UsersDatabase(db);
+    })();
+  }
+  return await usersDbPromise;
+}
+
+// 後方互換性のため、既存のシングルトンも維持（非推奨）
+export const usersDb = new Proxy({} as UsersDatabase, {
+  get: () => {
+    throw new Error(
+      "usersDb is no longer available synchronously. Use getUsersDatabase() instead.",
+    );
+  },
+});

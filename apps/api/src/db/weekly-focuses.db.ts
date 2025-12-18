@@ -1,6 +1,7 @@
 import { WeeklyFocus } from '../models/daily-report.model.js';
 import { getDatabase } from './database.js';
 import type { Database as DatabaseType } from 'better-sqlite3';
+import { markAsChanged } from './storage-adapter.js';
 
 /**
  * SQLiteベースの週次フォーカスデータベース
@@ -8,8 +9,8 @@ import type { Database as DatabaseType } from 'better-sqlite3';
 export class WeeklyFocusesDatabase {
   private db: DatabaseType;
 
-  constructor(db?: DatabaseType) {
-    this.db = db || getDatabase();
+  constructor(db: DatabaseType) {
+    this.db = db;
   }
 
   save(weeklyFocus: WeeklyFocus): void {
@@ -27,6 +28,7 @@ export class WeeklyFocusesDatabase {
       weeklyFocus.weekStartDate,
       weeklyFocus.createdAt
     );
+    markAsChanged();
   }
 
   findById(id: string): WeeklyFocus | undefined {
@@ -57,10 +59,12 @@ export class WeeklyFocusesDatabase {
 
   delete(id: string): void {
     this.db.prepare('DELETE FROM weekly_focuses WHERE id = ?').run(id);
+    markAsChanged();
   }
 
   clear(): void {
     this.db.prepare('DELETE FROM weekly_focuses').run();
+    markAsChanged();
   }
 
   private mapRowToWeeklyFocus(row: any): WeeklyFocus {
@@ -76,5 +80,24 @@ export class WeeklyFocusesDatabase {
   }
 }
 
-// シングルトンインスタンス
-export const weeklyFocusesDb = new WeeklyFocusesDatabase();
+// ファクトリーパターンで非同期初期化
+let weeklyFocusesDbPromise: Promise<WeeklyFocusesDatabase> | null = null;
+
+export async function getWeeklyFocusesDatabase(): Promise<WeeklyFocusesDatabase> {
+  if (!weeklyFocusesDbPromise) {
+    weeklyFocusesDbPromise = (async () => {
+      const db = await getDatabase();
+      return new WeeklyFocusesDatabase(db);
+    })();
+  }
+  return await weeklyFocusesDbPromise;
+}
+
+// 後方互換性のため、既存のシングルトンも維持（非推奨）
+export const weeklyFocusesDb = new Proxy({} as WeeklyFocusesDatabase, {
+  get: () => {
+    throw new Error(
+      "weeklyFocusesDb is no longer available synchronously. Use getWeeklyFocusesDatabase() instead.",
+    );
+  },
+});

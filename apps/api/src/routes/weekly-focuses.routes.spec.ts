@@ -1,18 +1,108 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import { weeklyFocusesRouter } from './weekly-focuses.routes.js';
-import { weeklyFocusesDb } from '../db/weekly-focuses.db.js';
-import { goodPointsDb, improvementsDb, dailyReportsDb } from '../db/daily-reports.db.js';
-import { dailyReportGoalsDb } from '../db/daily-report-goals.db.js';
-import { goalsDb } from '../db/goals.db.js';
-import { followupsDb } from '../db/followups.db.js';
-import { usersDb } from '../db/users.db.js';
+import Database, { type Database as DatabaseType } from 'better-sqlite3';
+import { WeeklyFocusesDatabase } from '../db/weekly-focuses.db.js';
+import { GoodPointsDatabase, ImprovementsDatabase, DailyReportsDatabase } from '../db/daily-reports.db.js';
+import { DailyReportGoalsDatabase } from '../db/daily-report-goals.db.js';
+import { GoalsDatabase } from '../db/goals.db.js';
+import { FollowupsDatabase } from '../db/followups.db.js';
+import { UsersDatabase } from '../db/users.db.js';
+import { initializeTables } from '../db/database.js';
 import { generateToken } from '../middleware/auth.middleware.js';
+
+// モジュールをモック（実際のインスタンスを返すようにする）
+const mockDbInstances = {
+  weeklyFocusesDb: null as WeeklyFocusesDatabase | null,
+  goodPointsDb: null as GoodPointsDatabase | null,
+  improvementsDb: null as ImprovementsDatabase | null,
+  dailyReportsDb: null as DailyReportsDatabase | null,
+  dailyReportGoalsDb: null as DailyReportGoalsDatabase | null,
+  goalsDb: null as GoalsDatabase | null,
+  followupsDb: null as FollowupsDatabase | null,
+  usersDb: null as UsersDatabase | null,
+};
+
+vi.mock('../db/weekly-focuses.db.js', async () => {
+  const actual = await vi.importActual('../db/weekly-focuses.db.js');
+  return {
+    ...actual,
+    getWeeklyFocusesDatabase: async () => {
+      return mockDbInstances.weeklyFocusesDb || (actual as any).weeklyFocusesDb;
+    },
+  };
+});
+
+vi.mock('../db/daily-reports.db.js', async () => {
+  const actual = await vi.importActual('../db/daily-reports.db.js');
+  return {
+    ...actual,
+    getGoodPointsDatabase: async () => {
+      return mockDbInstances.goodPointsDb || (actual as any).goodPointsDb;
+    },
+    getImprovementsDatabase: async () => {
+      return mockDbInstances.improvementsDb || (actual as any).improvementsDb;
+    },
+    getDailyReportsDatabase: async () => {
+      return mockDbInstances.dailyReportsDb || (actual as any).dailyReportsDb;
+    },
+  };
+});
+
+vi.mock('../db/daily-report-goals.db.js', async () => {
+  const actual = await vi.importActual('../db/daily-report-goals.db.js');
+  return {
+    ...actual,
+    getDailyReportGoalsDatabase: async () => {
+      return mockDbInstances.dailyReportGoalsDb || (actual as any).dailyReportGoalsDb;
+    },
+  };
+});
+
+vi.mock('../db/goals.db.js', async () => {
+  const actual = await vi.importActual('../db/goals.db.js');
+  return {
+    ...actual,
+    getGoalsDatabase: async () => {
+      return mockDbInstances.goalsDb || (actual as any).goalsDb;
+    },
+  };
+});
+
+vi.mock('../db/followups.db.js', async () => {
+  const actual = await vi.importActual('../db/followups.db.js');
+  return {
+    ...actual,
+    getFollowupsDatabase: async () => {
+      return mockDbInstances.followupsDb || (actual as any).followupsDb;
+    },
+  };
+});
+
+vi.mock('../db/users.db.js', async () => {
+  const actual = await vi.importActual('../db/users.db.js');
+  return {
+    ...actual,
+    getUsersDatabase: async () => {
+      return mockDbInstances.usersDb || (actual as any).usersDb;
+    },
+  };
+});
+
+import { weeklyFocusesRouter } from './weekly-focuses.routes.js';
 
 describe('weeklyFocusesRouter', () => {
   let app: express.Application;
   let authToken: string;
+  let db: DatabaseType;
+  let weeklyFocusesDb: WeeklyFocusesDatabase;
+  let goodPointsDb: GoodPointsDatabase;
+  let improvementsDb: ImprovementsDatabase;
+  let dailyReportsDb: DailyReportsDatabase;
+  let dailyReportGoalsDb: DailyReportGoalsDatabase;
+  let goalsDb: GoalsDatabase;
+  let followupsDb: FollowupsDatabase;
+  let usersDb: UsersDatabase;
   const testUserId = 'test-user-id';
   const testUserEmail = 'test@example.com';
 
@@ -24,6 +114,8 @@ describe('weeklyFocusesRouter', () => {
       date: '2025-12-01',
       events: 'テストイベント',
       learnings: null,
+      goodPointIds: [],
+      improvementIds: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -32,6 +124,33 @@ describe('weeklyFocusesRouter', () => {
   };
 
   beforeEach(() => {
+    // インメモリデータベースを作成
+    db = new Database(':memory:');
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initializeTables(db);
+    
+    // 各データベースクラスのインスタンスを作成
+    usersDb = new UsersDatabase(db);
+    dailyReportsDb = new DailyReportsDatabase(db);
+    goodPointsDb = new GoodPointsDatabase(db);
+    improvementsDb = new ImprovementsDatabase(db);
+    dailyReportGoalsDb = new DailyReportGoalsDatabase(db);
+    goalsDb = new GoalsDatabase(db);
+    followupsDb = new FollowupsDatabase(db);
+    weeklyFocusesDb = new WeeklyFocusesDatabase(db);
+
+    // モックインスタンスを設定
+    mockDbInstances.weeklyFocusesDb = weeklyFocusesDb;
+    mockDbInstances.goodPointsDb = goodPointsDb;
+    mockDbInstances.improvementsDb = improvementsDb;
+    mockDbInstances.dailyReportsDb = dailyReportsDb;
+    mockDbInstances.dailyReportGoalsDb = dailyReportGoalsDb;
+    mockDbInstances.goalsDb = goalsDb;
+    mockDbInstances.followupsDb = followupsDb;
+    mockDbInstances.usersDb = usersDb;
+
+    // テスト用アプリケーション設定
     app = express();
     app.use(express.json());
     app.use('/api', weeklyFocusesRouter);
@@ -45,23 +164,20 @@ describe('weeklyFocusesRouter', () => {
     });
 
     authToken = generateToken(testUserId);
-
-    weeklyFocusesDb.clear();
-    goodPointsDb.clear();
-    improvementsDb.clear();
-    dailyReportsDb.clear();
   });
 
   afterEach(() => {
-    // 外部キー制約を考慮して削除順序を調整
-    weeklyFocusesDb.clear();
-    followupsDb.clear();
-    goodPointsDb.clear();
-    improvementsDb.clear();
-    dailyReportGoalsDb.clear();
-    dailyReportsDb.clear();
-    goalsDb.clear();
-    usersDb.clear();
+    // モックインスタンスをクリア
+    mockDbInstances.weeklyFocusesDb = null;
+    mockDbInstances.goodPointsDb = null;
+    mockDbInstances.improvementsDb = null;
+    mockDbInstances.dailyReportsDb = null;
+    mockDbInstances.dailyReportGoalsDb = null;
+    mockDbInstances.goalsDb = null;
+    mockDbInstances.followupsDb = null;
+    mockDbInstances.usersDb = null;
+
+    db.close();
   });
 
   describe('GET /api/weekly-focuses', () => {

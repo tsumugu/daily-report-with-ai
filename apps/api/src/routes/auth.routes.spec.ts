@@ -15,7 +15,7 @@ vi.mock('../db/users.db.js', async () => {
   const actual = await vi.importActual('../db/users.db.js');
   return {
     ...actual,
-    get usersDb() {
+    getUsersDatabase: async () => {
       return mockDbInstances.usersDb || (actual as any).usersDb;
     },
   };

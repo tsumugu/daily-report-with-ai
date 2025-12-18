@@ -1,6 +1,7 @@
 import { DailyReportGoal } from '../models/daily-report.model.js';
 import { getDatabase } from './database.js';
 import type { Database as DatabaseType } from 'better-sqlite3';
+import { markAsChanged } from './storage-adapter.js';
 
 /**
  * SQLiteベースの日報と目標の関連付けデータベース
@@ -8,8 +9,8 @@ import type { Database as DatabaseType } from 'better-sqlite3';
 export class DailyReportGoalsDatabase {
   private db: DatabaseType;
 
-  constructor(db?: DatabaseType) {
-    this.db = db || getDatabase();
+  constructor(db: DatabaseType) {
+    this.db = db;
   }
 
   save(dailyReportGoal: DailyReportGoal): void {
@@ -24,6 +25,7 @@ export class DailyReportGoalsDatabase {
       dailyReportGoal.goalId,
       dailyReportGoal.createdAt
     );
+    markAsChanged();
   }
 
   findById(id: string): DailyReportGoal | undefined {
@@ -80,14 +82,17 @@ export class DailyReportGoalsDatabase {
    */
   deleteByDailyReportId(dailyReportId: string): void {
     this.db.prepare('DELETE FROM daily_report_goals WHERE daily_report_id = ?').run(dailyReportId);
+    markAsChanged();
   }
 
   delete(id: string): void {
     this.db.prepare('DELETE FROM daily_report_goals WHERE id = ?').run(id);
+    markAsChanged();
   }
 
   clear(): void {
     this.db.prepare('DELETE FROM daily_report_goals').run();
+    markAsChanged();
   }
 
   private mapRowToDailyReportGoal(row: any): DailyReportGoal {
@@ -100,5 +105,24 @@ export class DailyReportGoalsDatabase {
   }
 }
 
-// シングルトンインスタンス
-export const dailyReportGoalsDb = new DailyReportGoalsDatabase();
+// ファクトリーパターンで非同期初期化
+let dailyReportGoalsDbPromise: Promise<DailyReportGoalsDatabase> | null = null;
+
+export async function getDailyReportGoalsDatabase(): Promise<DailyReportGoalsDatabase> {
+  if (!dailyReportGoalsDbPromise) {
+    dailyReportGoalsDbPromise = (async () => {
+      const db = await getDatabase();
+      return new DailyReportGoalsDatabase(db);
+    })();
+  }
+  return await dailyReportGoalsDbPromise;
+}
+
+// 後方互換性のため、既存のシングルトンも維持（非推奨）
+export const dailyReportGoalsDb = new Proxy({} as DailyReportGoalsDatabase, {
+  get: () => {
+    throw new Error(
+      "dailyReportGoalsDb is no longer available synchronously. Use getDailyReportGoalsDatabase() instead.",
+    );
+  },
+});

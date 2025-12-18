@@ -1,6 +1,7 @@
 import { DailyReport, GoodPoint, Improvement } from '../models/daily-report.model.js';
 import { getDatabase } from './database.js';
 import type { Database as DatabaseType } from 'better-sqlite3';
+import { markAsChanged } from './storage-adapter.js';
 
 /**
  * SQLiteベースの日報データベース
@@ -8,8 +9,8 @@ import type { Database as DatabaseType } from 'better-sqlite3';
 export class DailyReportsDatabase {
   private db: DatabaseType;
 
-  constructor(db?: DatabaseType) {
-    this.db = db || getDatabase();
+  constructor(db: DatabaseType) {
+    this.db = db;
   }
 
   save(report: DailyReport): void {
@@ -87,6 +88,7 @@ export class DailyReportsDatabase {
         report.updatedAt,
         report.id
       );
+      markAsChanged();
     } catch (error: any) {
       if (error.code === 'SQLITE_CONSTRAINT_FOREIGNKEY' || error.message?.includes('FOREIGN KEY constraint failed')) {
         throw new Error(`ユーザーID ${report.userId} が存在しません`);
@@ -97,6 +99,7 @@ export class DailyReportsDatabase {
 
   clear(): void {
     this.db.prepare('DELETE FROM daily_reports').run();
+    markAsChanged();
   }
 
   private getGoodPointIdsByDailyReportId(dailyReportId: string): string[] {
@@ -140,8 +143,8 @@ export class DailyReportsDatabase {
 export class GoodPointsDatabase {
   private db: DatabaseType;
 
-  constructor(db?: DatabaseType) {
-    this.db = db || getDatabase();
+  constructor(db: DatabaseType) {
+    this.db = db;
   }
 
   save(goodPoint: GoodPoint, dailyReportId?: string): void {
@@ -162,6 +165,7 @@ export class GoodPointsDatabase {
       goodPoint.createdAt,
       goodPoint.updatedAt
     );
+    markAsChanged();
   }
 
   findById(id: string): GoodPoint | undefined {
@@ -212,14 +216,17 @@ export class GoodPointsDatabase {
       goodPoint.updatedAt,
       goodPoint.id
     );
+    markAsChanged();
   }
 
   delete(id: string): void {
     this.db.prepare('DELETE FROM good_points WHERE id = ?').run(id);
+    markAsChanged();
   }
 
   clear(): void {
     this.db.prepare('DELETE FROM good_points').run();
+    markAsChanged();
   }
 
   private mapRowToGoodPoint(row: any): GoodPoint {
@@ -243,8 +250,8 @@ export class GoodPointsDatabase {
 export class ImprovementsDatabase {
   private db: DatabaseType;
 
-  constructor(db?: DatabaseType) {
-    this.db = db || getDatabase();
+  constructor(db: DatabaseType) {
+    this.db = db;
   }
 
   save(improvement: Improvement, dailyReportId?: string): void {
@@ -264,6 +271,7 @@ export class ImprovementsDatabase {
       improvement.createdAt,
       improvement.updatedAt
     );
+    markAsChanged();
   }
 
   findById(id: string): Improvement | undefined {
@@ -313,14 +321,17 @@ export class ImprovementsDatabase {
       improvement.updatedAt,
       improvement.id
     );
+    markAsChanged();
   }
 
   delete(id: string): void {
     this.db.prepare('DELETE FROM improvements WHERE id = ?').run(id);
+    markAsChanged();
   }
 
   clear(): void {
     this.db.prepare('DELETE FROM improvements').run();
+    markAsChanged();
   }
 
   private mapRowToImprovement(row: any): Improvement {
@@ -337,7 +348,62 @@ export class ImprovementsDatabase {
   }
 }
 
-// シングルトンインスタンス
-export const dailyReportsDb = new DailyReportsDatabase();
-export const goodPointsDb = new GoodPointsDatabase();
-export const improvementsDb = new ImprovementsDatabase();
+// ファクトリーパターンで非同期初期化
+let dailyReportsDbPromise: Promise<DailyReportsDatabase> | null = null;
+let goodPointsDbPromise: Promise<GoodPointsDatabase> | null = null;
+let improvementsDbPromise: Promise<ImprovementsDatabase> | null = null;
+
+export async function getDailyReportsDatabase(): Promise<DailyReportsDatabase> {
+  if (!dailyReportsDbPromise) {
+    dailyReportsDbPromise = (async () => {
+      const db = await getDatabase();
+      return new DailyReportsDatabase(db);
+    })();
+  }
+  return await dailyReportsDbPromise;
+}
+
+export async function getGoodPointsDatabase(): Promise<GoodPointsDatabase> {
+  if (!goodPointsDbPromise) {
+    goodPointsDbPromise = (async () => {
+      const db = await getDatabase();
+      return new GoodPointsDatabase(db);
+    })();
+  }
+  return await goodPointsDbPromise;
+}
+
+export async function getImprovementsDatabase(): Promise<ImprovementsDatabase> {
+  if (!improvementsDbPromise) {
+    improvementsDbPromise = (async () => {
+      const db = await getDatabase();
+      return new ImprovementsDatabase(db);
+    })();
+  }
+  return await improvementsDbPromise;
+}
+
+// 後方互換性のため、既存のシングルトンも維持（非推奨）
+export const dailyReportsDb = new Proxy({} as DailyReportsDatabase, {
+  get: () => {
+    throw new Error(
+      "dailyReportsDb is no longer available synchronously. Use getDailyReportsDatabase() instead.",
+    );
+  },
+});
+
+export const goodPointsDb = new Proxy({} as GoodPointsDatabase, {
+  get: () => {
+    throw new Error(
+      "goodPointsDb is no longer available synchronously. Use getGoodPointsDatabase() instead.",
+    );
+  },
+});
+
+export const improvementsDb = new Proxy({} as ImprovementsDatabase, {
+  get: () => {
+    throw new Error(
+      "improvementsDb is no longer available synchronously. Use getImprovementsDatabase() instead.",
+    );
+  },
+});

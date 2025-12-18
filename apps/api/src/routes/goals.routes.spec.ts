@@ -4,6 +4,9 @@ import request from 'supertest';
 import Database, { type Database as DatabaseType } from 'better-sqlite3';
 import { GoalsDatabase } from '../db/goals.db.js';
 import { UsersDatabase } from '../db/users.db.js';
+import { WeeklyFocusesDatabase } from '../db/weekly-focuses.db.js';
+import { DailyReportGoalsDatabase } from '../db/daily-report-goals.db.js';
+import { DailyReportsDatabase } from '../db/daily-reports.db.js';
 import { initializeTables } from '../db/database.js';
 import { generateToken } from '../middleware/auth.middleware.js';
 import { Goal } from '../models/daily-report.model.js';
@@ -12,13 +15,16 @@ import { Goal } from '../models/daily-report.model.js';
 const mockDbInstances = {
   goalsDb: null as GoalsDatabase | null,
   usersDb: null as UsersDatabase | null,
+  weeklyFocusesDb: null as any | null,
+  dailyReportGoalsDb: null as any | null,
+  dailyReportsDb: null as any | null,
 };
 
 vi.mock('../db/goals.db.js', async () => {
   const actual = await vi.importActual('../db/goals.db.js');
   return {
     ...actual,
-    get goalsDb() {
+    getGoalsDatabase: async () => {
       return mockDbInstances.goalsDb || (actual as any).goalsDb;
     },
   };
@@ -28,8 +34,38 @@ vi.mock('../db/users.db.js', async () => {
   const actual = await vi.importActual('../db/users.db.js');
   return {
     ...actual,
-    get usersDb() {
+    getUsersDatabase: async () => {
       return mockDbInstances.usersDb || (actual as any).usersDb;
+    },
+  };
+});
+
+vi.mock('../db/weekly-focuses.db.js', async () => {
+  const actual = await vi.importActual('../db/weekly-focuses.db.js');
+  return {
+    ...actual,
+    getWeeklyFocusesDatabase: async () => {
+      return mockDbInstances.weeklyFocusesDb || (actual as any).weeklyFocusesDb;
+    },
+  };
+});
+
+vi.mock('../db/daily-report-goals.db.js', async () => {
+  const actual = await vi.importActual('../db/daily-report-goals.db.js');
+  return {
+    ...actual,
+    getDailyReportGoalsDatabase: async () => {
+      return mockDbInstances.dailyReportGoalsDb || (actual as any).dailyReportGoalsDb;
+    },
+  };
+});
+
+vi.mock('../db/daily-reports.db.js', async () => {
+  const actual = await vi.importActual('../db/daily-reports.db.js');
+  return {
+    ...actual,
+    getDailyReportsDatabase: async () => {
+      return mockDbInstances.dailyReportsDb || (actual as any).dailyReportsDb;
     },
   };
 });
@@ -55,10 +91,16 @@ describe('goalsRouter', () => {
     // 各データベースクラスのインスタンスを作成
     usersDb = new UsersDatabase(db);
     goalsDb = new GoalsDatabase(db);
+    const weeklyFocusesDb = new WeeklyFocusesDatabase(db);
+    const dailyReportGoalsDb = new DailyReportGoalsDatabase(db);
+    const dailyReportsDb = new DailyReportsDatabase(db);
 
     // モックインスタンスを設定
     mockDbInstances.goalsDb = goalsDb;
     mockDbInstances.usersDb = usersDb;
+    mockDbInstances.weeklyFocusesDb = weeklyFocusesDb;
+    mockDbInstances.dailyReportGoalsDb = dailyReportGoalsDb;
+    mockDbInstances.dailyReportsDb = dailyReportsDb;
 
     // テスト用アプリケーション設定
     app = express();
@@ -82,6 +124,9 @@ describe('goalsRouter', () => {
     // モックインスタンスをクリア
     mockDbInstances.goalsDb = null;
     mockDbInstances.usersDb = null;
+    mockDbInstances.weeklyFocusesDb = null;
+    mockDbInstances.dailyReportGoalsDb = null;
+    mockDbInstances.dailyReportsDb = null;
     db.close();
   });
 

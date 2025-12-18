@@ -1,6 +1,7 @@
 import { Followup } from '../models/daily-report.model.js';
 import { getDatabase } from './database.js';
 import type { Database as DatabaseType } from 'better-sqlite3';
+import { markAsChanged } from './storage-adapter.js';
 
 /**
  * SQLiteベースのフォローアップデータベース
@@ -8,8 +9,8 @@ import type { Database as DatabaseType } from 'better-sqlite3';
 export class FollowupsDatabase {
   private db: DatabaseType;
 
-  constructor(db?: DatabaseType) {
-    this.db = db || getDatabase();
+  constructor(db: DatabaseType) {
+    this.db = db;
   }
 
   save(followup: Followup): void {
@@ -29,6 +30,7 @@ export class FollowupsDatabase {
       followup.createdAt,
       followup.updatedAt
     );
+    markAsChanged();
   }
 
   findById(id: string): Followup | undefined {
@@ -67,14 +69,17 @@ export class FollowupsDatabase {
       followup.updatedAt,
       followup.id
     );
+    markAsChanged();
   }
 
   delete(id: string): void {
     this.db.prepare('DELETE FROM followups WHERE id = ?').run(id);
+    markAsChanged();
   }
 
   clear(): void {
     this.db.prepare('DELETE FROM followups').run();
+    markAsChanged();
   }
 
   private mapRowToFollowup(row: any): Followup {
@@ -92,5 +97,24 @@ export class FollowupsDatabase {
   }
 }
 
-// シングルトンインスタンス
-export const followupsDb = new FollowupsDatabase();
+// ファクトリーパターンで非同期初期化
+let followupsDbPromise: Promise<FollowupsDatabase> | null = null;
+
+export async function getFollowupsDatabase(): Promise<FollowupsDatabase> {
+  if (!followupsDbPromise) {
+    followupsDbPromise = (async () => {
+      const db = await getDatabase();
+      return new FollowupsDatabase(db);
+    })();
+  }
+  return await followupsDbPromise;
+}
+
+// 後方互換性のため、既存のシングルトンも維持（非推奨）
+export const followupsDb = new Proxy({} as FollowupsDatabase, {
+  get: () => {
+    throw new Error(
+      "followupsDb is no longer available synchronously. Use getFollowupsDatabase() instead.",
+    );
+  },
+});

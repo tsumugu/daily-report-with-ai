@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { authMiddleware } from '../middleware/auth.middleware.js';
-import { goalsDb } from '../db/goals.db.js';
-import { weeklyFocusesDb } from '../db/weekly-focuses.db.js';
-import { dailyReportGoalsDb } from '../db/daily-report-goals.db.js';
-import { dailyReportsDb } from '../db/daily-reports.db.js';
+import { getGoalsDatabase } from '../db/goals.db.js';
+import { getWeeklyFocusesDatabase } from '../db/weekly-focuses.db.js';
+import { getDailyReportGoalsDatabase } from '../db/daily-report-goals.db.js';
+import { getDailyReportsDatabase } from '../db/daily-reports.db.js';
 import {
   Goal,
   CreateGoalRequest,
@@ -117,7 +117,7 @@ function validateCircularReference(goalId: string, newParentId: string | null, g
     return true;
   }
 
-  let currentId = newParentId;
+  let currentId: string | null = newParentId;
   const visited = new Set<string>();
 
   while (currentId) {
@@ -186,12 +186,14 @@ function buildHierarchy(goals: Goal[]): GoalWithChildren[] {
  * GET /api/goals
  * 目標一覧を取得する。階層構造を含む。
  */
-goalsRouter.get('/goals', (req: Request, res: Response) => {
+goalsRouter.get('/goals', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const goalsDb = await getGoalsDatabase();
 
   const hierarchy = req.query.hierarchy !== 'false'; // デフォルト: true
   const goals = goalsDb.findAllByUserId(userId);
@@ -208,12 +210,16 @@ goalsRouter.get('/goals', (req: Request, res: Response) => {
  * GET /api/goals/:id
  * 目標詳細を取得する。
  */
-goalsRouter.get('/goals/:id', (req: Request, res: Response) => {
+goalsRouter.get('/goals/:id', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const goalsDb = await getGoalsDatabase();
+  const dailyReportGoalsDb = await getDailyReportGoalsDatabase();
+  const dailyReportsDb = await getDailyReportsDatabase();
 
   const goalId = req.params.id;
   const goal = goalsDb.findById(goalId);
@@ -295,12 +301,14 @@ goalsRouter.get('/goals/:id', (req: Request, res: Response) => {
  * POST /api/goals
  * 目標を作成する。
  */
-goalsRouter.post('/goals', (req: Request, res: Response) => {
+goalsRouter.post('/goals', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const goalsDb = await getGoalsDatabase();
 
   const body: CreateGoalRequest = req.body;
   const validationError = validateGoal(body, true); // isCreate = true
@@ -312,7 +320,7 @@ goalsRouter.post('/goals', (req: Request, res: Response) => {
   // 親目標の検証
   let parentGoal: Goal | null = null;
   if (body.parentId) {
-    parentGoal = goalsDb.findById(body.parentId);
+    parentGoal = goalsDb.findById(body.parentId) || null;
     if (!parentGoal) {
       res.status(400).json({ message: '親目標が見つかりません' });
       return;
@@ -367,12 +375,14 @@ goalsRouter.post('/goals', (req: Request, res: Response) => {
  * PUT /api/goals/:id
  * 目標を更新する。
  */
-goalsRouter.put('/goals/:id', (req: Request, res: Response) => {
+goalsRouter.put('/goals/:id', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const goalsDb = await getGoalsDatabase();
 
   const goalId = req.params.id;
   const existingGoal = goalsDb.findById(goalId);
@@ -398,7 +408,7 @@ goalsRouter.put('/goals/:id', (req: Request, res: Response) => {
   let parentGoal: Goal | null = null;
   const newParentId = body.parentId !== undefined ? body.parentId : existingGoal.parentId;
   if (newParentId) {
-    parentGoal = goalsDb.findById(newParentId);
+    parentGoal = goalsDb.findById(newParentId) || null;
     if (!parentGoal) {
       res.status(400).json({ message: '親目標が見つかりません' });
       return;
@@ -451,12 +461,15 @@ goalsRouter.put('/goals/:id', (req: Request, res: Response) => {
  * DELETE /api/goals/:id
  * 目標を削除する。
  */
-goalsRouter.delete('/goals/:id', (req: Request, res: Response) => {
+goalsRouter.delete('/goals/:id', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const goalsDb = await getGoalsDatabase();
+  const weeklyFocusesDb = await getWeeklyFocusesDatabase();
 
   const goalId = req.params.id;
   const goal = goalsDb.findById(goalId);

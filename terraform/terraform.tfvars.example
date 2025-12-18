@@ -1,0 +1,5 @@
+project_id  = "your-gcp-project-id"
+region      = "asia-northeast1"
+cors_origin = "https://yourusername.github.io"
+jwt_secret  = "your-very-secure-random-secret-key-minimum-32-characters"
+batch_size  = "10"

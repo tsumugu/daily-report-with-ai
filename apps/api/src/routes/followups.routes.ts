@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { authMiddleware } from '../middleware/auth.middleware.js';
-import { followupsDb } from '../db/followups.db.js';
-import { goodPointsDb, improvementsDb, dailyReportsDb } from '../db/daily-reports.db.js';
+import { getFollowupsDatabase } from '../db/followups.db.js';
+import { getGoodPointsDatabase, getImprovementsDatabase, getDailyReportsDatabase } from '../db/daily-reports.db.js';
 import {
   Followup,
   CreateFollowupRequest,
@@ -59,7 +59,8 @@ function validateFollowup(body: CreateFollowupRequest, status: string): string |
 /**
  * エピソード数をカウント
  */
-function countEpisodes(itemId: string): number {
+async function countEpisodes(itemId: string): Promise<number> {
+  const followupsDb = await getFollowupsDatabase();
   const followups = followupsDb.findByItemId('goodPoint', itemId);
   return followups.filter((f) => f.status === '再現成功').length;
 }
@@ -67,7 +68,8 @@ function countEpisodes(itemId: string): number {
 /**
  * アクション数をカウント
  */
-function countActions(itemId: string): number {
+async function countActions(itemId: string): Promise<number> {
+  const followupsDb = await getFollowupsDatabase();
   const followups = followupsDb.findByItemId('improvement', itemId);
   return followups.filter((f) => f.status === '完了').length;
 }
@@ -101,12 +103,16 @@ function calculateImprovementStatus(actionCount: number): Improvement['status'] 
 /**
  * フォロー項目一覧を取得
  */
-function getFollowupItems(
+async function getFollowupItems(
   userId: string,
   statusFilter?: string,
   itemTypeFilter?: string
-): FollowupItem[] {
+): Promise<FollowupItem[]> {
   const items: FollowupItem[] = [];
+
+  const dailyReportsDb = await getDailyReportsDatabase();
+  const goodPointsDb = await getGoodPointsDatabase();
+  const improvementsDb = await getImprovementsDatabase();
 
   // すべての日報を取得
   const reports = dailyReportsDb.findAllByUserId(userId);
@@ -167,12 +173,15 @@ function getFollowupItems(
  * POST /api/good-points/:id/followups
  * よかったことにフォローアップを追加
  */
-followupsRouter.post('/good-points/:id/followups', (req: Request, res: Response) => {
+followupsRouter.post('/good-points/:id/followups', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const goodPointsDb = await getGoodPointsDatabase();
+  const followupsDb = await getFollowupsDatabase();
 
   const goodPointId = req.params.id;
   const goodPoint = goodPointsDb.findById(goodPointId);
@@ -220,7 +229,7 @@ followupsRouter.post('/good-points/:id/followups', (req: Request, res: Response)
   followupsDb.save(followup);
 
   // エピソード数をカウント
-  const episodeCount = countEpisodes(goodPointId);
+  const episodeCount = await countEpisodes(goodPointId);
   
   // ステータスを自動判定して更新
   const newStatus = calculateGoodPointStatus(episodeCount);
@@ -239,12 +248,15 @@ followupsRouter.post('/good-points/:id/followups', (req: Request, res: Response)
  * POST /api/improvements/:id/followups
  * 改善点にフォローアップを追加
  */
-followupsRouter.post('/improvements/:id/followups', (req: Request, res: Response) => {
+followupsRouter.post('/improvements/:id/followups', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const improvementsDb = await getImprovementsDatabase();
+  const followupsDb = await getFollowupsDatabase();
 
   const improvementId = req.params.id;
   const improvement = improvementsDb.findById(improvementId);
@@ -292,7 +304,7 @@ followupsRouter.post('/improvements/:id/followups', (req: Request, res: Response
   followupsDb.save(followup);
 
   // アクション数をカウント
-  const actionCount = countActions(improvementId);
+  const actionCount = await countActions(improvementId);
   
   // ステータスを自動判定して更新
   const newStatus = calculateImprovementStatus(actionCount);
@@ -311,12 +323,15 @@ followupsRouter.post('/improvements/:id/followups', (req: Request, res: Response
  * PUT /api/good-points/:id/followups/:followupId
  * エピソードを更新
  */
-followupsRouter.put('/good-points/:id/followups/:followupId', (req: Request, res: Response) => {
+followupsRouter.put('/good-points/:id/followups/:followupId', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const goodPointsDb = await getGoodPointsDatabase();
+  const followupsDb = await getFollowupsDatabase();
 
   const goodPointId = req.params.id;
   const followupId = req.params.followupId;
@@ -380,7 +395,7 @@ followupsRouter.put('/good-points/:id/followups/:followupId', (req: Request, res
   followupsDb.update(updatedFollowup);
 
   // エピソード数を再カウント
-  const episodeCount = countEpisodes(goodPointId);
+  const episodeCount = await countEpisodes(goodPointId);
   
   // ステータスを自動再計算
   const newStatus = calculateGoodPointStatus(episodeCount);
@@ -399,12 +414,15 @@ followupsRouter.put('/good-points/:id/followups/:followupId', (req: Request, res
  * PUT /api/improvements/:id/followups/:followupId
  * アクションを更新
  */
-followupsRouter.put('/improvements/:id/followups/:followupId', (req: Request, res: Response) => {
+followupsRouter.put('/improvements/:id/followups/:followupId', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const improvementsDb = await getImprovementsDatabase();
+  const followupsDb = await getFollowupsDatabase();
 
   const improvementId = req.params.id;
   const followupId = req.params.followupId;
@@ -468,7 +486,7 @@ followupsRouter.put('/improvements/:id/followups/:followupId', (req: Request, re
   followupsDb.update(updatedFollowup);
 
   // アクション数を再カウント
-  const actionCount = countActions(improvementId);
+  const actionCount = await countActions(improvementId);
   
   // ステータスを自動再計算
   const newStatus = calculateImprovementStatus(actionCount);
@@ -487,12 +505,15 @@ followupsRouter.put('/improvements/:id/followups/:followupId', (req: Request, re
  * GET /api/good-points/:id/followups
  * よかったことのフォローアップ履歴を取得
  */
-followupsRouter.get('/good-points/:id/followups', (req: Request, res: Response) => {
+followupsRouter.get('/good-points/:id/followups', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const goodPointsDb = await getGoodPointsDatabase();
+  const followupsDb = await getFollowupsDatabase();
 
   const goodPointId = req.params.id;
   const goodPoint = goodPointsDb.findById(goodPointId);
@@ -533,12 +554,15 @@ followupsRouter.get('/good-points/:id/followups', (req: Request, res: Response) 
  * GET /api/improvements/:id/followups
  * 改善点のフォローアップ履歴を取得
  */
-followupsRouter.get('/improvements/:id/followups', (req: Request, res: Response) => {
+followupsRouter.get('/improvements/:id/followups', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const improvementsDb = await getImprovementsDatabase();
+  const followupsDb = await getFollowupsDatabase();
 
   const improvementId = req.params.id;
   const improvement = improvementsDb.findById(improvementId);
@@ -579,12 +603,15 @@ followupsRouter.get('/improvements/:id/followups', (req: Request, res: Response)
  * DELETE /api/good-points/:id/followups/:followupId
  * よかったことのエピソードを削除
  */
-followupsRouter.delete('/good-points/:id/followups/:followupId', (req: Request, res: Response) => {
+followupsRouter.delete('/good-points/:id/followups/:followupId', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const goodPointsDb = await getGoodPointsDatabase();
+  const followupsDb = await getFollowupsDatabase();
 
   const goodPointId = req.params.id;
   const followupId = req.params.followupId;
@@ -614,7 +641,7 @@ followupsRouter.delete('/good-points/:id/followups/:followupId', (req: Request, 
   followupsDb.delete(followupId);
 
   // エピソード数を再カウント
-  const episodeCount = countEpisodes(goodPointId);
+  const episodeCount = await countEpisodes(goodPointId);
   
   // ステータスを自動判定して更新
   const newStatus = calculateGoodPointStatus(episodeCount);
@@ -633,12 +660,15 @@ followupsRouter.delete('/good-points/:id/followups/:followupId', (req: Request, 
  * DELETE /api/improvements/:id/followups/:followupId
  * 改善点のアクションを削除
  */
-followupsRouter.delete('/improvements/:id/followups/:followupId', (req: Request, res: Response) => {
+followupsRouter.delete('/improvements/:id/followups/:followupId', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const improvementsDb = await getImprovementsDatabase();
+  const followupsDb = await getFollowupsDatabase();
 
   const improvementId = req.params.id;
   const followupId = req.params.followupId;
@@ -668,7 +698,7 @@ followupsRouter.delete('/improvements/:id/followups/:followupId', (req: Request,
   followupsDb.delete(followupId);
 
   // アクション数を再カウント
-  const actionCount = countActions(improvementId);
+  const actionCount = await countActions(improvementId);
   
   // ステータスを自動判定して更新
   const newStatus = calculateImprovementStatus(actionCount);
@@ -687,7 +717,7 @@ followupsRouter.delete('/improvements/:id/followups/:followupId', (req: Request,
  * GET /api/followups
  * フォロー項目一覧を取得
  */
-followupsRouter.get('/followups', (req: Request, res: Response) => {
+followupsRouter.get('/followups', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
@@ -699,7 +729,7 @@ followupsRouter.get('/followups', (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 20;
   const offset = parseInt(req.query.offset as string) || 0;
 
-  const allItems = getFollowupItems(userId, statusFilter, itemTypeFilter);
+  const allItems = await getFollowupItems(userId, statusFilter, itemTypeFilter);
   const total = allItems.length;
   const paginatedItems = allItems.slice(offset, offset + limit);
 

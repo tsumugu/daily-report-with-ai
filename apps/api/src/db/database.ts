@@ -3,11 +3,62 @@ import { join } from 'path';
 import { mkdirSync } from 'fs';
 
 let dbInstance: DatabaseType | null = null;
+let dbInstancePromise: Promise<DatabaseType> | null = null;
 
 /**
- * SQLiteデータベースインスタンスを取得（シングルトン）
+ * SQLiteデータベースインスタンスを取得（シングルトン、非同期）
  */
-export function getDatabase(): DatabaseType {
+export async function getDatabase(): Promise<DatabaseType> {
+  if (!dbInstancePromise) {
+    dbInstancePromise = initializeDatabase();
+  }
+  return await dbInstancePromise;
+}
+
+/**
+ * データベースを初期化（非同期）
+ */
+async function initializeDatabase(): Promise<DatabaseType> {
+  // 本番環境でCloud Storageアダプターを使用
+  if (process.env.NODE_ENV === "production" && process.env.GCS_BUCKET_NAME) {
+    const { getDatabase: getGCSDatabase } = await import("./storage-adapter.js");
+    return await getGCSDatabase();
+  }
+
+  // 開発環境は従来通り
+  if (!dbInstance) {
+    const dbPath = process.env.DB_PATH || join(process.cwd(), 'data', 'daily-report.db');
+    
+    // ディレクトリが存在しない場合は作成
+    const dbDir = join(dbPath, '..');
+    mkdirSync(dbDir, { recursive: true });
+    
+    dbInstance = new Database(dbPath);
+    
+    // WALモードを有効化（同時書き込みのパフォーマンス向上）
+    dbInstance.pragma('journal_mode = WAL');
+    
+    // 外部キー制約を有効化
+    dbInstance.pragma('foreign_keys = ON');
+    
+    // テーブル作成
+    initializeTables(dbInstance);
+  }
+  
+  return dbInstance;
+}
+
+/**
+ * 開発環境用の同期的なアクセス（後方互換性のため）
+ * 本番環境では使用不可
+ */
+export function getDatabaseSync(): DatabaseType {
+  if (dbInstancePromise) {
+    throw new Error(
+      "Database is being initialized asynchronously. Use getDatabase() instead.",
+    );
+  }
+  
   if (!dbInstance) {
     const dbPath = process.env.DB_PATH || join(process.cwd(), 'data', 'daily-report.db');
     

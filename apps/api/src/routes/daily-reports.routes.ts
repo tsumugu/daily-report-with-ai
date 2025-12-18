@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { authMiddleware } from '../middleware/auth.middleware.js';
-import { dailyReportsDb, goodPointsDb, improvementsDb } from '../db/daily-reports.db.js';
-import { dailyReportGoalsDb } from '../db/daily-report-goals.db.js';
-import { goalsDb } from '../db/goals.db.js';
+import { getDailyReportsDatabase, getGoodPointsDatabase, getImprovementsDatabase } from '../db/daily-reports.db.js';
+import { getDailyReportGoalsDatabase } from '../db/daily-report-goals.db.js';
+import { getGoalsDatabase } from '../db/goals.db.js';
 import {
   DailyReport,
   GoodPoint,
@@ -22,7 +22,7 @@ import {
   GoalSummary,
   Goal,
 } from '../models/daily-report.model.js';
-import { followupsDb } from '../db/followups.db.js';
+import { getFollowupsDatabase } from '../db/followups.db.js';
 
 export const dailyReportsRouter = Router();
 
@@ -99,7 +99,12 @@ function validateImprovementContent(body: { content: string; action?: string }):
 /**
  * 日報をレスポンス形式に変換
  */
-function toDailyReportResponse(report: DailyReport): DailyReportResponse {
+async function toDailyReportResponse(report: DailyReport): Promise<DailyReportResponse> {
+  const goodPointsDb = await getGoodPointsDatabase();
+  const improvementsDb = await getImprovementsDatabase();
+  const dailyReportGoalsDb = await getDailyReportGoalsDatabase();
+  const goalsDb = await getGoalsDatabase();
+
   const goodPoints = goodPointsDb.findByIds(report.goodPointIds);
   const improvements = improvementsDb.findByIds(report.improvementIds);
 
@@ -137,7 +142,7 @@ function toDailyReportResponse(report: DailyReport): DailyReportResponse {
  * POST /api/daily-reports
  * 日報を新規作成
  */
-dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
+dailyReportsRouter.post('/daily-reports', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
@@ -158,6 +163,13 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
     res.status(400).json({ message: '目標は最大10個まで選択できます' });
     return;
   }
+
+  // データベースインスタンスを取得
+  const dailyReportsDb = await getDailyReportsDatabase();
+  const goodPointsDb = await getGoodPointsDatabase();
+  const improvementsDb = await getImprovementsDatabase();
+  const dailyReportGoalsDb = await getDailyReportGoalsDatabase();
+  const goalsDb = await getGoalsDatabase();
 
   // goalIdsが存在し、ユーザーの所有する目標かチェック
   if (body.goalIds && body.goalIds.length > 0) {
@@ -273,7 +285,7 @@ dailyReportsRouter.post('/daily-reports', (req: Request, res: Response) => {
     res.status(500).json({ message: '日報の保存に失敗しました' });
     return;
   }
-  res.status(201).json(toDailyReportResponse(updatedReport));
+  res.status(201).json(await toDailyReportResponse(updatedReport));
 });
 
 /**
@@ -368,12 +380,19 @@ function toDailyReportListItem(
  * GET /api/daily-reports
  * 日報一覧を取得
  */
-dailyReportsRouter.get('/daily-reports', (req: Request, res: Response) => {
+dailyReportsRouter.get('/daily-reports', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  // データベースインスタンスを取得
+  const dailyReportsDb = await getDailyReportsDatabase();
+  const goodPointsDb = await getGoodPointsDatabase();
+  const improvementsDb = await getImprovementsDatabase();
+  const dailyReportGoalsDb = await getDailyReportGoalsDatabase();
+  const goalsDb = await getGoalsDatabase();
 
   // クエリパラメータの取得
   const limit = parseInt(req.query.limit as string) || 30;
@@ -468,13 +487,14 @@ dailyReportsRouter.get('/daily-reports', (req: Request, res: Response) => {
  * GET /api/daily-reports/:id
  * 日報詳細を取得
  */
-dailyReportsRouter.get('/daily-reports/:id', (req: Request, res: Response) => {
+dailyReportsRouter.get('/daily-reports/:id', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
 
+  const dailyReportsDb = await getDailyReportsDatabase();
   const report = dailyReportsDb.findById(req.params.id);
   if (!report) {
     res.status(404).json({ message: '日報が見つかりません' });
@@ -487,19 +507,27 @@ dailyReportsRouter.get('/daily-reports/:id', (req: Request, res: Response) => {
     return;
   }
 
-  res.status(200).json(toDailyReportResponse(report));
+  res.status(200).json(await toDailyReportResponse(report));
 });
 
 /**
  * PUT /api/daily-reports/:id
  * 日報を更新
  */
-dailyReportsRouter.put('/daily-reports/:id', (req: Request, res: Response) => {
+dailyReportsRouter.put('/daily-reports/:id', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  // データベースインスタンスを取得
+  const dailyReportsDb = await getDailyReportsDatabase();
+  const goodPointsDb = await getGoodPointsDatabase();
+  const improvementsDb = await getImprovementsDatabase();
+  const dailyReportGoalsDb = await getDailyReportGoalsDatabase();
+  const goalsDb = await getGoalsDatabase();
+  const followupsDb = await getFollowupsDatabase();
 
   const reportId = req.params.id;
   const report = dailyReportsDb.findById(reportId);
@@ -717,19 +745,21 @@ dailyReportsRouter.put('/daily-reports/:id', (req: Request, res: Response) => {
     return;
   }
 
-  res.status(200).json(toDailyReportResponse(updatedReport));
+  res.status(200).json(await toDailyReportResponse(updatedReport));
 });
 
 /**
  * POST /api/good-points
  * よかったことを単独で作成
  */
-dailyReportsRouter.post('/good-points', (req: Request, res: Response) => {
+dailyReportsRouter.post('/good-points', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const goodPointsDb = await getGoodPointsDatabase();
 
   const body: CreateGoodPointRequest = req.body;
 
@@ -760,12 +790,14 @@ dailyReportsRouter.post('/good-points', (req: Request, res: Response) => {
  * PATCH /api/good-points/:id
  * よかったことを更新
  */
-dailyReportsRouter.patch('/good-points/:id', (req: Request, res: Response) => {
+dailyReportsRouter.patch('/good-points/:id', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const goodPointsDb = await getGoodPointsDatabase();
 
   const goodPoint = goodPointsDb.findById(req.params.id);
   if (!goodPoint) {
@@ -798,12 +830,14 @@ dailyReportsRouter.patch('/good-points/:id', (req: Request, res: Response) => {
  * POST /api/improvements
  * 改善点を単独で作成
  */
-dailyReportsRouter.post('/improvements', (req: Request, res: Response) => {
+dailyReportsRouter.post('/improvements', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const improvementsDb = await getImprovementsDatabase();
 
   const body: CreateImprovementRequest = req.body;
 
@@ -833,12 +867,14 @@ dailyReportsRouter.post('/improvements', (req: Request, res: Response) => {
  * PATCH /api/improvements/:id
  * 改善点を更新
  */
-dailyReportsRouter.patch('/improvements/:id', (req: Request, res: Response) => {
+dailyReportsRouter.patch('/improvements/:id', async (req: Request, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     res.status(401).json({ message: '認証が必要です' });
     return;
   }
+
+  const improvementsDb = await getImprovementsDatabase();
 
   const improvement = improvementsDb.findById(req.params.id);
   if (!improvement) {
