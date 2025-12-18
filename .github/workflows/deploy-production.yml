@@ -16,7 +16,7 @@ jobs:
     name: Deploy Frontend to GitHub Pages
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write  # gh-pagesブランチにpushするために必要
       pages: write
       id-token: write
     steps:
@@ -53,6 +53,7 @@ jobs:
   deploy-backend:
     name: Deploy Backend to Cloud Run
     runs-on: ubuntu-latest
+    if: false  # 一時的に無効化
     steps:
       - name: Checkout
         uses: actions/checkout@v4
