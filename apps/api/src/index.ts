@@ -11,9 +11,15 @@ import { weeklyFocusesRouter } from './routes/weekly-focuses.routes.js';
 import { goalsRouter } from './routes/goals.routes.js';
 import { syncIfNeeded } from './db/storage-adapter.js';
 import { validateEnvironmentVariables } from './config/env.js';
+import { getDatabase } from './db/database.js';
 
 // 環境変数の検証
 validateEnvironmentVariables();
+
+// データベースの初期化（起動時にCloud Storageからダウンロード）
+console.log('🔧 Initializing database...');
+await getDatabase();
+console.log('✅ Database initialized successfully');
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
