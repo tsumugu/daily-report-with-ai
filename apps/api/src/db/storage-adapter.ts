@@ -19,7 +19,7 @@ let periodicSyncTimer: NodeJS.Timeout | null = null; // 定期的な同期のタ
 // 変更検知とバッチアップロードの統合
 let hasChanges = false;
 let changeCount = 0;
-const BATCH_SIZE = parseInt(process.env.BATCH_SIZE || "10", 10);
+const BATCH_SIZE = parseInt(process.env.BATCH_SIZE || "5", 10);
 // 最後の同期時刻（ミリ秒）
 let lastSyncTime: number | null = null;
 // 時間ベースの同期間隔（ミリ秒、デフォルト30秒）
