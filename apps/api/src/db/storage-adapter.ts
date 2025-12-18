@@ -161,14 +161,17 @@ function isDatabaseEmpty(db: DatabaseType): boolean {
  */
 async function uploadDatabase(): Promise<void> {
   try {
+    console.log("[DB] Starting upload process...");
+    
     if (!existsSync(TEMP_DB_PATH)) {
       console.warn("[DB] Database file does not exist locally. Skipping upload.");
       return;
     }
 
-    // ファイルサイズを確認
+    // ファイルサイズを確認（WALマージ前）
     const localStats = statSync(TEMP_DB_PATH);
     const localFileSize = localStats.size;
+    console.log(`[DB] Database file size before WAL merge: ${localFileSize} bytes`);
 
     // ファイルサイズが空（最小サイズ以下）の場合はアップロードしない
     if (localFileSize <= MIN_DB_SIZE) {
@@ -228,6 +231,35 @@ async function uploadDatabase(): Promise<void> {
         console.error("[DB] Failed to checkpoint WAL file:", error);
         // checkpointに失敗しても続行（WALファイルがない場合など）
       }
+    }
+
+    // WALマージ後のファイルサイズを再取得（マージによりファイルサイズが変わる可能性がある）
+    const updatedStats = statSync(TEMP_DB_PATH);
+    const updatedFileSize = updatedStats.size;
+    console.log(`[DB] Database file size after WAL merge: ${updatedFileSize} bytes (was ${localFileSize} bytes)`);
+
+    // マージ後のファイルサイズで空DBチェックを再実行
+    if (updatedFileSize <= MIN_DB_SIZE) {
+      console.log(
+        `[DB] Database file is too small after WAL merge (${updatedFileSize} bytes). ` +
+        `Skipping upload to prevent overwriting existing data with empty database.`
+      );
+      return;
+    }
+
+    // マージ後のファイルサイズで空DBチェックを再実行
+    if (dbInstance && isDatabaseEmpty(dbInstance)) {
+      console.log("[DB] Database is empty after WAL merge. Skipping upload to prevent overwriting existing data.");
+      return;
+    }
+
+    // マージ後のファイルサイズでCloud Storageとの比較を再実行
+    if (existingFileSize > 0 && updatedFileSize < existingFileSize) {
+      console.log(
+        `[DB] Local database file after WAL merge (${updatedFileSize} bytes) is smaller than Cloud Storage file (${existingFileSize} bytes). ` +
+        `Skipping upload to prevent data loss.`
+      );
+      return;
     }
 
     // メインデータベースファイルのアップロード（WALファイルはマージ済み）
@@ -298,8 +330,15 @@ export async function syncIfNeeded(): Promise<void> {
   const now = Date.now();
   const shouldSyncByTime = lastSyncTime !== null && (now - lastSyncTime) >= SYNC_INTERVAL_MS;
 
+  console.log(
+    `[DB] Sync check: changeCount=${changeCount}/${BATCH_SIZE}, ` +
+    `timeSinceLastSync=${lastSyncTime ? now - lastSyncTime : 'N/A'}ms/${SYNC_INTERVAL_MS}ms, ` +
+    `shouldSync=${changeCount >= BATCH_SIZE || shouldSyncByTime}`
+  );
+
   // バッチサイズに達した場合、または一定時間経過した場合は即座に同期
   if (changeCount >= BATCH_SIZE || shouldSyncByTime) {
+    console.log(`[DB] Triggering sync: changeCount=${changeCount}, shouldSyncByTime=${shouldSyncByTime}`);
     await syncDatabase();
     changeCount = 0;
   }
