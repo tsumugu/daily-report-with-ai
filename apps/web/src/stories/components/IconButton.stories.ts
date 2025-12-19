@@ -1,6 +1,6 @@
 import { Meta, StoryObj, moduleMetadata } from '@storybook/angular';
-import { IconButtonComponent } from '../../app/shared/components/icon-button/icon-button.component';
-import { IconName } from '../../app/shared/components/icon/icon.component';
+import { IconButtonComponent } from '../../app/shared/ui/icon-button/icon-button.component';
+import { IconName } from '../../app/shared/ui/icon/icon.component';
 import {
   LucideAngularModule,
   FileText,
@@ -19,7 +19,7 @@ import {
 } from 'lucide-angular';
 
 const meta: Meta<IconButtonComponent> = {
-  title: 'Components/IconButton',
+  title: 'Design System/UI Components/IconButton',
   component: IconButtonComponent,
   tags: ['autodocs'],
   decorators: [

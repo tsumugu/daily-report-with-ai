@@ -8,9 +8,10 @@ import {
   AlertBannerComponent,
   ToastComponent,
   HierarchyCardComponent,
-  HierarchyCardData,
+} from '../../../../shared/ui';
+import {
   RelatedDailyReportsListComponent,
-} from '../../../../shared/components';
+} from '../../../../shared/domain-components';
 
 /**
  * 目標詳細画面コンポーネント
@@ -157,14 +158,8 @@ export class GoalDetailPageComponent implements OnInit {
   }
 
   /**
-   * 下位目標のカードデータを取得
+   * 下位目標を編集
    */
-  getChildCardData(child: { id: string; name: string }): HierarchyCardData {
-    return {
-      id: child.id,
-      title: child.name,
-    };
-  }
 
   /**
    * 短期目標かどうか（最下位階層かどうか）

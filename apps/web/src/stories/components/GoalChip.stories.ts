@@ -1,9 +1,9 @@
 import { Meta, StoryObj, moduleMetadata } from '@storybook/angular';
 import { RouterTestingModule } from '@angular/router/testing';
-import { GoalChipComponent } from '../../app/shared/components/goal-chip/goal-chip.component';
+import { GoalChipComponent } from '../../app/shared/domain-components/goal-chip/goal-chip.component';
 
 const meta: Meta<GoalChipComponent> = {
-  title: 'Components/GoalChip',
+  title: 'Design System/Domain Components/GoalChip',
   component: GoalChipComponent,
   tags: ['autodocs'],
   decorators: [

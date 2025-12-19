@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-import { FormCardComponent } from '../../app/shared/components/form-card/form-card.component';
+import { FormCardComponent } from '../../app/shared/ui/form-card/form-card.component';
 
 const meta: Meta<FormCardComponent> = {
-  title: 'Components/FormCard',
+  title: 'Design System/UI Components/FormCard',
   component: FormCardComponent,
   tags: ['autodocs'],
 };
@@ -41,5 +41,6 @@ export const WithoutRemoveButton: Story = {
     `,
   }),
 };
+
 
 

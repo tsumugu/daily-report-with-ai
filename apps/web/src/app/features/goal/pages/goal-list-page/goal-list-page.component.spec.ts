@@ -312,7 +312,7 @@ describe('GoalListPageComponent', () => {
 
       // getGoalLevel()はprivateなので、convertToTreeNodes()を通じて間接的にテスト
       const treeNodes = component['convertToTreeNodes']([goal]);
-      expect(treeNodes[0].data.level).toBe('long');
+      expect(treeNodes[0].data.levelName).toBe('長期目標');
     });
 
     it('should return "medium" for depth 2 goal', () => {
@@ -350,7 +350,7 @@ describe('GoalListPageComponent', () => {
       fixture.detectChanges();
 
       const treeNodes = component['convertToTreeNodes']([parentGoal]);
-      expect(treeNodes[0].children[0].data.level).toBe('medium');
+      expect(treeNodes[0].children[0].data.levelName).toBe('中期目標');
     });
 
     it('should return "short" for depth 3 goal', () => {
@@ -403,7 +403,7 @@ describe('GoalListPageComponent', () => {
       fixture.detectChanges();
 
       const treeNodes = component['convertToTreeNodes']([parentGoal]);
-      expect(treeNodes[0].children[0].children[0].data.level).toBe('short');
+      expect(treeNodes[0].children[0].children[0].data.levelName).toBe('短期目標');
     });
 
     it('should return 1 when parent is not found in calculateDepth', () => {
@@ -428,7 +428,7 @@ describe('GoalListPageComponent', () => {
       // calculateDepth()はprivateなので、convertToTreeNodes()を通じて間接的にテスト
       // 親が見つからない場合、depthは1になる
       const treeNodes = component['convertToTreeNodes']([goal]);
-      expect(treeNodes[0].data.level).toBe('long'); // 親が見つからない場合、depthは1なのでlong
+      expect(treeNodes[0].data.levelName).toBe('長期目標'); // 親が見つからない場合、depthは1なのでlong
     });
   });
 

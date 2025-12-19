@@ -14,7 +14,7 @@ import {
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HierarchyCardComponent, HierarchyCardData } from '../hierarchy-card/hierarchy-card.component';
+import { HierarchyCardComponent } from '../hierarchy-card/hierarchy-card.component';
 import { IconComponent } from '../icon/icon.component';
 
 /**
@@ -22,7 +22,13 @@ import { IconComponent } from '../icon/icon.component';
  */
 export interface HierarchyTreeNode {
   id: string;
-  data: HierarchyCardData;
+  data: {
+    id: string;
+    title: string;
+    subtitle?: string;
+    metadata?: string;
+    levelName?: string;
+  };
   children: HierarchyTreeNode[];
 }
 
@@ -131,57 +137,57 @@ export class HierarchyTreeViewComponent implements AfterViewInit, AfterViewCheck
 
       // 親から子へのL字の線を描画
       if (this.hasChildren(node) && this.isExpanded(node.id)) {
-      const parentButton = parentButtonsArray[index];
-      // children要素はnodeElの直接の子要素として取得
-      const childrenElement = nodeEl.nativeElement.querySelector('.hierarchy-tree-view__children') as HTMLElement;
+        const parentButton = parentButtonsArray[index];
+        // children要素はnodeElの直接の子要素として取得
+        const childrenElement = nodeEl.nativeElement.querySelector('.hierarchy-tree-view__children') as HTMLElement;
 
         if (parentButton?.nativeElement && childrenElement) {
-      // 親のプラスボタンの位置を取得
-      const parentButtonRect = parentButton.nativeElement.getBoundingClientRect();
-      const nodeRect = nodeEl.nativeElement.getBoundingClientRect();
+          // 親のプラスボタンの位置を取得
+          const parentButtonRect = parentButton.nativeElement.getBoundingClientRect();
+          const nodeRect = nodeEl.nativeElement.getBoundingClientRect();
 
-      // 子のプラスボタンの位置を取得（最初の子ノードのプラスボタン）
-      const firstChildNode = childrenElement.querySelector('.hierarchy-tree-view__node');
-      const firstChildButton = firstChildNode?.querySelector('.hierarchy-tree-view__create-child-button') as HTMLElement;
+          // 子のプラスボタンの位置を取得（最初の子ノードのプラスボタン）
+          const firstChildNode = childrenElement.querySelector('.hierarchy-tree-view__node');
+          const firstChildButton = firstChildNode?.querySelector('.hierarchy-tree-view__create-child-button') as HTMLElement;
 
           if (firstChildButton) {
-      const firstChildButtonRect = firstChildButton.getBoundingClientRect();
-      const _childrenRect = childrenElement.getBoundingClientRect();
+            const firstChildButtonRect = firstChildButton.getBoundingClientRect();
+            const _childrenRect = childrenElement.getBoundingClientRect();
 
-      // 親のプラスボタン中央（親ノードからの相対位置）
-      const parentButtonCenterX = parentButtonRect.left - nodeRect.left + parentButtonRect.width / 2;
-      const parentButtonBottom = parentButtonRect.bottom - nodeRect.top;
+            // 親のプラスボタン中央（親ノードからの相対位置）
+            const parentButtonCenterX = parentButtonRect.left - nodeRect.left + parentButtonRect.width / 2;
+            const parentButtonBottom = parentButtonRect.bottom - nodeRect.top;
 
-      // 子のプラスボタンの位置（親ノードからの相対位置）
-      const childButtonLeft = firstChildButtonRect.left - nodeRect.left;
-      const _childButtonCenterX = firstChildButtonRect.left - nodeRect.left + firstChildButtonRect.width / 2;
-      const childButtonCenterY = firstChildButtonRect.top - nodeRect.top + firstChildButtonRect.height / 2;
+            // 子のプラスボタンの位置（親ノードからの相対位置）
+            const childButtonLeft = firstChildButtonRect.left - nodeRect.left;
+            const _childButtonCenterX = firstChildButtonRect.left - nodeRect.left + firstChildButtonRect.width / 2;
+            const childButtonCenterY = firstChildButtonRect.top - nodeRect.top + firstChildButtonRect.height / 2;
 
-      // L字の線を描画
-      // 横線: 親のプラスボタン中央から子のプラスボタンの左端まで（ボタンに被らないように短くする）
-      const _horizontalLineLeft = parentButtonCenterX;
-      const horizontalLineWidth = childButtonLeft - parentButtonCenterX; // 子のプラスボタンの左端まで
-      const horizontalLineTop = childButtonCenterY; // 子のプラスボタンの中央の高さ
+            // L字の線を描画
+            // 横線: 親のプラスボタン中央から子のプラスボタンの左端まで（ボタンに被らないように短くする）
+            const _horizontalLineLeft = parentButtonCenterX;
+            const horizontalLineWidth = childButtonLeft - parentButtonCenterX; // 子のプラスボタンの左端まで
+            const horizontalLineTop = childButtonCenterY; // 子のプラスボタンの中央の高さ
 
-      // 縦線: 親のプラスボタン下端から横線の位置まで
-      const verticalLineTop = parentButtonBottom;
-      const verticalLineHeight = horizontalLineTop - parentButtonBottom;
+            // 縦線: 親のプラスボタン下端から横線の位置まで
+            const verticalLineTop = parentButtonBottom;
+            const verticalLineHeight = horizontalLineTop - parentButtonBottom;
 
-      // 線のデータを保存（children要素からの相対位置で計算）
-      const childrenRectRelative = childrenElement.getBoundingClientRect();
-      const verticalLineLeft = parentButtonCenterX - (childrenRectRelative.left - nodeRect.left);
-      const horizontalLineLeftRelative = parentButtonCenterX - (childrenRectRelative.left - nodeRect.left);
-      const verticalLineTopRelative = verticalLineTop - (childrenRectRelative.top - nodeRect.top);
-      const horizontalLineTopRelative = horizontalLineTop - (childrenRectRelative.top - nodeRect.top);
+            // 線のデータを保存（children要素からの相対位置で計算）
+            const childrenRectRelative = childrenElement.getBoundingClientRect();
+            const verticalLineLeft = parentButtonCenterX - (childrenRectRelative.left - nodeRect.left);
+            const horizontalLineLeftRelative = parentButtonCenterX - (childrenRectRelative.left - nodeRect.left);
+            const verticalLineTopRelative = verticalLineTop - (childrenRectRelative.top - nodeRect.top);
+            const horizontalLineTopRelative = horizontalLineTop - (childrenRectRelative.top - nodeRect.top);
 
-      this.connectorLineData.set(node.id, {
-        left: verticalLineLeft, // 縦線のleft位置
-        top: verticalLineTopRelative, // 縦線のtop位置
-        width: horizontalLineWidth, // 横線の幅
-        height: verticalLineHeight, // 縦線の高さ
-        horizontalLeft: horizontalLineLeftRelative, // 横線のleft位置
-        horizontalTop: horizontalLineTopRelative, // 横線のtop位置
-      });
+            this.connectorLineData.set(node.id, {
+              left: verticalLineLeft, // 縦線のleft位置
+              top: verticalLineTopRelative, // 縦線のtop位置
+              width: horizontalLineWidth, // 横線の幅
+              height: verticalLineHeight, // 縦線の高さ
+              horizontalLeft: horizontalLineLeftRelative, // 横線のleft位置
+              horizontalTop: horizontalLineTopRelative, // 横線のtop位置
+            });
           }
         }
       }
@@ -260,30 +266,30 @@ export class HierarchyTreeViewComponent implements AfterViewInit, AfterViewCheck
           // 同じ階層のプラスボタン同士を縦に繋ぐ線を計算
           if (currentButton?.nativeElement && nextButton?.nativeElement && this.showCreateChildButton) {
             // コンテナを取得（ViewChildで取得できない場合は、DOMから取得）
-            const container = this.treeViewContainer?.nativeElement || 
-                             currentNode.closest('.hierarchy-tree-view') as HTMLElement;
-            
+            const container = this.treeViewContainer?.nativeElement ||
+              currentNode.closest('.hierarchy-tree-view') as HTMLElement;
+
             if (!container) {
               return;
             }
-            
+
             const currentButtonRect = currentButton.nativeElement.getBoundingClientRect();
             const nextButtonRect = nextButton.nativeElement.getBoundingClientRect();
             const containerRect = container.getBoundingClientRect();
-            
+
             // 現在のノードのプラスボタンの下端（hierarchy-tree-viewコンテナからの相対位置）
             const currentButtonBottom = currentButtonRect.bottom - containerRect.top;
-            
+
             // 次のノードのプラスボタンの上端（hierarchy-tree-viewコンテナからの相対位置）
             const nextButtonTop = nextButtonRect.top - containerRect.top;
-            
+
             // 縦線の位置と高さを計算
             // プラスボタンの中央位置を、hierarchy-tree-viewコンテナからの相対位置で計算
             const currentButtonCenterX = currentButtonRect.left - containerRect.left + currentButtonRect.width / 2;
             const verticalLineLeft = currentButtonCenterX; // プラスボタンの中央
             const verticalLineTop = currentButtonBottom; // 現在のプラスボタンの下端
             const verticalLineHeight = nextButtonTop - currentButtonBottom; // 次のプラスボタンの上端まで
-            
+
             // 縦線の高さが正の値の場合のみ設定
             if (verticalLineHeight > 0) {
               this.siblingVerticalLineData.set(node.id, {

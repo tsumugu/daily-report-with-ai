@@ -7,16 +7,13 @@ import {
 } from '../../models/goal.model';
 import {
   HierarchyTreeNode,
-} from '../../../../shared/components/hierarchy-tree-view/hierarchy-tree-view.component';
-import {
-  HierarchyCardData,
-} from '../../../../shared/components/hierarchy-card/hierarchy-card.component';
+} from '../../../../shared/ui/hierarchy-tree-view/hierarchy-tree-view.component';
 import {
   ButtonComponent,
   AlertBannerComponent,
   HierarchyTreeViewComponent,
   EmptyStateComponent,
-} from '../../../../shared/components';
+} from '../../../../shared/ui';
 
 /**
  * 目標一覧画面コンポーネント
@@ -138,34 +135,30 @@ export class GoalListPageComponent implements OnInit {
    * GoalをHierarchyTreeNodeに変換
    */
   private convertGoalToNode(goal: GoalWithChildren): HierarchyTreeNode {
-    const cardData: HierarchyCardData = {
-      id: goal.id,
-      title: goal.name,
-      subtitle: goal.description ? goal.description : undefined,
-      metadata: goal.startDate && goal.endDate ? `${goal.startDate} 〜 ${goal.endDate}` : undefined,
-      level: this.getGoalLevel(goal),
-      type: goal.goalType ? goal.goalType : undefined,
-    };
-
     return {
       id: goal.id,
-      data: cardData,
+      data: {
+        id: goal.id,
+        title: goal.name,
+        subtitle: goal.description ? goal.description : undefined,
+        metadata: goal.startDate && goal.endDate ? `${goal.startDate} 〜 ${goal.endDate}` : undefined,
+        levelName: this.getGoalLabel(goal),
+      },
       children: goal.children.map((child) => this.convertGoalToNode(child)),
     };
   }
 
   /**
-   * 目標の階層レベルを取得
-   * 階層の深さに基づいて判定（深さ1=長期、深さ2=中期、深さ3以上=短期）
+   * 目標の階層レベルのラベルを取得
    */
-  private getGoalLevel(goal: GoalWithChildren): 'long' | 'medium' | 'short' {
+  private getGoalLabel(goal: GoalWithChildren): string {
     const depth = this.calculateDepth(goal, this.goals());
     if (depth === 1) {
-      return 'long';
+      return '長期目標';
     } else if (depth === 2) {
-      return 'medium';
+      return '中期目標';
     } else {
-      return 'short';
+      return '短期目標';
     }
   }
 

@@ -204,13 +204,6 @@ describe('GoalDetailPageComponent', () => {
     expect(component.isShortTermGoal).toBe(false);
   });
 
-  it('should get child card data', () => {
-    const child = { id: 'child-1', name: '子目標' };
-    const cardData = component.getChildCardData(child);
-
-    expect(cardData.id).toBe('child-1');
-    expect(cardData.title).toBe('子目標');
-  });
 
   it('should not load goal when id is not provided', () => {
     const activatedRouteSpy = {

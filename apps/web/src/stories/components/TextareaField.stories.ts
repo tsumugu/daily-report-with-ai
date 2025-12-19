@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-import { TextareaFieldComponent } from '../../app/shared/components/textarea-field/textarea-field.component';
+import { TextareaFieldComponent } from '../../app/shared/ui/textarea-field/textarea-field.component';
 
 const meta: Meta<TextareaFieldComponent> = {
-  title: 'Components/TextareaField',
+  title: 'Design System/UI Components/TextareaField',
   component: TextareaFieldComponent,
   tags: ['autodocs'],
 };

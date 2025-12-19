@@ -7,10 +7,12 @@ import { FollowupItem } from '../../../../shared/models/followup.model';
 import { WeeklyFocusResponse } from '../../../../shared/models/weekly-focus.model';
 import { FollowupCardComponent } from '../../components/followup-card/followup-card.component';
 import { FollowupInputModalComponent } from '../../components/followup-input-modal/followup-input-modal.component';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { AlertBannerComponent } from '../../../../shared/components/alert-banner/alert-banner.component';
-import { ToastComponent } from '../../../../shared/components/toast/toast.component';
-import { EmptyStateComponent } from '../../../../shared/components/empty-state';
+import {
+  ButtonComponent,
+  AlertBannerComponent,
+  ToastComponent,
+  EmptyStateComponent,
+} from '../../../../shared/ui';
 import { Subscription, forkJoin } from 'rxjs';
 
 @Component({

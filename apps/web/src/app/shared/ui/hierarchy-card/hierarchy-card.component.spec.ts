@@ -1,18 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HierarchyCardComponent, HierarchyCardData } from './hierarchy-card.component';
+import { HierarchyCardComponent } from './hierarchy-card.component';
 import { provideLucideIconsForTesting } from '../../test-helpers/lucide-icons.helper';
 
 describe('HierarchyCardComponent', () => {
   let component: HierarchyCardComponent;
   let fixture: ComponentFixture<HierarchyCardComponent>;
-
-  const mockData: HierarchyCardData = {
-    id: '1',
-    title: 'テスト目標',
-    subtitle: 'テストサブタイトル',
-    metadata: '2025-01-01 〜 2025-06-30',
-    level: 'long',
-  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -22,7 +14,11 @@ describe('HierarchyCardComponent', () => {
 
     fixture = TestBed.createComponent(HierarchyCardComponent);
     component = fixture.componentInstance;
-    component.data = mockData;
+    component.id = '1';
+    component.title = 'テスト目標';
+    component.subtitle = 'テストサブタイトル';
+    component.metadata = '2025-01-01 〜 2025-06-30';
+    component.levelName = '長期目標';
     fixture.detectChanges();
   });
 
@@ -43,18 +39,11 @@ describe('HierarchyCardComponent', () => {
     expect(component.expandToggled.emit).toHaveBeenCalledWith('1');
   });
 
-  it('should return correct level label', () => {
-    component.data.level = 'long';
-    expect(component.levelLabel).toBe('長期目標');
-    component.data.level = 'medium';
-    expect(component.levelLabel).toBe('中期目標');
-    component.data.level = 'short';
-    expect(component.levelLabel).toBe('短期目標');
-  });
-
-  it('should return empty string for undefined level', () => {
-    component.data.level = undefined;
-    expect(component.levelLabel).toBe('');
+  it('should display levelName', () => {
+    component.levelName = 'Test Level';
+    fixture.detectChanges();
+    const levelElement = fixture.nativeElement.querySelector('.hierarchy-card__level');
+    expect(levelElement.textContent).toContain('Test Level');
   });
 
   it('should return correct expand icon name', () => {

@@ -1,12 +1,7 @@
 <div class="goal-detail-page">
   <!-- ヘッダー -->
   <header class="goal-detail-page__header">
-    <button
-      type="button"
-      class="goal-detail-page__back-button"
-      (click)="router.navigate(['/goals'])"
-      aria-label="戻る"
-    >
+    <button type="button" class="goal-detail-page__back-button" (click)="router.navigate(['/goals'])" aria-label="戻る">
       ←
     </button>
     <h1 class="goal-detail-page__title">目標詳細</h1>
@@ -14,116 +9,109 @@
 
   <!-- エラーメッセージ -->
   @if (errorMessage()) {
-    <app-alert-banner variant="error" [message]="errorMessage()!" />
+  <app-alert-banner variant="error" [message]="errorMessage()!" />
   }
 
   <!-- ローディング状態 -->
   @if (isLoading()) {
-    <div class="goal-detail-page__loading">読み込み中...</div>
+  <div class="goal-detail-page__loading">読み込み中...</div>
   }
 
   <!-- 目標詳細 -->
   @if (goal() && !isLoading()) {
-    <div class="goal-detail-page__content">
-      <!-- 目標情報セクション -->
-      <section class="goal-detail-page__section">
-        <h2 class="goal-detail-page__section-title">目標情報</h2>
-        <div class="goal-detail-page__info">
-          <div class="goal-detail-page__info-item">
-            <span class="goal-detail-page__info-label">目標名</span>
-            <span class="goal-detail-page__info-value">{{ goal()!.name }}</span>
-          </div>
-          @if (goal()!.description) {
-            <div class="goal-detail-page__info-item">
-              <span class="goal-detail-page__info-label">説明</span>
-              <span class="goal-detail-page__info-value">{{ goal()!.description }}</span>
-            </div>
-          }
-          <div class="goal-detail-page__info-item">
-            <span class="goal-detail-page__info-label">期間</span>
-            <span class="goal-detail-page__info-value">
-              {{ goal()!.startDate }} 〜 {{ goal()!.endDate }}
-            </span>
-          </div>
-          @if (goal()!.parent) {
-            <div class="goal-detail-page__info-item">
-              <span class="goal-detail-page__info-label">上位目標</span>
-              <span class="goal-detail-page__info-value">
-                <a
-                  [routerLink]="['/goals', goal()!.parent!.id]"
-                  class="goal-detail-page__link"
-                >
-                  {{ goal()!.parent!.name }}
-                </a>
-              </span>
-            </div>
-          }
-          <div class="goal-detail-page__info-item">
-            <span class="goal-detail-page__info-label">目標の性質</span>
-            <span class="goal-detail-page__info-value">
-              {{ getGoalTypeLabel(goal()!.goalType) }}
-            </span>
-          </div>
-          @if (goal()!.successCriteria) {
-            <div class="goal-detail-page__info-item">
-              <span class="goal-detail-page__info-label">達成基準</span>
-              <span class="goal-detail-page__info-value">{{ goal()!.successCriteria }}</span>
-            </div>
-          }
+  <div class="goal-detail-page__content">
+    <!-- 目標情報セクション -->
+    <section class="goal-detail-page__section">
+      <h2 class="goal-detail-page__section-title">目標情報</h2>
+      <div class="goal-detail-page__info">
+        <div class="goal-detail-page__info-item">
+          <span class="goal-detail-page__info-label">目標名</span>
+          <span class="goal-detail-page__info-value">{{ goal()!.name }}</span>
         </div>
-      </section>
-
-      <!-- アクションバー -->
-      <div class="goal-detail-page__actions">
-        <app-button variant="secondary" (clicked)="onEdit()" [disabled]="isDeleting()">
-          編集
-        </app-button>
-        <app-button variant="secondary" (clicked)="onCreateChild()" [disabled]="isDeleting()">
-          下位目標を作成
-        </app-button>
-        <app-button variant="danger" (clicked)="onDelete()" [disabled]="isDeleting()">
-          削除
-        </app-button>
+        @if (goal()!.description) {
+        <div class="goal-detail-page__info-item">
+          <span class="goal-detail-page__info-label">説明</span>
+          <span class="goal-detail-page__info-value">{{ goal()!.description }}</span>
+        </div>
+        }
+        <div class="goal-detail-page__info-item">
+          <span class="goal-detail-page__info-label">期間</span>
+          <span class="goal-detail-page__info-value">
+            {{ goal()!.startDate }} 〜 {{ goal()!.endDate }}
+          </span>
+        </div>
+        @if (goal()!.parent) {
+        <div class="goal-detail-page__info-item">
+          <span class="goal-detail-page__info-label">上位目標</span>
+          <span class="goal-detail-page__info-value">
+            <a [routerLink]="['/goals', goal()!.parent!.id]" class="goal-detail-page__link">
+              {{ goal()!.parent!.name }}
+            </a>
+          </span>
+        </div>
+        }
+        <div class="goal-detail-page__info-item">
+          <span class="goal-detail-page__info-label">目標の性質</span>
+          <span class="goal-detail-page__info-value">
+            {{ getGoalTypeLabel(goal()!.goalType) }}
+          </span>
+        </div>
+        @if (goal()!.successCriteria) {
+        <div class="goal-detail-page__info-item">
+          <span class="goal-detail-page__info-label">達成基準</span>
+          <span class="goal-detail-page__info-value">{{ goal()!.successCriteria }}</span>
+        </div>
+        }
       </div>
+    </section>
 
-      <!-- 下位目標一覧セクション -->
-      @if (goal()!.children.length > 0) {
-        <section class="goal-detail-page__section">
-          <h2 class="goal-detail-page__section-title">下位目標</h2>
-          <div class="goal-detail-page__children">
-            @for (child of goal()!.children; track child.id) {
-              <app-hierarchy-card
-                [data]="getChildCardData(child)"
-                (clicked)="router.navigate(['/goals', child.id])"
-              />
-            }
-          </div>
-        </section>
-      }
-
-      <!-- 週次フォーカス接続（短期目標の場合のみ） -->
-      @if (isShortTermGoal) {
-        <section class="goal-detail-page__section">
-          <h2 class="goal-detail-page__section-title">週次フォーカス</h2>
-          <app-button variant="secondary" (clicked)="router.navigate(['/followups'])">
-            週次フォーカスを設定
-          </app-button>
-          <p class="goal-detail-page__note">
-            短期目標と週次フォーカスを接続することで、日々の活動と目標達成を結びつけることができます。
-          </p>
-        </section>
-      }
-
-      <!-- 関連日報セクション -->
-      <section class="goal-detail-page__section">
-        <app-related-daily-reports-list [goalId]="goal()!.id" />
-      </section>
+    <!-- アクションバー -->
+    <div class="goal-detail-page__actions">
+      <app-button variant="secondary" (clicked)="onEdit()" [disabled]="isDeleting()">
+        編集
+      </app-button>
+      <app-button variant="secondary" (clicked)="onCreateChild()" [disabled]="isDeleting()">
+        下位目標を作成
+      </app-button>
+      <app-button variant="danger" (clicked)="onDelete()" [disabled]="isDeleting()">
+        削除
+      </app-button>
     </div>
+
+    <!-- 下位目標一覧セクション -->
+    @if (goal()!.children.length > 0) {
+    <section class="goal-detail-page__section">
+      <h2 class="goal-detail-page__section-title">下位目標</h2>
+      <div class="goal-detail-page__children">
+        @for (child of goal()!.children; track child.id) {
+        <app-hierarchy-card [id]="child.id" [title]="child.name" (clicked)="router.navigate(['/goals', child.id])" />
+        }
+      </div>
+    </section>
+    }
+
+    <!-- 週次フォーカス接続（短期目標の場合のみ） -->
+    @if (isShortTermGoal) {
+    <section class="goal-detail-page__section">
+      <h2 class="goal-detail-page__section-title">週次フォーカス</h2>
+      <app-button variant="secondary" (clicked)="router.navigate(['/followups'])">
+        週次フォーカスを設定
+      </app-button>
+      <p class="goal-detail-page__note">
+        短期目標と週次フォーカスを接続することで、日々の活動と目標達成を結びつけることができます。
+      </p>
+    </section>
+    }
+
+    <!-- 関連日報セクション -->
+    <section class="goal-detail-page__section">
+      <app-related-daily-reports-list [goalId]="goal()!.id" />
+    </section>
+  </div>
   }
 
   <!-- トースト通知 -->
   @if (toastMessage()) {
-    <app-toast [message]="toastMessage()!" [variant]="toastVariant()" />
+  <app-toast [message]="toastMessage()!" [variant]="toastVariant()" />
   }
 </div>
-

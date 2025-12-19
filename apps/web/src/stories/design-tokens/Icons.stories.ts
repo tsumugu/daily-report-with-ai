@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Meta, StoryObj, moduleMetadata } from '@storybook/angular';
-import { IconComponent, IconName } from '../../app/shared/components/icon/icon.component';
+import { IconComponent, IconName } from '../../app/shared/ui/icon/icon.component';
 import {
   LucideAngularModule,
   FileText,

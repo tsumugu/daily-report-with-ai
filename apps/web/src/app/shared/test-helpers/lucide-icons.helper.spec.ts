@@ -1,14 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { provideLucideIconsForTesting } from './lucide-icons.helper';
 import { Component } from '@angular/core';
-import { IconComponent } from '../components/icon/icon.component';
+import { IconComponent } from '../ui/icon/icon.component';
 
 @Component({
   standalone: true,
   imports: [IconComponent],
   template: '<app-icon name="target"></app-icon>',
 })
-class TestComponent {}
+class TestComponent { }
 
 describe('lucide-icons.helper', () => {
   describe('provideLucideIconsForTesting', () => {
@@ -27,7 +27,7 @@ describe('lucide-icons.helper', () => {
 
       const fixture = TestBed.createComponent(TestComponent);
       fixture.detectChanges();
-      
+
       expect(fixture.componentInstance).toBeTruthy();
       const iconElement = fixture.nativeElement.querySelector('app-icon');
       expect(iconElement).toBeTruthy();

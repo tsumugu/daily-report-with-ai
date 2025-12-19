@@ -1,9 +1,13 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StatusBadgeComponent, StatusBadgeType } from '../../../../shared/components/status-badge/status-badge.component';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { IconComponent, IconName } from '../../../../shared/components/icon';
-import { IconButtonComponent } from '../../../../shared/components/icon-button';
+import {
+  StatusBadgeComponent,
+  StatusBadgeType,
+  ButtonComponent,
+  IconComponent,
+  IconName,
+  IconButtonComponent,
+} from '../../../../shared/ui';
 import { FollowupItem } from '../../../../shared/models/followup.model';
 
 @Component({

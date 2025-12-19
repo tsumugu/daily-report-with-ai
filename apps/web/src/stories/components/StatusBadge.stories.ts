@@ -1,5 +1,5 @@
 import { Meta, StoryObj, moduleMetadata } from '@storybook/angular';
-import { StatusBadgeComponent } from '../../app/shared/components';
+import { StatusBadgeComponent } from '../../app/shared/ui/status-badge/status-badge.component';
 import {
   LucideAngularModule,
   FileText,
@@ -18,7 +18,7 @@ import {
 } from 'lucide-angular';
 
 const meta: Meta<StatusBadgeComponent> = {
-  title: 'Components/StatusBadge',
+  title: 'Design System/UI Components/StatusBadge',
   component: StatusBadgeComponent,
   tags: ['autodocs'],
   decorators: [

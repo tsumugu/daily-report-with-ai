@@ -1,8 +1,8 @@
 import { Meta, StoryObj } from '@storybook/angular';
-import { EntitySelectFieldComponent, EntitySelectOption } from '../../app/shared/components/entity-select-field/entity-select-field.component';
+import { EntitySelectFieldComponent, EntitySelectOption } from '../../app/shared/ui/entity-select-field/entity-select-field.component';
 
 const meta: Meta<EntitySelectFieldComponent> = {
-  title: 'Components/EntitySelectField',
+  title: 'Design System/UI Components/EntitySelectField',
   component: EntitySelectFieldComponent,
   tags: ['autodocs'],
   parameters: {

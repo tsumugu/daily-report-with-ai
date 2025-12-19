@@ -9,7 +9,7 @@ import {
   GoodPointStatus,
   ImprovementStatus,
 } from '../models/daily-report.model';
-import { ReportCardData } from '../../../shared/components/report-card/report-card.component';
+import { ReportCardData } from '../../../shared/domain-components';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({

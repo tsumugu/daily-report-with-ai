@@ -10,8 +10,10 @@ import {
   TextareaFieldComponent,
   FormCardComponent,
   IconComponent,
+} from '../../../../shared/ui';
+import {
   GoalMultiSelectFieldComponent,
-} from '../../../../shared/components';
+} from '../../../../shared/domain-components';
 
 @Component({
   selector: 'app-daily-report-edit-page',
@@ -41,7 +43,7 @@ export class DailyReportEditPageComponent implements OnInit {
   // よかったこと・改善点の配列（リアクティブ）
   goodPoints = signal<GoodPointForm[]>([]);
   improvements = signal<ImprovementForm[]>([]);
-  
+
   // 選択された目標のIDリスト
   selectedGoalIds = signal<string[]>([]);
 
@@ -103,7 +105,7 @@ export class DailyReportEditPageComponent implements OnInit {
             action: imp.action || '',
           }))
         );
-        
+
         // 関連目標を設定
         this.selectedGoalIds.set(report.goals.map((g) => g.id));
 
@@ -182,7 +184,7 @@ export class DailyReportEditPageComponent implements OnInit {
    */
   onSubmit(): void {
     this.isSubmitted.set(true);
-    
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

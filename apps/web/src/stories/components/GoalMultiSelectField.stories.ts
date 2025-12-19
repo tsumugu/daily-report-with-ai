@@ -1,13 +1,13 @@
 import { Meta, StoryObj, moduleMetadata } from '@storybook/angular';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { GoalMultiSelectFieldComponent } from '../../app/shared/components/goal-multi-select-field/goal-multi-select-field.component';
+import { GoalMultiSelectFieldComponent } from '../../app/shared/domain-components/goal-multi-select-field/goal-multi-select-field.component';
 import { GoalService } from '../../app/features/goal/services/goal.service';
 import { of } from 'rxjs';
 import { Goal } from '../../app/features/goal/models/goal.model';
 
 const meta: Meta<GoalMultiSelectFieldComponent> = {
-  title: 'Components/GoalMultiSelectField',
+  title: 'Design System/Domain Components/GoalMultiSelectField',
   component: GoalMultiSelectFieldComponent,
   tags: ['autodocs'],
   decorators: [

@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
  * リストアイテムの表示アニメーション（stagger）を確認
  */
 const meta: Meta = {
-  title: 'Prototypes/MicroInteractions/ListItem',
+  title: 'Design System/Prototypes/Micro-interactions/List Item',
   tags: ['autodocs'],
   parameters: {
     docs: {

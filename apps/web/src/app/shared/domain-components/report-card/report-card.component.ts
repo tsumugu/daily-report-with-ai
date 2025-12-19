@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IconComponent } from '../icon';
+import { IconComponent } from '../../ui';
 import { GoalChipComponent } from '../goal-chip';
 import { GoalSummary } from '../../../features/daily-report/models/daily-report.model';
 

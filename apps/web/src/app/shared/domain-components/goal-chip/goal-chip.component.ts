@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { IconComponent } from '../icon';
+import { IconComponent } from '../../ui';
 
 @Component({
   selector: 'app-goal-chip',

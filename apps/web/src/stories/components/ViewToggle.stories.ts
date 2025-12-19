@@ -1,8 +1,8 @@
 import { Meta, StoryObj } from '@storybook/angular';
-import { ViewToggleComponent } from '../../app/shared/components/view-toggle/view-toggle.component';
+import { ViewToggleComponent } from '../../app/shared/ui/view-toggle/view-toggle.component';
 
 const meta: Meta<ViewToggleComponent> = {
-  title: 'Components/ViewToggle',
+  title: 'Design System/UI Components/ViewToggle',
   component: ViewToggleComponent,
   tags: ['autodocs'],
   parameters: {

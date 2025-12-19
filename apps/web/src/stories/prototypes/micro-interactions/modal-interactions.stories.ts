@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from '@storybook/angular';
-import { ButtonComponent } from '../../../app/shared/components/button/button.component';
+import { ButtonComponent } from '../../../app/shared/ui/button/button.component';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
  * モーダル開閉時のスケールアニメーションを確認
  */
 const meta: Meta = {
-  title: 'Prototypes/MicroInteractions/Modal',
+  title: 'Design System/Prototypes/Micro-interactions/Modal',
   tags: ['autodocs'],
   parameters: {
     docs: {

@@ -2,8 +2,12 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
-import { WeeklyFocusSectionComponent } from '../../../../shared/components/weekly-focus-section/weekly-focus-section.component';
-import { IconComponent } from '../../../../shared/components/icon';
+import {
+  WeeklyFocusSectionComponent,
+} from '../../../../shared/domain-components';
+import {
+  IconComponent,
+} from '../../../../shared/ui';
 
 /**
  * ホームページコンポーネント

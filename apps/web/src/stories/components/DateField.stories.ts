@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/angular';
-import { DateFieldComponent } from '../../app/shared/components/date-field/date-field.component';
+import { DateFieldComponent } from '../../app/shared/ui/date-field/date-field.component';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 
 const meta: Meta<DateFieldComponent> = {
-  title: 'Components/DateField',
+  title: 'Design System/UI Components/DateField',
   component: DateFieldComponent,
   tags: ['autodocs'],
 };

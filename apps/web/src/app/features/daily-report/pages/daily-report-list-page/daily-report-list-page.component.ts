@@ -3,7 +3,16 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { DailyReportService } from '../../services/daily-report.service';
 import { AuthService } from '../../../auth/services/auth.service';
-import { ReportCardComponent, ReportCardData, ButtonComponent, AlertBannerComponent, IconComponent, EmptyStateComponent } from '../../../../shared/components';
+import {
+  ButtonComponent,
+  AlertBannerComponent,
+  IconComponent,
+  EmptyStateComponent,
+} from '../../../../shared/ui';
+import {
+  ReportCardComponent,
+  ReportCardData,
+} from '../../../../shared/domain-components';
 import { listItemAnimation } from '../../../../shared/animations/page.animations';
 
 @Component({

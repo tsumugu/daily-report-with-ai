@@ -2,10 +2,12 @@ import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FollowupService } from '../../../../shared/services/followup.service';
 import { FollowupItem, CreateFollowupRequest, FollowupStatus } from '../../../../shared/models/followup.model';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { TextareaFieldComponent } from '../../../../shared/components/textarea-field/textarea-field.component';
-import { DateFieldComponent } from '../../../../shared/components/date-field/date-field.component';
-import { FormCardComponent } from '../../../../shared/components/form-card/form-card.component';
+import {
+  ButtonComponent,
+  TextareaFieldComponent,
+  DateFieldComponent,
+  FormCardComponent,
+} from '../../../../shared/ui';
 import { modalScaleAnimation } from '../../../../shared/animations/page.animations';
 
 @Component({

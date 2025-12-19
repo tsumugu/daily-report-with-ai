@@ -3,7 +3,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { WeeklyFocusService } from '../../services/weekly-focus.service';
 import { WeeklyFocusResponse } from '../../models/weekly-focus.model';
 import { WeeklyFocusCardComponent } from '../weekly-focus-card/weekly-focus-card.component';
-import { ButtonComponent } from '../button/button.component';
+import { ButtonComponent } from '../../ui';
 import { Subscription, filter } from 'rxjs';
 
 @Component({

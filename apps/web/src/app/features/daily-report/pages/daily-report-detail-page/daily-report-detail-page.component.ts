@@ -4,7 +4,16 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DailyReportService } from '../../services/daily-report.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { DailyReport, GoodPointStatus, ImprovementStatus } from '../../models/daily-report.model';
-import { ButtonComponent, AlertBannerComponent, IconComponent, StatusBadgeComponent, StatusBadgeType, GoalChipComponent } from '../../../../shared/components';
+import {
+  ButtonComponent,
+  AlertBannerComponent,
+  IconComponent,
+  StatusBadgeComponent,
+  StatusBadgeType,
+} from '../../../../shared/ui';
+import {
+  GoalChipComponent,
+} from '../../../../shared/domain-components';
 
 @Component({
   selector: 'app-daily-report-detail-page',

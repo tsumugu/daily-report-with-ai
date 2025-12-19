@@ -1,0 +1,25 @@
+<div class="hierarchy-card" (click)="onCardClick()" (keyup.enter)="onCardClick()" tabindex="0" role="button">
+  <div class="hierarchy-card__header">
+    @if (showExpandIcon) {
+    <button type="button" class="hierarchy-card__expand-button" (click)="onExpandToggle($event)"
+      [attr.aria-expanded]="isExpanded" aria-label="展開/折りたたみ">
+      <app-icon [name]="expandIconName" [size]="20" color="var(--color-gray-600)" />
+    </button>
+    }
+    <div class="hierarchy-card__content">
+      <div class="hierarchy-card__title">
+        <app-icon name="target" [size]="20" color="var(--color-primary-500)" />
+        <span>{{ title }}</span>
+      </div>
+      @if (subtitle) {
+      <div class="hierarchy-card__subtitle">{{ subtitle }}</div>
+      }
+      @if (metadata) {
+      <div class="hierarchy-card__metadata">{{ metadata }}</div>
+      }
+      @if (levelName) {
+      <div class="hierarchy-card__level">{{ levelName }}</div>
+      }
+    </div>
+  </div>
+</div>

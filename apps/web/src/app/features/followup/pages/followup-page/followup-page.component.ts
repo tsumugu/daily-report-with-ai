@@ -4,13 +4,16 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { FollowupService } from '../../../../shared/services/followup.service';
 import { Episode, Action, EpisodesResponse, ActionsResponse } from '../../../../shared/models/followup.model';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { DateFieldComponent } from '../../../../shared/components/date-field/date-field.component';
-import { TextareaFieldComponent } from '../../../../shared/components/textarea-field/textarea-field.component';
-import { StatusBadgeComponent, StatusBadgeType } from '../../../../shared/components/status-badge/status-badge.component';
-import { ToastComponent } from '../../../../shared/components/toast/toast.component';
-import { IconComponent } from '../../../../shared/components/icon/icon.component';
-import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import {
+  ButtonComponent,
+  DateFieldComponent,
+  TextareaFieldComponent,
+  StatusBadgeComponent,
+  StatusBadgeType,
+  ToastComponent,
+  IconComponent,
+  EmptyStateComponent,
+} from '../../../../shared/ui';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -345,7 +348,7 @@ export class FollowupPageComponent implements OnInit, OnDestroy {
       error: (err: { error?: { message?: string } }) => {
         this.errorMessage.set(
           err.error?.message ||
-            (itemType === 'goodPoint' ? 'エピソードの追加に失敗しました' : 'アクションの追加に失敗しました')
+          (itemType === 'goodPoint' ? 'エピソードの追加に失敗しました' : 'アクションの追加に失敗しました')
         );
         this.isSubmitting.set(false);
       },
@@ -380,7 +383,7 @@ export class FollowupPageComponent implements OnInit, OnDestroy {
       error: (err: { error?: { message?: string } }) => {
         this.showToast(
           err.error?.message ||
-            (itemType === 'goodPoint' ? 'エピソードの削除に失敗しました' : 'アクションの削除に失敗しました'),
+          (itemType === 'goodPoint' ? 'エピソードの削除に失敗しました' : 'アクションの削除に失敗しました'),
           'error'
         );
       },
@@ -449,8 +452,8 @@ export class FollowupPageComponent implements OnInit, OnDestroy {
    * エピソード/アクション一覧が空かどうか
    */
   get isEmpty(): boolean {
-    return this.itemType() === 'goodPoint' 
-      ? this.episodes().length === 0 
+    return this.itemType() === 'goodPoint'
+      ? this.episodes().length === 0
       : this.actions().length === 0;
   }
 }

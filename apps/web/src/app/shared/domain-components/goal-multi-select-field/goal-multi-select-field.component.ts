@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { GoalService } from '../../../features/goal/services/goal.service';
 import { Goal } from '../../../features/goal/models/goal.model';
-import { IconComponent } from '../icon';
+import { IconComponent } from '../../ui';
 import { GoalChipComponent } from '../goal-chip';
 
 /**

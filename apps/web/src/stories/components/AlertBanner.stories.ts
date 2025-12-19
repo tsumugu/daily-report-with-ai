@@ -1,8 +1,8 @@
 import { Meta, StoryObj } from '@storybook/angular';
-import { AlertBannerComponent } from '../../app/shared/components/alert-banner/alert-banner.component';
+import { AlertBannerComponent } from '../../app/shared/ui/alert-banner/alert-banner.component';
 
 const meta: Meta<AlertBannerComponent> = {
-  title: 'Components/AlertBanner',
+  title: 'Design System/UI Components/AlertBanner',
   component: AlertBannerComponent,
   tags: ['autodocs'],
   argTypes: {

@@ -7,7 +7,7 @@ import { of, throwError } from 'rxjs';
 import { HomePageComponent } from './home-page.component';
 import { AuthService } from '../../../auth/services/auth.service';
 import { provideLucideIconsForTesting } from '../../../../shared/test-helpers/lucide-icons.helper';
-import { WeeklyFocusSectionComponent } from '../../../../shared/components/weekly-focus-section/weekly-focus-section.component';
+import { WeeklyFocusSectionComponent } from '../../../../shared/domain-components';
 import { By } from '@angular/platform-browser';
 
 describe('HomePageComponent', () => {
@@ -122,14 +122,14 @@ describe('HomePageComponent', () => {
       fixture.detectChanges();
       const weeklyFocusSectionDebugElement = fixture.debugElement.query(By.directive(WeeklyFocusSectionComponent));
       expect(weeklyFocusSectionDebugElement).toBeTruthy();
-      
+
       // WeeklyFocusSectionComponentのインスタンスを取得
       const weeklyFocusSectionComponent = weeklyFocusSectionDebugElement.componentInstance;
-      
+
       // addClickedイベントを発火（これでテンプレートのイベントバインディングが実行される）
       weeklyFocusSectionComponent.addClicked.emit();
       fixture.detectChanges();
-      
+
       // onAddWeeklyFocusが呼ばれたことを確認
       expect(router.navigate).toHaveBeenCalledWith(['/followups']);
     });

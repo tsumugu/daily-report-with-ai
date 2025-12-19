@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from '@storybook/angular';
-import { InputFieldComponent } from '../../../app/shared/components/input-field/input-field.component';
-import { TextareaFieldComponent } from '../../../app/shared/components/textarea-field/textarea-field.component';
+import { InputFieldComponent } from '../../../app/shared/ui/input-field/input-field.component';
+import { TextareaFieldComponent } from '../../../app/shared/ui/textarea-field/textarea-field.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
  * フォーカス、バリデーション、エラー表示のアニメーションを確認
  */
 const meta: Meta = {
-  title: 'Prototypes/MicroInteractions/Form',
+  title: 'Design System/Prototypes/Micro-interactions/Form',
   tags: ['autodocs'],
   parameters: {
     docs: {

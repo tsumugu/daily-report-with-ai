@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { GoalService } from '../../../features/goal/services/goal.service';
 import { GoalDetailResponse, DailyReportSummary } from '../../../features/goal/models/goal.model';
-import { ButtonComponent, EmptyStateComponent } from '../index';
+import { ButtonComponent, EmptyStateComponent } from '../../ui';
 
 @Component({
   selector: 'app-related-daily-reports-list',

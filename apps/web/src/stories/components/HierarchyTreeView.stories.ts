@@ -1,8 +1,8 @@
 import { Meta, StoryObj } from '@storybook/angular';
-import { HierarchyTreeViewComponent, HierarchyTreeNode } from '../../app/shared/components/hierarchy-tree-view/hierarchy-tree-view.component';
+import { HierarchyTreeViewComponent, HierarchyTreeNode } from '../../app/shared/ui/hierarchy-tree-view/hierarchy-tree-view.component';
 
 const meta: Meta<HierarchyTreeViewComponent> = {
-  title: 'Components/HierarchyTreeView',
+  title: 'Design System/UI Components/HierarchyTreeView',
   component: HierarchyTreeViewComponent,
   tags: ['autodocs'],
   parameters: {
@@ -39,8 +39,7 @@ const mockNodes: HierarchyTreeNode[] = [
       title: 'スキル習得',
       subtitle: 'フロントエンド開発のスキルを向上させる',
       metadata: '2025-01-01 〜 2025-06-30',
-      level: 'long',
-      type: 'skill',
+      levelName: '長期目標',
     },
     children: [
       {
@@ -50,8 +49,7 @@ const mockNodes: HierarchyTreeNode[] = [
           title: 'React基礎を習得',
           subtitle: 'Reactの基本概念と実践的な使い方を学ぶ',
           metadata: '2025-01-01 〜 2025-03-31',
-          level: 'medium',
-          type: 'skill',
+          levelName: '中期目標',
         },
         children: [
           {
@@ -60,7 +58,7 @@ const mockNodes: HierarchyTreeNode[] = [
               id: '3',
               title: '週次学習',
               metadata: '2025-01-01 〜 2025-01-07',
-              level: 'short',
+              levelName: '短期目標',
             },
             children: [],
           },
@@ -73,8 +71,7 @@ const mockNodes: HierarchyTreeNode[] = [
           title: 'Next.jsを習得',
           subtitle: 'Next.jsの基本から応用まで',
           metadata: '2025-04-01 〜 2025-06-30',
-          level: 'medium',
-          type: 'skill',
+          levelName: '中期目標',
         },
         children: [],
       },
@@ -105,7 +102,7 @@ export const SingleNode: Story = {
           id: '1',
           title: '単一目標',
           metadata: '2025-01-01 〜 2025-06-30',
-          level: 'long',
+          levelName: '長期目標',
         },
         children: [],
       },
@@ -122,7 +119,7 @@ export const DeepHierarchy: Story = {
         data: {
           id: '1',
           title: '長期目標1',
-          level: 'long',
+          levelName: '長期目標',
         },
         children: [
           {
@@ -130,7 +127,7 @@ export const DeepHierarchy: Story = {
             data: {
               id: '2',
               title: '中期目標1',
-              level: 'medium',
+              levelName: '中期目標',
             },
             children: [
               {
@@ -138,7 +135,7 @@ export const DeepHierarchy: Story = {
                 data: {
                   id: '3',
                   title: '短期目標1',
-                  level: 'short',
+                  levelName: '短期目標',
                 },
                 children: [
                   {
@@ -146,7 +143,7 @@ export const DeepHierarchy: Story = {
                     data: {
                       id: '4',
                       title: '週次目標1',
-                      level: 'short',
+                      levelName: '短期目標',
                     },
                     children: [],
                   },

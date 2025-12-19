@@ -14,7 +14,7 @@ describe('HierarchyTreeViewComponent', () => {
       data: {
         id: '1',
         title: 'テスト目標1',
-        level: 'long',
+        levelName: '長期目標',
       },
       children: [
         {
@@ -22,7 +22,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '2',
             title: 'テスト目標2',
-            level: 'medium',
+            levelName: '中期目標',
           },
           children: [],
         },
@@ -165,11 +165,11 @@ describe('HierarchyTreeViewComponent', () => {
       fixture.detectChanges();
       tick(0);
       fixture.detectChanges();
-      
+
       // cardElementsを取得
       const cardElements = component['cardElements'];
       expect(cardElements).toBeDefined();
-      
+
       // nativeElementが存在するcardElementの数を数える
       let nativeElementCount = 0;
       cardElements?.forEach((cardEl) => {
@@ -177,16 +177,16 @@ describe('HierarchyTreeViewComponent', () => {
           nativeElementCount++;
         }
       });
-      
+
       // nativeElementが存在する場合、setupResizeObserverを呼び出す
       if (nativeElementCount > 0) {
         // 既存のresizeObserverをクリア
         component['resizeObserver']?.disconnect();
         component['resizeObserver'] = undefined;
-        
+
         // setupResizeObserverを呼び出す（109行目が実行される）
         component['setupResizeObserver']();
-        
+
         // ResizeObserverが作成されたことを確認
         expect(component['resizeObserver']).toBeDefined();
       }
@@ -212,7 +212,7 @@ describe('HierarchyTreeViewComponent', () => {
           callback({ nativeElement: mockElement });
         }
       };
-      
+
       // cardElementsを一時的にモック
       const originalCardElements = component['cardElements'];
       Object.defineProperty(component, 'cardElements', {
@@ -223,7 +223,7 @@ describe('HierarchyTreeViewComponent', () => {
       // ResizeObserverをモックして、observeが呼ばれることを確認
       const observedElements: Element[] = [];
       const originalResizeObserver = window.ResizeObserver;
-      
+
       class MockResizeObserver {
         callback: ResizeObserverCallback;
         constructor(callback: ResizeObserverCallback) {
@@ -239,13 +239,13 @@ describe('HierarchyTreeViewComponent', () => {
           // Mock implementation
         }
       }
-      
+
       (window as unknown as { ResizeObserver: typeof MockResizeObserver }).ResizeObserver = MockResizeObserver;
-      
+
       try {
         // setupResizeObserverを呼び出す
         component['setupResizeObserver']();
-        
+
         // observeが呼ばれたことを確認（109行目がカバーされる）
         expect(observedElements.length).toBe(1);
         expect(observedElements[0]).toBe(mockElement);
@@ -282,7 +282,7 @@ describe('HierarchyTreeViewComponent', () => {
 
       // updateConnectorLinesを直接呼び出す
       component['updateConnectorLines']();
-      
+
       // エラーが発生しないことを確認
       expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
     });
@@ -309,7 +309,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '1',
             title: '目標1',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -318,7 +318,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '2',
             title: '目標2',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -334,7 +334,7 @@ describe('HierarchyTreeViewComponent', () => {
 
       // updateConnectorLinesを直接呼び出す
       component['updateConnectorLines']();
-      
+
       // エラーが発生しないことを確認
       expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
     }));
@@ -353,7 +353,7 @@ describe('HierarchyTreeViewComponent', () => {
 
         // setupResizeObserverが呼ばれることを確認（直接呼び出し）
         component['setupResizeObserver']();
-        
+
         // updateConnectorLinesが呼ばれることを確認
         component['updateConnectorLines']();
         expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
@@ -368,7 +368,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '1',
             title: '目標1',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -377,7 +377,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '2',
             title: '目標2',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -393,7 +393,7 @@ describe('HierarchyTreeViewComponent', () => {
 
       // updateConnectorLinesを直接呼び出す
       component['updateConnectorLines']();
-      
+
       // エラーが発生しないことを確認
       expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
     }));
@@ -406,7 +406,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '1',
             title: '目標1',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -415,7 +415,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '2',
             title: '目標2',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -439,7 +439,7 @@ describe('HierarchyTreeViewComponent', () => {
 
       // updateConnectorLinesを直接呼び出す
       component['updateConnectorLines']();
-      
+
       // エラーが発生しないことを確認（早期returnされる）
       expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
     }));
@@ -452,7 +452,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '1',
             title: '目標1',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -461,7 +461,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '2',
             title: '目標2',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -485,7 +485,7 @@ describe('HierarchyTreeViewComponent', () => {
 
       // updateConnectorLinesを直接呼び出す
       component['updateConnectorLines']();
-      
+
       // エラーが発生しないことを確認（早期returnされる）
       expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
     }));
@@ -498,7 +498,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '1',
             title: '目標1',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -507,7 +507,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '2',
             title: '目標2',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -525,7 +525,7 @@ describe('HierarchyTreeViewComponent', () => {
       const nativeElement = fixture.nativeElement;
       const buttons = nativeElement.querySelectorAll('.hierarchy-tree-view__create-child-button');
       const containers = nativeElement.querySelectorAll('.hierarchy-tree-view');
-      
+
       // プラスボタンとコンテナが存在する場合、updateConnectorLinesを呼び出す
       if (buttons.length >= 2 && containers.length > 0) {
         // getBoundingClientRectをモック
@@ -537,15 +537,15 @@ describe('HierarchyTreeViewComponent', () => {
           width: 100,
           height: 50,
         };
-        
+
         // すべての要素のgetBoundingClientRectをモック
         const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
         Element.prototype.getBoundingClientRect = jasmine.createSpy('getBoundingClientRect').and.returnValue(mockRect);
-        
+
         try {
           // updateConnectorLinesを直接呼び出す
           component['updateConnectorLines']();
-          
+
           // エラーが発生しないことを確認
           expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
         } finally {
@@ -563,7 +563,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '1',
             title: '目標1',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -572,7 +572,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '2',
             title: '目標2',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -592,7 +592,7 @@ describe('HierarchyTreeViewComponent', () => {
 
       // updateConnectorLinesを直接呼び出す
       component['updateConnectorLines']();
-      
+
       // エラーが発生しないことを確認
       expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
     }));
@@ -605,7 +605,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '1',
             title: '親目標',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [
             {
@@ -613,7 +613,7 @@ describe('HierarchyTreeViewComponent', () => {
               data: {
                 id: '2',
                 title: '子目標',
-                level: 'medium',
+                levelName: '中期目標',
               },
               children: [],
             },
@@ -633,7 +633,7 @@ describe('HierarchyTreeViewComponent', () => {
       // DOM要素が存在することを確認
       const nativeElement = fixture.nativeElement;
       const childrenElements = nativeElement.querySelectorAll('.hierarchy-tree-view__children');
-      
+
       // 子要素が存在する場合、updateConnectorLinesを呼び出す
       if (childrenElements.length > 0) {
         // getBoundingClientRectをモック
@@ -645,15 +645,15 @@ describe('HierarchyTreeViewComponent', () => {
           width: 100,
           height: 50,
         };
-        
+
         // すべての要素のgetBoundingClientRectをモック
         const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
         Element.prototype.getBoundingClientRect = jasmine.createSpy('getBoundingClientRect').and.returnValue(mockRect);
-        
+
         try {
           // updateConnectorLinesを直接呼び出す
           component['updateConnectorLines']();
-          
+
           // エラーが発生しないことを確認
           expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
         } finally {
@@ -671,7 +671,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '1',
             title: '目標1',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -680,7 +680,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '2',
             title: '目標2',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -698,7 +698,7 @@ describe('HierarchyTreeViewComponent', () => {
       const nativeElement = fixture.nativeElement;
       const buttons = nativeElement.querySelectorAll('.hierarchy-tree-view__create-child-button');
       const cards = nativeElement.querySelectorAll('app-hierarchy-card');
-      
+
       // プラスボタンとカードが存在する場合、updateConnectorLinesを呼び出す
       if (buttons.length >= 2 && cards.length >= 2) {
         // getBoundingClientRectをモック（次のノードが右側にあるように設定）
@@ -726,7 +726,7 @@ describe('HierarchyTreeViewComponent', () => {
           width: 300,
           height: 100,
         };
-        
+
         // すべての要素のgetBoundingClientRectをモック
         const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
         let callCount = 0;
@@ -740,11 +740,11 @@ describe('HierarchyTreeViewComponent', () => {
             return wrapperRect;
           }
         });
-        
+
         try {
           // updateConnectorLinesを直接呼び出す
           component['updateConnectorLines']();
-          
+
           // エラーが発生しないことを確認
           expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
           // siblingLineDataが設定されていることを確認（siblingLineWidth > 0の場合）
@@ -764,7 +764,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '1',
             title: '目標1',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -773,7 +773,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '2',
             title: '目標2',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -791,7 +791,7 @@ describe('HierarchyTreeViewComponent', () => {
       const nativeElement = fixture.nativeElement;
       const buttons = nativeElement.querySelectorAll('.hierarchy-tree-view__create-child-button');
       const containers = nativeElement.querySelectorAll('.hierarchy-tree-view');
-      
+
       // プラスボタンとコンテナが存在する場合、updateConnectorLinesを呼び出す
       if (buttons.length >= 2 && containers.length > 0) {
         // getBoundingClientRectをモック（次のボタンが下側にあるように設定）
@@ -827,7 +827,7 @@ describe('HierarchyTreeViewComponent', () => {
           width: 300,
           height: 100,
         };
-        
+
         // すべての要素のgetBoundingClientRectをモック
         const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
         let callCount = 0;
@@ -843,11 +843,11 @@ describe('HierarchyTreeViewComponent', () => {
             return wrapperRect;
           }
         });
-        
+
         try {
           // updateConnectorLinesを直接呼び出す
           component['updateConnectorLines']();
-          
+
           // エラーが発生しないことを確認
           expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
           // siblingVerticalLineDataが設定されていることを確認（verticalLineHeight > 0の場合）
@@ -873,10 +873,10 @@ describe('HierarchyTreeViewComponent', () => {
 
         // setupResizeObserverを呼び出す
         component['setupResizeObserver']();
-        
+
         // ResizeObserverが設定されていることを確認
         expect(component['resizeObserver']).toBeDefined();
-        
+
         // cardElementsが存在する場合、ResizeObserverが監視していることを確認
         if (component['cardElements'] && component['cardElements'].length > 0) {
           // ResizeObserverのobserveが呼ばれていることを確認（直接確認は難しいが、エラーが発生しないことを確認）
@@ -899,17 +899,17 @@ describe('HierarchyTreeViewComponent', () => {
 
         // setupResizeObserverを呼び出す
         component['setupResizeObserver']();
-        
+
         // ResizeObserverが設定されていることを確認
         const resizeObserver = component['resizeObserver'];
         expect(resizeObserver).toBeDefined();
-        
+
         // ResizeObserverのコールバックを手動で呼び出す（実際のリサイズをシミュレート）
         // これは直接テストできないため、updateConnectorLinesとdetectChangesが呼ばれることを確認
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         spyOn(component as any, 'updateConnectorLines');
         spyOn(component['cdr'], 'detectChanges');
-        
+
         // ResizeObserverのコールバックを手動で呼び出す
         // 実際のResizeObserverのコールバックは、observeされた要素がリサイズされたときに呼ばれる
         // テストでは、コールバック関数を直接呼び出すことはできないため、
@@ -917,7 +917,7 @@ describe('HierarchyTreeViewComponent', () => {
         // updateConnectorLinesを直接呼び出して、エラーが発生しないことを確認
         component['updateConnectorLines']();
         component['cdr'].detectChanges();
-        
+
         // エラーが発生しないことを確認
         expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
       }
@@ -939,10 +939,10 @@ describe('HierarchyTreeViewComponent', () => {
       // この場合、nodeがnullとして扱われ、早期returnされる
       const originalNodes = component.nodes;
       component.nodes = [originalNodes[0]]; // ノードを1つに減らす
-      
+
       // updateConnectorLinesを直接呼び出す
       component['updateConnectorLines']();
-      
+
       // エラーが発生しないことを確認（早期returnされる）
       expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
     }));
@@ -955,7 +955,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '1',
             title: '目標1',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -964,7 +964,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '2',
             title: '目標2',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -981,18 +981,18 @@ describe('HierarchyTreeViewComponent', () => {
       // treeViewContainerをnullに設定し、closestもnullを返すようにモック
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       component['treeViewContainer'] = null as any;
-      
+
       // DOM要素のclosestメソッドをモックしてnullを返す
       const nativeElement = fixture.nativeElement;
       const nodes = nativeElement.querySelectorAll('.hierarchy-tree-view__node');
       if (nodes.length > 0) {
         const originalClosest = Element.prototype.closest;
         Element.prototype.closest = jasmine.createSpy('closest').and.returnValue(null);
-        
+
         try {
           // updateConnectorLinesを直接呼び出す
           component['updateConnectorLines']();
-          
+
           // エラーが発生しないことを確認（早期returnされる）
           expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
         } finally {
@@ -1011,7 +1011,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '1',
             title: '目標1',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -1020,7 +1020,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '2',
             title: '目標2',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -1094,7 +1094,7 @@ describe('HierarchyTreeViewComponent', () => {
           writable: true,
           configurable: true
         });
-        
+
         const originalButton1GetBoundingClientRect = buttons[0].getBoundingClientRect;
         const originalButton2GetBoundingClientRect = buttons[1].getBoundingClientRect;
         const originalContainerGetBoundingClientRect = container.getBoundingClientRect;
@@ -1104,7 +1104,7 @@ describe('HierarchyTreeViewComponent', () => {
         const cards = nativeElement.querySelectorAll('app-hierarchy-card') as NodeListOf<HTMLElement>;
         const originalWrapperGetBoundingClientRects: (() => DOMRect)[] = [];
         const originalCardGetBoundingClientRects: (() => DOMRect)[] = [];
-        
+
         let wrapperIndex = 0;
         wrappers.forEach((wrapper) => {
           originalWrapperGetBoundingClientRects.push(wrapper.getBoundingClientRect);
@@ -1128,7 +1128,7 @@ describe('HierarchyTreeViewComponent', () => {
             configurable: true
           });
         });
-        
+
         let cardIndex = 0;
         cards.forEach((card) => {
           originalCardGetBoundingClientRects.push(card.getBoundingClientRect);
@@ -1156,13 +1156,13 @@ describe('HierarchyTreeViewComponent', () => {
         try {
           // siblingVerticalLineDataをクリア
           component['siblingVerticalLineData'].clear();
-          
+
           // updateConnectorLinesを直接呼び出す
           component['updateConnectorLines']();
-          
+
           // エラーが発生しないことを確認
           expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
-          
+
           // siblingVerticalLineDataにデータが設定されていることを確認（289行目をカバー）
           // verticalLineHeight = nextButtonTop - currentButtonBottom = 150 - 32 = 118 > 0
           // 注意: siblingLineWidth > 0の条件も満たす必要がある
@@ -1228,7 +1228,7 @@ describe('HierarchyTreeViewComponent', () => {
       const mockDisconnectSpy = jasmine.createSpy('disconnect');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const originalResizeObserver = (window as any).ResizeObserver;
-      
+
       // ResizeObserverをモック（コンストラクタとして動作するように）
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).ResizeObserver = class MockResizeObserver {
@@ -1238,11 +1238,11 @@ describe('HierarchyTreeViewComponent', () => {
         observe = mockObserveSpy;
         disconnect = mockDisconnectSpy;
       };
-      
+
       try {
         // setupResizeObserverを呼び出す
         component['setupResizeObserver']();
-        
+
         // cardElementsの各要素に対してobserveが呼ばれることを確認（109行目をカバー）
         let observeCallCount = 0;
         cardElements?.forEach((cardEl) => {
@@ -1250,20 +1250,20 @@ describe('HierarchyTreeViewComponent', () => {
             observeCallCount++;
           }
         });
-        
+
         // observeが呼ばれたことを確認（109行目をカバー）
         expect(mockObserveSpy).toHaveBeenCalledTimes(observeCallCount);
-        
+
         // コールバック関数が存在することを確認
         expect(callbackFunction).toBeDefined();
-        
+
         // ResizeObserverのコールバック関数を直接呼び出す（102, 103行目をカバー）
         // スパイを使用せず、実際の実装を実行する
         if (callbackFunction) {
           // コールバック関数を直接呼び出す（102, 103行目をカバー）
           // これにより、ResizeObserverのコールバック内の処理が実行される
           callbackFunction();
-          
+
           // エラーが発生しないことを確認
           expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
         }
@@ -1283,10 +1283,10 @@ describe('HierarchyTreeViewComponent', () => {
       fixture.detectChanges();
       tick(0);
       fixture.detectChanges();
-      
+
       // cardElementsを取得
       const cardElements = component['cardElements'];
-      
+
       // cardElementsが存在する場合
       if (cardElements && cardElements.length > 0) {
         // 各cardElementのnativeElementを確認
@@ -1296,11 +1296,11 @@ describe('HierarchyTreeViewComponent', () => {
             hasNativeElement = true;
           }
         });
-        
+
         if (hasNativeElement) {
           // 手動でsetupResizeObserverを呼び出す
           component['setupResizeObserver']();
-          
+
           // ResizeObserverが作成されたことを確認
           expect(component['resizeObserver']).toBeDefined();
         } else {
@@ -1334,7 +1334,7 @@ describe('HierarchyTreeViewComponent', () => {
           const mockResizeObserver = jasmine.createSpyObj('ResizeObserver', ['observe', 'disconnect']);
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const originalResizeObserver = (window as any).ResizeObserver;
-          
+
           // ResizeObserverをspyで置き換える
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (window as any).ResizeObserver = class MockResizeObserver {
@@ -1344,14 +1344,14 @@ describe('HierarchyTreeViewComponent', () => {
             observe = mockResizeObserver.observe;
             disconnect = mockResizeObserver.disconnect;
           };
-          
+
           try {
             // setupResizeObserverを呼び出す
             component['setupResizeObserver']();
-            
+
             // ResizeObserverが作成されたことを確認
             expect(component['resizeObserver']).toBeDefined();
-            
+
             // cardElementsの各要素に対してobserveが呼ばれることを確認（109行目をカバー）
             let observeCallCount = 0;
             cardElements.forEach((cardEl) => {
@@ -1359,20 +1359,20 @@ describe('HierarchyTreeViewComponent', () => {
                 observeCallCount++;
               }
             });
-            
+
             if (observeCallCount > 0) {
               // observeが呼ばれたことを確認（109行目をカバー）
               expect(mockResizeObserver.observe).toHaveBeenCalledTimes(observeCallCount);
-              
+
               // コールバック関数が存在することを確認
               expect(callbackFunction).toBeDefined();
-              
+
               // コールバック関数を直接呼び出す（102, 103行目をカバー）
               if (callbackFunction) {
                 // スパイを使用せず、実際の実装を実行する（102, 103行目をカバー）
                 // コールバック関数を直接呼び出すことで、ResizeObserverのコールバック内の処理が実行される
                 callbackFunction();
-                
+
                 // エラーが発生しないことを確認
                 expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
               }
@@ -1407,7 +1407,7 @@ describe('HierarchyTreeViewComponent', () => {
           const mockResizeObserver = jasmine.createSpyObj('ResizeObserver', ['observe', 'disconnect']);
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const originalResizeObserver = (window as any).ResizeObserver;
-          
+
           // ResizeObserverをspyで置き換える
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (window as any).ResizeObserver = class MockResizeObserver {
@@ -1417,14 +1417,14 @@ describe('HierarchyTreeViewComponent', () => {
             observe = mockResizeObserver.observe;
             disconnect = mockResizeObserver.disconnect;
           };
-          
+
           try {
             // setupResizeObserverを呼び出す
             component['setupResizeObserver']();
-            
+
             // ResizeObserverが作成されたことを確認
             expect(component['resizeObserver']).toBeDefined();
-            
+
             // cardElementsの各要素に対してobserveが呼ばれることを確認（109行目をカバー）
             let observeCallCount = 0;
             cardElements.forEach((cardEl) => {
@@ -1432,14 +1432,14 @@ describe('HierarchyTreeViewComponent', () => {
                 observeCallCount++;
               }
             });
-            
+
             if (observeCallCount > 0) {
               // observeが呼ばれたことを確認（109行目をカバー）
               expect(mockResizeObserver.observe).toHaveBeenCalledTimes(observeCallCount);
-              
+
               // コールバック関数が存在することを確認
               expect(callbackFunction).toBeDefined();
-              
+
               // コールバック関数を直接呼び出す（102, 103行目をカバー）
               // スパイを使用せず、実際の実装を実行する
               if (callbackFunction) {
@@ -1448,7 +1448,7 @@ describe('HierarchyTreeViewComponent', () => {
                 // 102行目: this.updateConnectorLines();
                 // 103行目: this.cdr.detectChanges();
                 callbackFunction();
-                
+
                 // エラーが発生しないことを確認
                 expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
               }
@@ -1476,11 +1476,11 @@ describe('HierarchyTreeViewComponent', () => {
 
         // setupResizeObserverを呼び出す（実際のResizeObserverを使用）
         component['setupResizeObserver']();
-        
+
         // ResizeObserverが設定されていることを確認
         const resizeObserver = component['resizeObserver'];
         expect(resizeObserver).toBeDefined();
-        
+
         // ResizeObserverのコールバック関数を直接呼び出すために、
         // resizeObserverの内部状態を確認
         // 実際のResizeObserverのコールバック関数は、observeされた要素がリサイズされたときに呼ばれる
@@ -1494,7 +1494,7 @@ describe('HierarchyTreeViewComponent', () => {
         // updateConnectorLinesを直接呼び出して、エラーが発生しないことを確認
         component['updateConnectorLines']();
         component['cdr'].detectChanges();
-        
+
         // エラーが発生しないことを確認
         expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
       }
@@ -1514,11 +1514,11 @@ describe('HierarchyTreeViewComponent', () => {
 
         // setupResizeObserverを呼び出す（実際のResizeObserverを使用）
         component['setupResizeObserver']();
-        
+
         // ResizeObserverが設定されていることを確認
         const resizeObserver = component['resizeObserver'];
         expect(resizeObserver).toBeDefined();
-        
+
         // cardElementsが存在する場合、実際のリサイズイベントをシミュレート
         const cardElements = component['cardElements'];
         if (cardElements && cardElements.length > 0 && cardElements.first?.nativeElement) {
@@ -1527,21 +1527,21 @@ describe('HierarchyTreeViewComponent', () => {
           const element = cardElements.first.nativeElement;
           const originalWidth = element.offsetWidth;
           const originalHeight = element.offsetHeight;
-          
+
           // 要素のサイズを変更（実際のリサイズイベントをトリガー）
           element.style.width = (originalWidth + 10) + 'px';
           element.style.height = (originalHeight + 10) + 'px';
-          
+
           // ResizeObserverのコールバックが呼ばれるまで待つ
           tick(100);
           fixture.detectChanges();
-          
+
           // updateConnectorLinesとdetectChangesが呼ばれたことを確認（102, 103行目をカバー）
           // 注意: 実際のResizeObserverのコールバックは非同期で呼ばれるため、
           // 必ずしも呼ばれるとは限らない
           // しかし、少なくともエラーが発生しないことを確認
           expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
-          
+
           // 元に戻す
           element.style.width = originalWidth + 'px';
           element.style.height = originalHeight + 'px';
@@ -1559,7 +1559,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '1',
             title: '目標1',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -1568,7 +1568,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '2',
             title: '目標2',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -1585,10 +1585,10 @@ describe('HierarchyTreeViewComponent', () => {
       // nodeElementsArrayの長さをnodesの長さより大きくする（nullノードをシミュレート）
       // nodesを1つに減らすことで、nodeElementsArray.length > nodes.lengthの状態を作る
       component.nodes = [multipleNodes[0]]; // ノードを1つに減らす
-      
+
       // updateConnectorLinesを直接呼び出す
       component['updateConnectorLines']();
-      
+
       // エラーが発生しないことを確認（早期returnされる）
       expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
     }));
@@ -1601,7 +1601,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '1',
             title: '目標1',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -1610,7 +1610,7 @@ describe('HierarchyTreeViewComponent', () => {
           data: {
             id: '2',
             title: '目標2',
-            level: 'long',
+            levelName: '長期目標',
           },
           children: [],
         },
@@ -1627,16 +1627,16 @@ describe('HierarchyTreeViewComponent', () => {
       // treeViewContainerをnullに設定し、closestもnullを返すようにモック
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       component['treeViewContainer'] = null as any;
-      
+
       // DOM要素のclosestメソッドをモックしてnullを返す
       const nativeElement = fixture.nativeElement;
       const nodes = nativeElement.querySelectorAll('.hierarchy-tree-view__node');
       const buttons = nativeElement.querySelectorAll('.hierarchy-tree-view__create-child-button');
-      
+
       if (nodes.length >= 2 && buttons.length >= 2) {
         const originalClosest = Element.prototype.closest;
         Element.prototype.closest = jasmine.createSpy('closest').and.returnValue(null);
-        
+
         // getBoundingClientRectをモック（verticalLineHeight > 0になるように設定）
         const firstButtonRect = {
           left: 0,
@@ -1662,7 +1662,7 @@ describe('HierarchyTreeViewComponent', () => {
           width: 300,
           height: 100,
         };
-        
+
         const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
         let callCount = 0;
         Element.prototype.getBoundingClientRect = jasmine.createSpy('getBoundingClientRect').and.callFake(() => {
@@ -1675,11 +1675,11 @@ describe('HierarchyTreeViewComponent', () => {
             return wrapperRect;
           }
         });
-        
+
         try {
           // updateConnectorLinesを直接呼び出す
           component['updateConnectorLines']();
-          
+
           // エラーが発生しないことを確認（早期returnされる）
           expect(component['connectorLineData'].size).toBeGreaterThanOrEqual(0);
         } finally {

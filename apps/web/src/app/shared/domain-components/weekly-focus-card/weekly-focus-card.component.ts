@@ -1,9 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { StatusBadgeComponent, StatusBadgeType } from '../status-badge/status-badge.component';
-import { IconComponent, IconName } from '../icon';
-import { IconButtonComponent } from '../icon-button';
+import { StatusBadgeComponent, StatusBadgeType, IconComponent, IconName, IconButtonComponent } from '../../ui';
 import { WeeklyFocusResponse } from '../../models/weekly-focus.model';
 
 @Component({

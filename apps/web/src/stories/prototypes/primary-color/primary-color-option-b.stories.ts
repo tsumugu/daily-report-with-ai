@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from '@storybook/angular';
-import { ButtonComponent } from '../../../app/shared/components/button/button.component';
+import { ButtonComponent } from '../../../app/shared/ui/button/button.component';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
  * 信頼・安定を表現するBlue系
  */
 const meta: Meta = {
-  title: 'Prototypes/PrimaryColor/OptionB-Blue',
+  title: 'Design System/Prototypes/Primary Color/Option B',
   tags: ['autodocs'],
   parameters: {
     docs: {

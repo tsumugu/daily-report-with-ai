@@ -1,13 +1,13 @@
 import { Meta, StoryObj, moduleMetadata } from '@storybook/angular';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { RelatedDailyReportsListComponent } from '../../app/shared/components/related-daily-reports-list/related-daily-reports-list.component';
+import { RelatedDailyReportsListComponent } from '../../app/shared/domain-components/related-daily-reports-list/related-daily-reports-list.component';
 import { GoalService } from '../../app/features/goal/services/goal.service';
 import { of } from 'rxjs';
 import { GoalDetailResponse } from '../../app/features/goal/models/goal.model';
 
 const meta: Meta<RelatedDailyReportsListComponent> = {
-  title: 'Components/RelatedDailyReportsList',
+  title: 'Design System/Domain Components/RelatedDailyReportsList',
   component: RelatedDailyReportsListComponent,
   tags: ['autodocs'],
   decorators: [

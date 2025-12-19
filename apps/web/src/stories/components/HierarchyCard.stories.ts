@@ -1,8 +1,8 @@
 import { Meta, StoryObj } from '@storybook/angular';
-import { HierarchyCardComponent, HierarchyCardData } from '../../app/shared/components/hierarchy-card/hierarchy-card.component';
+import { HierarchyCardComponent } from '../../app/shared/ui/hierarchy-card/hierarchy-card.component';
 
 const meta: Meta<HierarchyCardComponent> = {
-  title: 'Components/HierarchyCard',
+  title: 'Design System/UI Components/HierarchyCard',
   component: HierarchyCardComponent,
   tags: ['autodocs'],
   parameters: {
@@ -35,18 +35,17 @@ const meta: Meta<HierarchyCardComponent> = {
 export default meta;
 type Story = StoryObj<HierarchyCardComponent>;
 
-const mockData: HierarchyCardData = {
+const mockArgs = {
   id: '1',
   title: 'スキル習得',
   subtitle: 'フロントエンド開発のスキルを向上させる',
   metadata: '2025-01-01 〜 2025-06-30',
-  level: 'long',
-  type: 'skill',
+  levelName: '長期目標',
 };
 
 export const Default: Story = {
   args: {
-    data: mockData,
+    ...mockArgs,
     showExpandIcon: false,
     isExpanded: false,
   },
@@ -54,7 +53,7 @@ export const Default: Story = {
 
 export const WithExpandIcon: Story = {
   args: {
-    data: mockData,
+    ...mockArgs,
     showExpandIcon: true,
     isExpanded: false,
   },
@@ -62,7 +61,7 @@ export const WithExpandIcon: Story = {
 
 export const Expanded: Story = {
   args: {
-    data: mockData,
+    ...mockArgs,
     showExpandIcon: true,
     isExpanded: true,
   },
@@ -70,11 +69,9 @@ export const Expanded: Story = {
 
 export const MediumLevel: Story = {
   args: {
-    data: {
-      ...mockData,
-      title: 'React基礎を習得',
-      level: 'medium',
-    },
+    ...mockArgs,
+    title: 'React基礎を習得',
+    levelName: '中期目標',
     showExpandIcon: true,
     isExpanded: false,
   },
@@ -82,11 +79,9 @@ export const MediumLevel: Story = {
 
 export const ShortLevel: Story = {
   args: {
-    data: {
-      ...mockData,
-      title: '週次学習',
-      level: 'short',
-    },
+    ...mockArgs,
+    title: '週次学習',
+    levelName: '短期目標',
     showExpandIcon: false,
     isExpanded: false,
   },
@@ -94,10 +89,8 @@ export const ShortLevel: Story = {
 
 export const WithoutSubtitle: Story = {
   args: {
-    data: {
-      ...mockData,
-      subtitle: undefined,
-    },
+    ...mockArgs,
+    subtitle: undefined,
     showExpandIcon: false,
     isExpanded: false,
   },

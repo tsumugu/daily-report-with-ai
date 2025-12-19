@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * ビルド時に環境変数を設定するスクリプト
  * GitHub Actionsから渡されたAPI_URLを environment.prod.ts に注入します

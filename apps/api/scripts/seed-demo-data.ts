@@ -19,7 +19,6 @@
 
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
-import { getDatabase } from '../src/db/database.js';
 import { getUsersDatabase } from '../src/db/users.db.js';
 import { getDailyReportsDatabase, getGoodPointsDatabase, getImprovementsDatabase } from '../src/db/daily-reports.db.js';
 import { getGoalsDatabase } from '../src/db/goals.db.js';
@@ -70,11 +69,10 @@ function toISOString(date: Date): string {
  * デモデータを作成
  */
 async function seedDemoData() {
-  console.log('🌱 デモデータの作成を開始します...\n');
+  console.info('🌱 デモデータの作成を開始します...\n');
 
   try {
     // データベースを取得
-    const db = await getDatabase();
     const usersDb = await getUsersDatabase();
     const dailyReportsDb = await getDailyReportsDatabase();
     const goodPointsDb = await getGoodPointsDatabase();
@@ -87,7 +85,7 @@ async function seedDemoData() {
     // ============================================
     // 1. ユーザー作成
     // ============================================
-    console.log('📝 ユーザーを作成中...');
+    console.info('📝 ユーザーを作成中...');
     const demoUser: User = {
       id: uuidv4(),
       email: 'demo@example.com',
@@ -96,13 +94,13 @@ async function seedDemoData() {
       updatedAt: toISOString(daysAgo(30)),
     };
     usersDb.save(demoUser);
-    console.log(`✅ ユーザー作成完了: ${demoUser.email} (ID: ${demoUser.id})\n`);
+    console.info(`✅ ユーザー作成完了: ${demoUser.email} (ID: ${demoUser.id})\n`);
 
     // ============================================
     // 2. 目標作成（階層構造）
     // ============================================
-    console.log('🎯 目標を作成中...');
-    
+    console.info('🎯 目標を作成中...');
+
     // 長期目標（半期）
     const longTermGoal: Goal = {
       id: uuidv4(),
@@ -118,7 +116,7 @@ async function seedDemoData() {
       updatedAt: toISOString(daysAgo(90)),
     };
     goalsDb.save(longTermGoal);
-    console.log(`  ✅ 長期目標: ${longTermGoal.name}`);
+    console.info(`  ✅ 長期目標: ${longTermGoal.name}`);
 
     // 中期目標1（1ヶ月）
     const midTermGoal1: Goal = {
@@ -135,7 +133,7 @@ async function seedDemoData() {
       updatedAt: toISOString(daysAgo(30)),
     };
     goalsDb.save(midTermGoal1);
-    console.log(`  ✅ 中期目標1: ${midTermGoal1.name}`);
+    console.info(`  ✅ 中期目標1: ${midTermGoal1.name}`);
 
     // 中期目標2（1ヶ月）
     const midTermGoal2: Goal = {
@@ -152,7 +150,7 @@ async function seedDemoData() {
       updatedAt: toISOString(daysAgo(30)),
     };
     goalsDb.save(midTermGoal2);
-    console.log(`  ✅ 中期目標2: ${midTermGoal2.name}`);
+    console.info(`  ✅ 中期目標2: ${midTermGoal2.name}`);
 
     // 短期目標1（1週間）
     const shortTermGoal1: Goal = {
@@ -169,7 +167,7 @@ async function seedDemoData() {
       updatedAt: toISOString(daysAgo(7)),
     };
     goalsDb.save(shortTermGoal1);
-    console.log(`  ✅ 短期目標1: ${shortTermGoal1.name}`);
+    console.info(`  ✅ 短期目標1: ${shortTermGoal1.name}`);
 
     // 短期目標2（1週間）
     const shortTermGoal2: Goal = {
@@ -186,12 +184,12 @@ async function seedDemoData() {
       updatedAt: toISOString(daysAgo(7)),
     };
     goalsDb.save(shortTermGoal2);
-    console.log(`  ✅ 短期目標2: ${shortTermGoal2.name}\n`);
+    console.info(`  ✅ 短期目標2: ${shortTermGoal2.name}\n`);
 
     // ============================================
     // 3. 日報作成（過去4週間分）
     // ============================================
-    console.log('📅 日報を作成中...');
+    console.info('📅 日報を作成中...');
     const reports: DailyReport[] = [];
     const goodPoints: GoodPoint[] = [];
     const improvements: Improvement[] = [];
@@ -201,7 +199,7 @@ async function seedDemoData() {
     for (let day = 0; day < 28; day++) {
       const date = daysAgo(day);
       const dayOfWeek = date.getDay();
-      
+
       // 土日はスキップ
       if (dayOfWeek === 0 || dayOfWeek === 6) continue;
 
@@ -301,15 +299,15 @@ async function seedDemoData() {
       }
 
       if (day % 5 === 0) {
-        console.log(`  ✅ ${reportDate} の日報を作成`);
+        console.info(`  ✅ ${reportDate} の日報を作成`);
       }
     }
-    console.log(`✅ 日報作成完了: ${reports.length}件\n`);
+    console.info(`✅ 日報作成完了: ${reports.length}件\n`);
 
     // ============================================
     // 4. フォローアップ作成
     // ============================================
-    console.log('🔄 フォローアップを作成中...');
+    console.info('🔄 フォローアップを作成中...');
     const followups: Followup[] = [];
 
     // いくつかのよかったことと改善点にフォローアップを追加
@@ -346,12 +344,12 @@ async function seedDemoData() {
       followupsDb.save(followup);
       followups.push(followup);
     }
-    console.log(`✅ フォローアップ作成完了: ${followups.length}件\n`);
+    console.info(`✅ フォローアップ作成完了: ${followups.length}件\n`);
 
     // ============================================
     // 5. 週次フォーカス作成
     // ============================================
-    console.log('📌 週次フォーカスを作成中...');
+    console.info('📌 週次フォーカスを作成中...');
     const weeklyFocuses: WeeklyFocus[] = [];
 
     // 過去4週間分の週次フォーカスを作成
@@ -366,7 +364,7 @@ async function seedDemoData() {
         const itemType = i % 2 === 0 ? 'goodPoint' : 'improvement';
         const items = itemType === 'goodPoint' ? goodPoints : improvements;
         const itemIndex = week * 5 + i;
-        
+
         if (itemIndex < items.length) {
           const item = items[itemIndex];
           const weeklyFocus: WeeklyFocus = {
@@ -382,26 +380,26 @@ async function seedDemoData() {
           weeklyFocuses.push(weeklyFocus);
         }
       }
-      console.log(`  ✅ ${weekStartDate} の週次フォーカスを作成`);
+      console.info(`  ✅ ${weekStartDate} の週次フォーカスを作成`);
     }
-    console.log(`✅ 週次フォーカス作成完了: ${weeklyFocuses.length}件\n`);
+    console.info(`✅ 週次フォーカス作成完了: ${weeklyFocuses.length}件\n`);
 
     // ============================================
     // 完了
     // ============================================
-    console.log('✨ デモデータの作成が完了しました！\n');
-    console.log('📊 作成されたデータ:');
-    console.log(`  - ユーザー: 1名 (${demoUser.email})`);
-    console.log(`  - 目標: 5個 (長期1、中期2、短期2)`);
-    console.log(`  - 日報: ${reports.length}件`);
-    console.log(`  - よかったこと: ${goodPoints.length}件`);
-    console.log(`  - 改善点: ${improvements.length}件`);
-    console.log(`  - フォローアップ: ${followups.length}件`);
-    console.log(`  - 週次フォーカス: ${weeklyFocuses.length}件`);
-    console.log(`  - 日報-目標紐付け: ${dailyReportGoals.length}件\n`);
-    console.log('🔑 ログイン情報:');
-    console.log(`  メールアドレス: ${demoUser.email}`);
-    console.log(`  パスワード: password123\n`);
+    console.info('✨ デモデータの作成が完了しました！\n');
+    console.info('📊 作成されたデータ:');
+    console.info(`  - ユーザー: 1名 (${demoUser.email})`);
+    console.info(`  - 目標: 5個 (長期1、中期2、短期2)`);
+    console.info(`  - 日報: ${reports.length}件`);
+    console.info(`  - よかったこと: ${goodPoints.length}件`);
+    console.info(`  - 改善点: ${improvements.length}件`);
+    console.info(`  - フォローアップ: ${followups.length}件`);
+    console.info(`  - 週次フォーカス: ${weeklyFocuses.length}件`);
+    console.info(`  - 日報-目標紐付け: ${dailyReportGoals.length}件\n`);
+    console.info('🔑 ログイン情報:');
+    console.info(`  メールアドレス: ${demoUser.email}`);
+    console.info(`  パスワード: password123\n`);
 
   } catch (error) {
     console.error('❌ デモデータの作成に失敗しました:', error);
@@ -411,7 +409,7 @@ async function seedDemoData() {
 
 // スクリプト実行
 seedDemoData().then(() => {
-  console.log('✅ スクリプトが正常に完了しました');
+  console.info('✅ スクリプトが正常に完了しました');
   process.exit(0);
 }).catch((error) => {
   console.error('❌ エラーが発生しました:', error);

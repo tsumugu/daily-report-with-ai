@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from '@storybook/angular';
-import { ButtonComponent } from '../../../app/shared/components/button/button.component';
+import { ButtonComponent } from '../../../app/shared/ui/button/button.component';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
  * 成長・前進を表現するGreen系
  */
 const meta: Meta = {
-  title: 'Prototypes/PrimaryColor/OptionA-EmeraldGreen',
+  title: 'Design System/Prototypes/Primary Color/Option A',
   tags: ['autodocs'],
   parameters: {
     docs: {

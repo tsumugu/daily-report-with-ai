@@ -3,7 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { InputFieldComponent, ButtonComponent, AlertBannerComponent } from '../../../../shared/components';
+import {
+  InputFieldComponent,
+  ButtonComponent,
+  AlertBannerComponent,
+} from '../../../../shared/ui';
 import { getFieldErrorMessage } from '../../../../shared/utils';
 
 /**

@@ -17,7 +17,7 @@ import {
   EntitySelectOption,
   AlertBannerComponent,
   ToastComponent,
-} from '../../../../shared/components';
+} from '../../../../shared/ui';
 
 /**
  * 目標作成・編集画面コンポーネント
