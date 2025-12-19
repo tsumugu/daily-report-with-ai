@@ -10,7 +10,8 @@
     "start": "node dist/index.js",
     "lint": "eslint src --ext .ts",
     "test": "vitest run",
-    "test:ci": "vitest run"
+    "test:ci": "vitest run",
+    "seed:demo": "tsx scripts/seed-demo-data.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.18.0",

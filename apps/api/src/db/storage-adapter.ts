@@ -3,6 +3,7 @@ import { readFileSync, existsSync, writeFileSync, statSync } from "fs";
 import { join } from "path";
 import Database, { type Database as DatabaseType } from "better-sqlite3";
 import { initializeTables } from "./database.js";
+import { dbLog, dbWarn, dbError } from "../config/logger.js";
 
 const BUCKET_NAME = process.env.GCS_BUCKET_NAME || "daily-report-db";
 const DB_FILE_NAME = "daily-report.db";
@@ -72,7 +73,7 @@ async function downloadDatabase(): Promise<boolean> {
   const maxRetries = 3;
   let retries = 0;
 
-  console.log(`[DB] Attempting to download database from bucket: ${BUCKET_NAME}`);
+  dbLog(`[DB] Attempting to download database from bucket: ${BUCKET_NAME}`);
 
   while (retries < maxRetries) {
     try {
@@ -83,7 +84,7 @@ async function downloadDatabase(): Promise<boolean> {
       // ファイルの存在確認
       const [exists] = await file.exists();
       if (!exists) {
-        console.log(
+        dbLog(
           "[DB] Database file does not exist in Cloud Storage. Creating new database.",
         );
         return false; // 新しいデータベースファイルを作成
@@ -102,13 +103,13 @@ async function downloadDatabase(): Promise<boolean> {
 
       // Cloud Storageのファイルが空（最小サイズ以下）の場合はダウンロードしない
       if (gcsFileSize <= MIN_DB_SIZE) {
-        console.log(
+        dbLog(
           `[DB] Cloud Storage database file is empty or too small (${gcsFileSize} bytes). ` +
           `Skipping download to prevent overwriting local data.`
         );
         // ローカルのファイルが存在する場合はそれを使用
         if (existsSync(TEMP_DB_PATH)) {
-          console.log(`[DB] Using existing local database file (${localFileSize} bytes).`);
+          dbLog(`[DB] Using existing local database file (${localFileSize} bytes).`);
           return true; // ローカルのファイルを使用
         }
         return false; // 新規作成
@@ -116,7 +117,7 @@ async function downloadDatabase(): Promise<boolean> {
 
       // Cloud Storageのファイルがローカルのファイルより小さい場合はダウンロードしない
       if (localFileSize > 0 && gcsFileSize < localFileSize) {
-        console.log(
+        dbLog(
           `[DB] Cloud Storage database file (${gcsFileSize} bytes) is smaller than local file (${localFileSize} bytes). ` +
           `Skipping download to prevent data loss.`
         );
@@ -126,16 +127,16 @@ async function downloadDatabase(): Promise<boolean> {
       // ダウンロード
       const [contents] = await file.download();
       writeFileSync(TEMP_DB_PATH, contents);
-      console.log(`[DB] Database downloaded from Cloud Storage successfully. Size: ${contents.length} bytes`);
+      dbLog(`[DB] Database downloaded from Cloud Storage successfully. Size: ${contents.length} bytes`);
 
       return true; // ダウンロード成功
     } catch (error) {
       retries++;
       if (retries >= maxRetries) {
-        console.error("Failed to download database after retries:", error);
+        dbError("Failed to download database after retries:", error);
         throw error;
       }
-      console.log(`Retrying download (attempt ${retries}/${maxRetries})...`);
+      dbLog(`Retrying download (attempt ${retries}/${maxRetries})...`);
       await new Promise((resolve) => setTimeout(resolve, 1000 * retries));
     }
   }
@@ -161,17 +162,17 @@ function isDatabaseEmpty(db: DatabaseType): boolean {
  */
 async function uploadDatabase(): Promise<void> {
   try {
-    console.log("[DB] Starting upload process...");
+    dbLog("[DB] Starting upload process...");
     
     if (!existsSync(TEMP_DB_PATH)) {
-      console.warn("[DB] Database file does not exist locally. Skipping upload.");
+      dbWarn("[DB] Database file does not exist locally. Skipping upload.");
       return;
     }
 
     // ファイルサイズを確認（WALマージ前）
     const localStats = statSync(TEMP_DB_PATH);
     const localFileSize = localStats.size;
-    console.log(`[DB] Database file size before WAL merge: ${localFileSize} bytes`);
+    dbLog(`[DB] Database file size before WAL merge: ${localFileSize} bytes`);
 
     // WALファイルの存在を確認
     const walPath = `${TEMP_DB_PATH}-wal`;
@@ -182,7 +183,7 @@ async function uploadDatabase(): Promise<void> {
     if (!walExists) {
       // ファイルサイズが最小サイズ以下の場合、空DBと判断
       if (localFileSize <= MIN_DB_SIZE) {
-        console.log(
+        dbLog(
           `[DB] Database file is too small (${localFileSize} bytes) and no WAL file exists. ` +
           `Skipping upload to prevent overwriting existing data with empty database.`
         );
@@ -191,7 +192,7 @@ async function uploadDatabase(): Promise<void> {
       
       // データベースが空の場合もアップロードしない
       if (dbInstance && isDatabaseEmpty(dbInstance)) {
-        console.log("[DB] Database is empty and no WAL file exists. Skipping upload to prevent overwriting existing data.");
+        dbLog("[DB] Database is empty and no WAL file exists. Skipping upload to prevent overwriting existing data.");
         return;
       }
     }
@@ -210,13 +211,13 @@ async function uploadDatabase(): Promise<void> {
       }
     } catch (error) {
       // メタデータ取得に失敗しても続行
-      console.warn("[DB] Failed to get existing file metadata:", error);
+      dbWarn("[DB] Failed to get existing file metadata:", error);
     }
 
     // WALファイルが存在しない場合のみ、マージ前のサイズで比較
     // WALファイルが存在する場合は、マージ後に比較する
     if (!walExists && existingFileSize > 0 && localFileSize < existingFileSize) {
-      console.log(
+      dbLog(
         `[DB] Local database file (${localFileSize} bytes) is smaller than Cloud Storage file (${existingFileSize} bytes). ` +
         `Skipping upload to prevent data loss.`
       );
@@ -226,33 +227,33 @@ async function uploadDatabase(): Promise<void> {
     // WALファイルをマージしてからアップロード（データの整合性を保証）
     if (dbInstance && walExists) {
       try {
-        console.log("[DB] WAL file exists. Merging WAL file into main database before upload...");
+        dbLog("[DB] WAL file exists. Merging WAL file into main database before upload...");
         
         // WALファイルのサイズを確認
         const walStats = statSync(walPath);
-        console.log(`[DB] WAL file size: ${walStats.size} bytes`);
+        dbLog(`[DB] WAL file size: ${walStats.size} bytes`);
         
         // WALファイルの内容をメインファイルにマージ
         // better-sqlite3では、pragmaの戻り値は配列またはオブジェクトになる可能性がある
         const checkpointResult = dbInstance.pragma("wal_checkpoint(FULL)", { simple: true });
-        console.log(`[DB] WAL checkpoint result:`, checkpointResult);
+        dbLog(`[DB] WAL checkpoint result:`, checkpointResult);
         
         // checkpointの結果を確認（戻り値の形式に応じて処理）
         let checkpointSuccess = false;
         if (typeof checkpointResult === 'number') {
           if (checkpointResult === 0) {
-            console.log("[DB] WAL checkpoint completed successfully.");
+            dbLog("[DB] WAL checkpoint completed successfully.");
             checkpointSuccess = true;
           } else if (checkpointResult === 1) {
-            console.log("[DB] WAL checkpoint completed, but some frames may still be in WAL.");
+            dbLog("[DB] WAL checkpoint completed, but some frames may still be in WAL.");
             checkpointSuccess = true;
           } else {
-            console.warn("[DB] WAL checkpoint returned error code:", checkpointResult);
+            dbWarn("[DB] WAL checkpoint returned error code:", checkpointResult);
           }
         } else if (checkpointResult && typeof checkpointResult === 'object') {
           // オブジェクト形式の戻り値の場合
           const result = checkpointResult as { busy?: number; log?: number; checkpointed?: number };
-          console.log(`[DB] WAL checkpoint details:`, result);
+          dbLog(`[DB] WAL checkpoint details:`, result);
           checkpointSuccess = true;
         }
         
@@ -263,21 +264,21 @@ async function uploadDatabase(): Promise<void> {
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
       } catch (error) {
-        console.error("[DB] Failed to checkpoint WAL file:", error);
+        dbError("[DB] Failed to checkpoint WAL file:", error);
         // checkpointに失敗しても続行
       }
     } else if (!walExists) {
-      console.log("[DB] No WAL file found. Skipping checkpoint (data is already in main database).");
+      dbLog("[DB] No WAL file found. Skipping checkpoint (data is already in main database).");
     }
 
     // WALマージ後のファイルサイズを再取得（マージによりファイルサイズが変わる可能性がある）
     const updatedStats = statSync(TEMP_DB_PATH);
     const updatedFileSize = updatedStats.size;
-    console.log(`[DB] Database file size after WAL merge: ${updatedFileSize} bytes (was ${localFileSize} bytes)`);
+    dbLog(`[DB] Database file size after WAL merge: ${updatedFileSize} bytes (was ${localFileSize} bytes)`);
     
     // WALファイルが存在した場合、マージ後のサイズが増加しているか確認
     if (walExists && updatedFileSize === localFileSize) {
-      console.warn(
+      dbWarn(
         `[DB] WARNING: File size did not change after WAL checkpoint. ` +
         `WAL file may not have been merged properly. ` +
         `Proceeding with upload anyway.`
@@ -286,7 +287,7 @@ async function uploadDatabase(): Promise<void> {
 
     // マージ後のファイルサイズで空DBチェック（ファイルサイズベース）
     if (updatedFileSize <= MIN_DB_SIZE) {
-      console.log(
+      dbLog(
         `[DB] Database file is too small after WAL merge (${updatedFileSize} bytes). ` +
         `Skipping upload to prevent overwriting existing data with empty database.`
       );
@@ -295,13 +296,13 @@ async function uploadDatabase(): Promise<void> {
 
     // マージ後のデータベース内容で空DBチェック（データベース内容ベース）
     if (dbInstance && isDatabaseEmpty(dbInstance)) {
-      console.log("[DB] Database is empty after WAL merge. Skipping upload to prevent overwriting existing data.");
+      dbLog("[DB] Database is empty after WAL merge. Skipping upload to prevent overwriting existing data.");
       return;
     }
 
     // マージ後のファイルサイズでCloud Storageとの比較を再実行
     if (existingFileSize > 0 && updatedFileSize < existingFileSize) {
-      console.log(
+      dbLog(
         `[DB] Local database file after WAL merge (${updatedFileSize} bytes) is smaller than Cloud Storage file (${existingFileSize} bytes). ` +
         `Skipping upload to prevent data loss.`
       );
@@ -310,7 +311,7 @@ async function uploadDatabase(): Promise<void> {
 
     // メインデータベースファイルのアップロード（WALファイルはマージ済み）
     const dbContents = readFileSync(TEMP_DB_PATH);
-    console.log(`[DB] Uploading database to Cloud Storage. Size: ${dbContents.length} bytes`);
+    dbLog(`[DB] Uploading database to Cloud Storage. Size: ${dbContents.length} bytes`);
     await file.save(dbContents, {
       contentType: "application/x-sqlite3",
       metadata: {
@@ -318,34 +319,34 @@ async function uploadDatabase(): Promise<void> {
       },
     });
 
-    console.log("[DB] Database uploaded to Cloud Storage successfully.");
+    dbLog("[DB] Database uploaded to Cloud Storage successfully.");
 
     // WALファイルとSHMファイルはマージ済みのため、アップロード不要
     // 既存のWALファイルとSHMファイルをCloud Storageから削除（存在する場合）
     const walFile = bucket.file(`${GCS_DB_PATH}-wal`);
     const shmFile = bucket.file(`${GCS_DB_PATH}-shm`);
-    
+
     try {
       const [walFileExists] = await walFile.exists();
       if (walFileExists) {
         await walFile.delete();
-        console.log("[DB] Removed old WAL file from Cloud Storage (merged into main database).");
+        dbLog("[DB] Removed old WAL file from Cloud Storage (merged into main database).");
       }
     } catch (error) {
-      console.warn("[DB] Failed to delete old WAL file from Cloud Storage:", error);
+      dbWarn("[DB] Failed to delete old WAL file from Cloud Storage:", error);
     }
 
     try {
       const [shmFileExists] = await shmFile.exists();
       if (shmFileExists) {
         await shmFile.delete();
-        console.log("[DB] Removed old SHM file from Cloud Storage (no longer needed).");
+        dbLog("[DB] Removed old SHM file from Cloud Storage (no longer needed).");
       }
     } catch (error) {
-      console.warn("[DB] Failed to delete old SHM file from Cloud Storage:", error);
+      dbWarn("[DB] Failed to delete old SHM file from Cloud Storage:", error);
     }
   } catch (error) {
-    console.error("Failed to upload database to Cloud Storage:", error);
+    dbError("Failed to upload database to Cloud Storage:", error);
     throw error;
   }
 }
@@ -358,7 +359,7 @@ async function syncDatabase(): Promise<void> {
     await uploadDatabase();
     clearChanges();
   } catch (error) {
-    console.error("Failed to sync database:", error);
+    dbError("Failed to sync database:", error);
     throw error;
   }
 }
@@ -376,7 +377,7 @@ export async function syncIfNeeded(): Promise<void> {
   const now = Date.now();
   const shouldSyncByTime = lastSyncTime !== null && (now - lastSyncTime) >= SYNC_INTERVAL_MS;
 
-  console.log(
+  dbLog(
     `[DB] Sync check: changeCount=${changeCount}/${BATCH_SIZE}, ` +
     `timeSinceLastSync=${lastSyncTime ? now - lastSyncTime : 'N/A'}ms/${SYNC_INTERVAL_MS}ms, ` +
     `shouldSync=${changeCount >= BATCH_SIZE || shouldSyncByTime}`
@@ -384,7 +385,7 @@ export async function syncIfNeeded(): Promise<void> {
 
   // バッチサイズに達した場合、または一定時間経過した場合は即座に同期
   if (changeCount >= BATCH_SIZE || shouldSyncByTime) {
-    console.log(`[DB] Triggering sync: changeCount=${changeCount}, shouldSyncByTime=${shouldSyncByTime}`);
+    dbLog(`[DB] Triggering sync: changeCount=${changeCount}, shouldSyncByTime=${shouldSyncByTime}`);
     await syncDatabase();
     changeCount = 0;
   }
@@ -431,7 +432,7 @@ async function initializeDatabase(): Promise<DatabaseType> {
 
   // ダウンロードしたDBが空の場合、警告を出力
   if (downloaded && isDatabaseEmpty(dbInstance)) {
-    console.warn(
+    dbWarn(
       "[DB] WARNING: Downloaded database appears to be empty. " +
       "If this is unexpected, check Cloud Storage bucket for existing database file."
     );
@@ -442,35 +443,35 @@ async function initializeDatabase(): Promise<DatabaseType> {
     // Cloud Runの停止処理を改善
     // SIGTERM受信時に、猶予時間内（デフォルト10秒）にアップロードを完了させる
     const gracefulShutdown = async (signal: string) => {
-      console.log(`[DB] ${signal} received. Starting graceful shutdown...`);
+      dbLog(`[DB] ${signal} received. Starting graceful shutdown...`);
       
       // タイムアウトを設定（8秒、猶予時間10秒のうち）
       // Cloud Runのデフォルト猶予時間は10秒なので、8秒でタイムアウトして安全に終了
       const timeout = setTimeout(() => {
-        console.error(`[DB] Upload timeout after ${signal}. Forcing exit...`);
+        dbError(`[DB] Upload timeout after ${signal}. Forcing exit...`);
         process.exit(1);
       }, 8000);
-      
+
       try {
         // 変更がある場合は確実にアップロード
         if (hasChanges) {
-          console.log("[DB] Changes detected. Syncing database before shutdown...");
+          dbLog("[DB] Changes detected. Syncing database before shutdown...");
           await syncDatabase();
-          console.log("[DB] Database synced successfully before shutdown.");
+          dbLog("[DB] Database synced successfully before shutdown.");
         } else {
-          console.log("[DB] No changes detected. Skipping sync.");
+          dbLog("[DB] No changes detected. Skipping sync.");
         }
         
         clearTimeout(timeout);
-        console.log(`[DB] Graceful shutdown completed for ${signal}.`);
+        dbLog(`[DB] Graceful shutdown completed for ${signal}.`);
       } catch (error) {
         clearTimeout(timeout);
-        console.error(`[DB] Failed to sync database before shutdown (${signal}):`, error);
+        dbError(`[DB] Failed to sync database before shutdown (${signal}):`, error);
         // エラーが発生しても、ログを残してから終了
         process.exit(1);
       } finally {
         // 確実に終了
-        process.exit(0);
+      process.exit(0);
       }
     };
 
@@ -490,7 +491,7 @@ async function initializeDatabase(): Promise<DatabaseType> {
 
     periodicSyncTimer = setInterval(async () => {
       if (hasChanges) {
-        console.log("Periodic sync triggered. Syncing database...");
+        dbLog("Periodic sync triggered. Syncing database...");
         await syncDatabasePeriodically();
       }
     }, SYNC_INTERVAL_MS);
