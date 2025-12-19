@@ -8,7 +8,7 @@ describe('日報一覧・詳細画面', () => {
     uniqueEmail = `e2e-list-${Cypress._.random(0, 1e6)}@example.com`;
 
     // サインアップしてログイン状態にする
-    cy.visit('http://localhost:4200/signup');
+    cy.visit('http://localhost:4200/#/signup');
 
     // ページが読み込まれるまで待機
     cy.get('input#email').should('be.visible');
@@ -22,20 +22,20 @@ describe('日報一覧・詳細画面', () => {
     cy.get('button[type="submit"]').click();
 
     // ホーム画面に遷移するまで待機
-    cy.url().should('eq', 'http://localhost:4200/', { timeout: 15000 });
+    cy.url().should('eq', 'http://localhost:4200/#/', { timeout: 15000 });
   });
 
   it('ホーム画面から日報一覧画面に遷移できること', () => {
     // 日報一覧リンクをクリック
-    cy.get('a[href="/daily-reports"]').click();
+    cy.get('a[href="#/daily-reports"]').click();
 
     // 日報一覧画面に遷移したことを確認
-    cy.url().should('eq', 'http://localhost:4200/daily-reports');
+    cy.url().should('eq', 'http://localhost:4200/#/daily-reports');
     cy.get('.page-title').should('contain.text', '日報一覧');
   });
 
   it('日報がない場合は空状態が表示されること', () => {
-    cy.visit('http://localhost:4200/daily-reports');
+    cy.visit('http://localhost:4200/#/daily-reports');
 
     // 空状態が表示されることを確認（app-empty-stateコンポーネントを使用）
     cy.contains('まだ日報がありません').should('be.visible', { timeout: 10000 });
@@ -43,11 +43,11 @@ describe('日報一覧・詳細画面', () => {
 
   it('日報を作成後、一覧に表示されること', () => {
     // 日報を作成
-    cy.visit('http://localhost:4200/daily-reports/new');
+    cy.visit('http://localhost:4200/#/daily-reports/new');
     cy.get('textarea#events').should('be.visible');
     cy.get('textarea#events').type('E2Eテストで作成した日報です');
     cy.get('button[type="submit"]').click();
-    cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+    cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
     // 一覧画面に日報が表示されていることを確認
     cy.get('.report-card').should('be.visible');
@@ -56,12 +56,12 @@ describe('日報一覧・詳細画面', () => {
 
   it('日報カードをクリックすると詳細画面に遷移すること', () => {
     // 日報を作成
-    cy.visit('http://localhost:4200/daily-reports/new');
+    cy.visit('http://localhost:4200/#/daily-reports/new');
     cy.get('textarea#events').should('be.visible');
     cy.get('textarea#events').type('詳細確認用の日報');
     cy.get('textarea#learnings').type('テストの学び');
     cy.get('button[type="submit"]').click();
-    cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+    cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
     // 日報カードをクリック
     cy.get('.report-card').click();
@@ -73,7 +73,7 @@ describe('日報一覧・詳細画面', () => {
 
   it('詳細画面で日報の内容が表示されること', () => {
     // 日報を作成
-    cy.visit('http://localhost:4200/daily-reports/new');
+    cy.visit('http://localhost:4200/#/daily-reports/new');
     cy.get('textarea#events').should('be.visible');
     cy.get('textarea#events').type('詳細表示テストのできごと');
     cy.get('textarea#learnings').type('詳細表示テストの学び');
@@ -91,7 +91,7 @@ describe('日報一覧・詳細画面', () => {
     cy.contains('.form-group', '改善点').find('.form-card').first().find('textarea').last().type('毎日コツコツやる');
 
     cy.get('button[type="submit"]').click();
-    cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+    cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
     // 詳細画面に遷移
     cy.get('.report-card').click();
@@ -111,11 +111,11 @@ describe('日報一覧・詳細画面', () => {
 
   it('詳細画面から一覧画面に戻れること', () => {
     // 日報を作成
-    cy.visit('http://localhost:4200/daily-reports/new');
+    cy.visit('http://localhost:4200/#/daily-reports/new');
     cy.get('textarea#events').should('be.visible');
     cy.get('textarea#events').type('戻るボタンテスト');
     cy.get('button[type="submit"]').click();
-    cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+    cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
     // 詳細画面に遷移
     cy.get('.report-card').click();
@@ -125,22 +125,22 @@ describe('日報一覧・詳細画面', () => {
     cy.get('.back-button').click();
 
     // 一覧画面に戻ったことを確認
-    cy.url().should('eq', 'http://localhost:4200/daily-reports');
+    cy.url().should('eq', 'http://localhost:4200/#/daily-reports');
   });
 
   it('一覧画面から日報入力画面に遷移できること', () => {
-    cy.visit('http://localhost:4200/daily-reports');
+    cy.visit('http://localhost:4200/#/daily-reports');
 
     // 日報を書くボタンをクリック
     cy.get('.new-report-button').click();
 
     // 日報入力画面に遷移したことを確認
-    cy.url().should('eq', 'http://localhost:4200/daily-reports/new');
+    cy.url().should('eq', 'http://localhost:4200/#/daily-reports/new');
   });
 
   it('よかったことがある日報にはバッジが表示されること', () => {
     // よかったこと付きの日報を作成
-    cy.visit('http://localhost:4200/daily-reports/new');
+    cy.visit('http://localhost:4200/#/daily-reports/new');
     cy.get('textarea#events').should('be.visible');
     cy.get('textarea#events').type('バッジテスト用日報');
 
@@ -150,7 +150,7 @@ describe('日報一覧・詳細画面', () => {
     cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('よかったこと');
 
     cy.get('button[type="submit"]').click();
-    cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+    cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
     // よかったことバッジが表示されていることを確認
     cy.get('.report-card__badge--good').should('be.visible');
@@ -159,7 +159,7 @@ describe('日報一覧・詳細画面', () => {
 
   it('改善点がある日報にはバッジが表示されること', () => {
     // 改善点付きの日報を作成
-    cy.visit('http://localhost:4200/daily-reports/new');
+    cy.visit('http://localhost:4200/#/daily-reports/new');
     cy.get('textarea#events').should('be.visible');
     cy.get('textarea#events').type('改善点バッジテスト');
 
@@ -169,7 +169,7 @@ describe('日報一覧・詳細画面', () => {
     cy.contains('.form-group', '改善点').find('.form-card').first().find('textarea').first().type('改善点');
 
     cy.get('button[type="submit"]').click();
-    cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+    cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
     // 改善点バッジが表示されていることを確認
     cy.get('.report-card__badge--improvement').should('be.visible');
@@ -178,7 +178,7 @@ describe('日報一覧・詳細画面', () => {
 
   it('よかったこと・改善点のサマリーが表示されること', () => {
     // よかったこと・改善点付きの日報を作成
-    cy.visit('http://localhost:4200/daily-reports/new');
+    cy.visit('http://localhost:4200/#/daily-reports/new');
     cy.get('textarea#events').should('be.visible');
     cy.get('textarea#events').type('サマリーテスト用日報');
 
@@ -197,7 +197,7 @@ describe('日報一覧・詳細画面', () => {
     cy.contains('.form-group', '改善点').find('.form-card').first().find('textarea').first().type('改善点1');
 
     cy.get('button[type="submit"]').click();
-    cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+    cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
     // サマリーセクションが表示されていることを確認
     cy.get('.report-card__summary').should('be.visible');
@@ -213,12 +213,12 @@ describe('日報一覧・詳細画面', () => {
 
   it('よかったこと・改善点が0件の場合、サマリーセクションが表示されないこと', () => {
     // よかったこと・改善点なしの日報を作成
-    cy.visit('http://localhost:4200/daily-reports/new');
+    cy.visit('http://localhost:4200/#/daily-reports/new');
     cy.get('textarea#events').should('be.visible');
     cy.get('textarea#events').type('サマリーなしテスト');
 
     cy.get('button[type="submit"]').click();
-    cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+    cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
     // サマリーセクションが表示されないことを確認
     cy.get('.report-card__summary').should('not.exist');

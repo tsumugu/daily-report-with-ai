@@ -12,7 +12,7 @@
  */
 
 describe('編集機能', () => {
-  const baseUrl = 'http://localhost:4200';
+  const baseUrl = 'http://localhost:4200/#';
   const testPassword = 'TestPassword123!';
 
   // テスト用ユーティリティ
@@ -45,14 +45,14 @@ describe('編集機能', () => {
       .first()
       .type('テスト用改善点');
     cy.get('button[type="submit"]').click();
-    cy.url().should('include', '/daily-reports', { timeout: 15000 });
+    cy.url().should('include', '/#/daily-reports', { timeout: 15000 });
   };
 
   const navigateToDailyReportDetail = () => {
     cy.visit(`${baseUrl}/daily-reports`);
     cy.get('.report-card', { timeout: 10000 }).should('exist');
     cy.get('.report-card').first().click();
-    cy.url().should('include', '/daily-reports/', { timeout: 10000 });
+    cy.url().should('include', '/#/daily-reports/', { timeout: 10000 });
   };
 
   const navigateToFollowupPage = (itemType: 'goodPoint' | 'improvement', itemContent: string) => {
@@ -69,14 +69,14 @@ describe('編集機能', () => {
       // app-buttonコンポーネント内のテキストを探す
       cy.contains('フォローアップ').should('be.visible', { timeout: 5000 }).click();
     });
-    cy.url().should('include', `/followups/${itemType}/`, { timeout: 15000 });
+    cy.url().should('include', `/#/followups/${itemType}/`, { timeout: 15000 });
   };
 
   const addEpisode = (memo: string) => {
     const today = new Date().toISOString().split('T')[0];
     // 空状態の場合はempty-stateのアクションボタン、そうでない場合はadd-buttonを使用
     cy.get('.followup-page').should('be.visible', { timeout: 10000 });
-    
+
     // モーダルが開いている場合は閉じる
     cy.get('body').then(($body) => {
       const overlay = $body.find('.followup-page__overlay');
@@ -86,11 +86,11 @@ describe('編集機能', () => {
         cy.wait(500); // モーダルが閉じるのを待つ
       }
     });
-    
+
     // 空状態かどうかを確認して、適切なボタンをクリック
     // モーダルが開いていないことを確認してから判定
     cy.get('.followup-page__overlay').should('not.exist');
-    
+
     // 空状態かどうかを確認
     cy.get('.followup-page').then(($page) => {
       // モーダルが開いていない、かつ空状態が表示されている場合のみ空状態と判定
@@ -98,7 +98,7 @@ describe('編集機能', () => {
       const hasEmptyState = $page.find('.empty-state').length > 0;
       const isEmptyStateVisible = hasEmptyState && $page.find('.empty-state').is(':visible');
       const isEmpty = !hasOverlay && isEmptyStateVisible;
-      
+
       return isEmpty;
     }).then((isEmpty) => {
       if (isEmpty) {
@@ -112,7 +112,7 @@ describe('編集機能', () => {
         cy.get('.followup-page__add-button').should('be.visible', { timeout: 5000 }).click();
       }
     });
-    
+
     // クリック後、モーダルが表示されるまで待機
     cy.get('.followup-page__overlay').should('be.visible', { timeout: 10000 });
     cy.get('.followup-page__modal').should('be.visible', { timeout: 10000 });
@@ -191,7 +191,7 @@ describe('編集機能', () => {
       cy.contains('button', '保存する').click();
 
       // 日報詳細画面に戻ったことを確認
-      cy.url().should('include', '/daily-reports/', { timeout: 10000 });
+      cy.url().should('include', '/#/daily-reports/', { timeout: 10000 });
       cy.url().should('not.include', '/edit');
 
       // 編集後の内容が表示されていることを確認
@@ -211,7 +211,7 @@ describe('編集機能', () => {
       cy.contains('button', 'キャンセル').click();
 
       // 日報詳細画面に戻ったことを確認
-      cy.url().should('include', '/daily-reports/', { timeout: 10000 });
+      cy.url().should('include', '/#/daily-reports/', { timeout: 10000 });
       cy.url().should('not.include', '/edit');
 
       // 編集前の内容が表示されていることを確認（キャンセルされたため）
@@ -247,7 +247,7 @@ describe('編集機能', () => {
 
       // 保存
       cy.contains('button', '保存する').click();
-      cy.url().should('include', '/daily-reports/', { timeout: 10000 });
+      cy.url().should('include', '/#/daily-reports/', { timeout: 10000 });
     });
 
     it('改善点を追加・編集・削除できる', () => {
@@ -301,7 +301,7 @@ describe('編集機能', () => {
         .first()
         .type(goodPointContent);
       cy.get('button[type="submit"]').click();
-      cy.url().should('include', '/daily-reports', { timeout: 15000 });
+      cy.url().should('include', '/#/daily-reports', { timeout: 15000 });
       // 日報が保存され、フォローアップカードが作成されるまで待機
       cy.wait(2000);
 
@@ -404,7 +404,7 @@ describe('編集機能', () => {
         .first()
         .type(improvementContent);
       cy.get('button[type="submit"]').click();
-      cy.url().should('include', '/daily-reports', { timeout: 15000 });
+      cy.url().should('include', '/#/daily-reports', { timeout: 15000 });
       // 日報が保存され、フォローアップカードが作成されるまで待機
       cy.wait(2000);
 
@@ -487,6 +487,6 @@ describe('編集機能', () => {
       // 編集後の日付が表示されていることを確認
       cy.contains(yesterdayStr).should('be.visible');
     });
-});
+  });
 });
 

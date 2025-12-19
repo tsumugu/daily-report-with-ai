@@ -8,7 +8,10 @@ describe('フォローアップ管理機能', () => {
     uniqueEmail = `e2e-followup-${Cypress._.random(0, 1e6)}@example.com`;
 
     // サインアップしてログイン状態にする
-    cy.visit('http://localhost:4200/signup');
+    cy.visit('http://localhost:4200/#/signup');
+
+    // ページが読み込まれるまで待機
+    cy.get('input#email').should('be.visible');
 
     // フォーム入力
     cy.get('input#email').type(uniqueEmail);
@@ -19,7 +22,7 @@ describe('フォローアップ管理機能', () => {
     cy.get('button[type="submit"]').click();
 
     // ホーム画面に遷移するまで待機
-    cy.url().should('eq', 'http://localhost:4200/', { timeout: 15000 });
+    cy.url().should('eq', 'http://localhost:4200/#/', { timeout: 15000 });
   });
 
   // 空状態を考慮した「追加」ボタンクリックのヘルパー関数
@@ -33,17 +36,17 @@ describe('フォローアップ管理機能', () => {
         cy.wait(500);
       }
     });
-    
+
     // モーダルが開いていないことを確認
     cy.get('.followup-page__overlay').should('not.exist');
-    
+
     // 空状態かどうかを確認して、適切なボタンをクリック
     cy.get('.followup-page').then(($page) => {
       const hasOverlay = $page.find('.followup-page__overlay').length > 0;
       const hasEmptyState = $page.find('.empty-state').length > 0;
       const isEmptyStateVisible = hasEmptyState && $page.find('.empty-state').is(':visible');
       const isEmpty = !hasOverlay && isEmptyStateVisible;
-      
+
       return isEmpty;
     }).then((isEmpty) => {
       if (isEmpty) {
@@ -66,15 +69,15 @@ describe('フォローアップ管理機能', () => {
     it('ホーム画面からフォロー項目一覧画面に遷移できること', () => {
       // フォロー項目一覧へのリンクを探す（ホーム画面に直接リンクがない場合は、ナビゲーションから）
       // 実際の実装に合わせて調整が必要
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
 
       // フォロー項目一覧画面に遷移したことを確認
-      cy.url().should('eq', 'http://localhost:4200/followups');
+      cy.url().should('eq', 'http://localhost:4200/#/followups');
       cy.get('.followup-list-page__title').should('contain.text', 'フォロー項目');
     });
 
     it('フォロー項目がない場合は空状態が表示されること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-list-page').should('be.visible');
 
       // 空状態が表示されることを確認
@@ -83,7 +86,7 @@ describe('フォローアップ管理機能', () => {
 
     it('フォロー項目が一覧に表示されること', () => {
       // 日報を作成してよかったこと/改善点を追加
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('フォローアップテスト用日報');
 
@@ -98,10 +101,10 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', '改善点').find('.form-card').first().find('textarea').first().type('テスト用改善点');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
       // フォロー項目一覧画面に遷移
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-list-page').should('be.visible');
 
       // フォロー項目が表示されていることを確認
@@ -111,7 +114,7 @@ describe('フォローアップ管理機能', () => {
 
     it('デフォルトで未完了（未着手/進行中）のみ表示されること', () => {
       // 日報を作成
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('フィルタテスト用日報');
 
@@ -121,10 +124,10 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('未着手のよかったこと');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
       // フォロー項目一覧画面に遷移
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-list-page').should('be.visible');
 
       // デフォルトフィルタが「未完了」になっていることを確認
@@ -142,7 +145,7 @@ describe('フォローアップ管理機能', () => {
   describe('フィルタ機能', () => {
     beforeEach(() => {
       // テストデータを準備：よかったことと改善点を含む日報を作成
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('フィルタテスト用日報');
 
@@ -157,11 +160,11 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', '改善点').find('.form-card').first().find('textarea').first().type('フィルタテスト用改善点');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
     });
 
     it('ステータスフィルタで「すべて」を選択できること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-list-page').should('be.visible');
 
       // ステータスフィルタを「すべて」に変更
@@ -172,7 +175,7 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('ステータスフィルタで「未着手」を選択できること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-list-page').should('be.visible');
 
       cy.get('.followup-list-page__filter').first().select('未着手');
@@ -181,7 +184,7 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('ステータスフィルタで「進行中」を選択できること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-list-page').should('be.visible');
 
       cy.get('.followup-list-page__filter').first().select('進行中');
@@ -190,7 +193,7 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('種別フィルタで「よかったこと」を選択できること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-list-page').should('be.visible');
 
       cy.get('.followup-list-page__filter').eq(1).select('goodPoint');
@@ -199,7 +202,7 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('種別フィルタで「改善点」を選択できること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-list-page').should('be.visible');
 
       cy.get('.followup-list-page__filter').eq(1).select('improvement');
@@ -215,7 +218,7 @@ describe('フォローアップ管理機能', () => {
   describe('フォローアップ入力モーダル（よかったこと）', () => {
     beforeEach(() => {
       // テストデータを準備：よかったことを含む日報を作成
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('フォローアップ入力テスト用日報');
 
@@ -224,27 +227,27 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('フォローアップ入力テスト用よかったこと');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
     });
 
     it('フォロー項目カードをクリックするとフォローアップページに遷移すること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
 
       // 最初のカードの「フォローアップ」ボタンをクリック
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
 
       // フォローアップページに遷移したことを確認
-      cy.url().should('match', /\/followups\/goodPoint\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/goodPoint\/.+/, { timeout: 5000 });
       cy.get('.followup-page__title').should('contain.text', 'よかったことのフォローアップ');
     });
 
     it('よかったことのフォローアップページでエピソードを追加できること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
-      
+
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/goodPoint\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/goodPoint\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // 「エピソードを追加」ボタンをクリック
@@ -269,11 +272,11 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('よかったことのフォローアップページでステータスが自動更新されること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
-      
+
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/goodPoint\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/goodPoint\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // 初期状態は「未着手」
@@ -299,11 +302,11 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('よかったことのフォローアップページでエピソードを3件追加すると「定着」になること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
-      
+
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/goodPoint\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/goodPoint\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // エピソードを3件追加
@@ -335,11 +338,11 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('エピソード追加時に日付が必須であること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
-      
+
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/goodPoint\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/goodPoint\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // 「エピソードを追加」ボタンをクリック
@@ -358,11 +361,11 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('再現メモを入力できること（最大500文字）', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
-      
+
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/goodPoint\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/goodPoint\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // 「エピソードを追加」ボタンをクリック
@@ -377,11 +380,11 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('フォローアップを保存できること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
-      
+
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/goodPoint\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/goodPoint\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // 「エピソードを追加」ボタンをクリック
@@ -406,12 +409,12 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('保存後に一覧が更新されること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
 
       // フォローアップを入力
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/goodPoint\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/goodPoint\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // 「エピソードを追加」ボタンをクリック
@@ -431,7 +434,7 @@ describe('フォローアップ管理機能', () => {
 
       // 一覧ページに戻る
       cy.get('.followup-page__back').click();
-      cy.url().should('eq', 'http://localhost:4200/followups', { timeout: 5000 });
+      cy.url().should('eq', 'http://localhost:4200/#/followups', { timeout: 5000 });
       cy.wait(1000);
 
       // 一覧が更新されていることを確認（成功回数が表示される）
@@ -443,7 +446,7 @@ describe('フォローアップ管理機能', () => {
   describe('フォローアップ入力モーダル（改善点）', () => {
     beforeEach(() => {
       // テストデータを準備：改善点を含む日報を作成
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('改善点フォローアップテスト用日報');
 
@@ -452,11 +455,11 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', '改善点').find('.form-card').first().find('textarea').first().type('改善点フォローアップテスト用改善点');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
     });
 
     it('改善点のフォローアップページでアクションを追加できること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
 
       // 改善点のカードを探す（種別フィルタで絞り込む）
@@ -464,7 +467,7 @@ describe('フォローアップ管理機能', () => {
       cy.wait(500); // フィルタ適用を待つ
 
       cy.contains('button', 'フォローアップ').click();
-      cy.url().should('match', /\/followups\/improvement\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/improvement\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // 「アクションを追加」ボタンをクリック
@@ -489,14 +492,14 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('改善点のフォローアップページでアクションを3件追加すると「習慣化」になること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
 
       cy.get('.followup-list-page__filter').eq(1).select('improvement');
       cy.wait(500);
 
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/improvement\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/improvement\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // アクションを3件追加
@@ -528,14 +531,14 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('アクション追加時に日付が必須であること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
 
       cy.get('.followup-list-page__filter').eq(1).select('improvement');
       cy.wait(500);
 
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/improvement\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/improvement\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // 「アクションを追加」ボタンをクリック
@@ -554,14 +557,14 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('改善点のフォローアップを保存できること', () => {
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
 
       cy.get('.followup-list-page__filter').eq(1).select('improvement');
       cy.wait(500);
 
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/improvement\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/improvement\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // 「アクションを追加」ボタンをクリック
@@ -593,7 +596,7 @@ describe('フォローアップ管理機能', () => {
   describe('成功カウント・定着バッジ', () => {
     it('成功回数が表示されること', () => {
       // 日報を作成
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('成功カウントテスト用日報');
 
@@ -602,14 +605,14 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('成功カウントテスト用よかったこと');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
       // フォローアップを追加
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
-      
+
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/goodPoint\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/goodPoint\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // 「エピソードを追加」ボタンをクリック
@@ -629,7 +632,7 @@ describe('フォローアップ管理機能', () => {
 
       // 一覧ページに戻る
       cy.get('.followup-page__back').click();
-      cy.url().should('eq', 'http://localhost:4200/followups', { timeout: 5000 });
+      cy.url().should('eq', 'http://localhost:4200/#/followups', { timeout: 5000 });
       cy.wait(1000);
 
       // 成功回数が表示されていることを確認
@@ -640,7 +643,7 @@ describe('フォローアップ管理機能', () => {
 
     it('成功回数が3回以上の場合、ステータスが「定着」になること（よかったこと）', () => {
       // 日報を作成
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('定着バッジテスト用日報');
 
@@ -649,14 +652,14 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('定着バッジテスト用よかったこと');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
       // フォローアップページに遷移
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
-      
+
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/goodPoint\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/goodPoint\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // エピソードを3回追加
@@ -692,7 +695,7 @@ describe('フォローアップ管理機能', () => {
 
   describe('週次フォーカス', () => {
     it('ホーム画面に週次フォーカスセクションが表示されること', () => {
-      cy.visit('http://localhost:4200/');
+      cy.visit('http://localhost:4200/#/');
       cy.get('.home-container').should('be.visible');
 
       // 週次フォーカスセクションが表示されていることを確認
@@ -701,7 +704,7 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('週次フォーカスが未設定の場合、空状態メッセージが表示されること', () => {
-      cy.visit('http://localhost:4200/');
+      cy.visit('http://localhost:4200/#/');
       cy.get('.weekly-focus-section').should('be.visible');
 
       // 空状態が表示されていることを確認
@@ -710,19 +713,19 @@ describe('フォローアップ管理機能', () => {
     });
 
     it('「＋追加」ボタンでフォロー項目一覧画面に遷移できること', () => {
-      cy.visit('http://localhost:4200/');
+      cy.visit('http://localhost:4200/#/');
       cy.get('.weekly-focus-section').should('be.visible');
 
       // 「＋追加」ボタンをクリック
       cy.contains('button', '＋追加').click();
 
       // フォロー項目一覧画面に遷移したことを確認
-      cy.url().should('eq', 'http://localhost:4200/followups');
+      cy.url().should('eq', 'http://localhost:4200/#/followups');
     });
 
     it('週次フォーカスを削除できること', () => {
       // まず、週次フォーカスを追加するために日報とフォロー項目を作成
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('週次フォーカス削除テスト用日報');
 
@@ -731,10 +734,10 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('週次フォーカス削除テスト用よかったこと');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
       // フォロー項目一覧からピンアイコンをクリックして週次フォーカスに追加
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card', { timeout: 10000 }).should('exist');
       cy.contains('.followup-card', '週次フォーカス削除テスト用よかったこと').within(() => {
         cy.get('.icon-button__wrapper button[aria-label="フォーカスに追加"]').click();
@@ -742,7 +745,7 @@ describe('フォローアップ管理機能', () => {
       cy.get('.toast--success', { timeout: 5000 }).should('be.visible');
 
       // ホーム画面に戻って週次フォーカスを確認
-      cy.visit('http://localhost:4200/');
+      cy.visit('http://localhost:4200/#/');
       cy.get('.weekly-focus-section').should('be.visible');
       cy.get('.weekly-focus-card', { timeout: 10000 }).should('exist');
 
@@ -763,7 +766,7 @@ describe('フォローアップ管理機能', () => {
   describe('エラーハンドリング', () => {
     it('必須項目未入力時にエラーメッセージが表示されること', () => {
       // 日報を作成
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('エラーハンドリングテスト用日報');
 
@@ -772,14 +775,14 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('エラーハンドリングテスト用よかったこと');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
       // フォローアップページに遷移
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
-      
+
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/goodPoint\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/goodPoint\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // 「エピソードを追加」ボタンをクリック
@@ -796,7 +799,7 @@ describe('フォローアップ管理機能', () => {
 
     it('同じ項目に複数回フォローアップを追加できること', () => {
       // 日報を作成
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('複数回フォローアップテスト用日報');
 
@@ -805,14 +808,14 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('複数回フォローアップテスト用よかったこと');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
       // フォローアップページに遷移
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
-      
+
       cy.get('.followup-card').first().find('button:contains("フォローアップ")').click();
-      cy.url().should('match', /\/followups\/goodPoint\/.+/, { timeout: 5000 });
+      cy.url().should('match', /\/#\/followups\/goodPoint\/.+/, { timeout: 5000 });
       cy.get('.followup-page').should('be.visible');
 
       // 1回目のエピソードを追加
@@ -852,7 +855,7 @@ describe('フォローアップ管理機能', () => {
 
       // 一覧ページに戻る
       cy.get('.followup-page__back').click();
-      cy.url().should('eq', 'http://localhost:4200/followups', { timeout: 5000 });
+      cy.url().should('eq', 'http://localhost:4200/#/followups', { timeout: 5000 });
       cy.wait(1000);
 
       // 成功回数が2回になっていることを確認
@@ -871,7 +874,7 @@ describe('フォローアップ管理機能', () => {
   describe('週次フォーカス管理機能', () => {
     it('フォロー項目一覧から週次フォーカスを追加できること', () => {
       // 日報を作成してよかったことを追加
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('週次フォーカステスト用日報');
 
@@ -880,10 +883,10 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('週次フォーカステスト用よかったこと');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
       // フォロー項目一覧画面に遷移
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
 
       // 「フォーカスに追加」ボタンをクリック
@@ -904,7 +907,7 @@ describe('フォローアップ管理機能', () => {
 
     it('ピンアイコンで週次フォーカスに追加できること', () => {
       // 日報を作成してよかったことを追加
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('ピン追加テスト用日報');
 
@@ -913,10 +916,10 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('ピン追加テスト用よかったこと');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
       // フォロー項目一覧画面でピンアイコンをクリック
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
 
       cy.get('.followup-card').first().find('.icon-button__wrapper button[aria-label="フォーカスに追加"]').click();
@@ -932,7 +935,7 @@ describe('フォローアップ管理機能', () => {
 
     it('ピンアイコンで週次フォーカスから削除できること', () => {
       // 事前に追加しておく
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('ピン削除テスト用日報');
 
@@ -941,9 +944,9 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('ピン削除テスト用よかったこと');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
       cy.get('.followup-card').first().as('firstCard');
 
@@ -965,7 +968,7 @@ describe('フォローアップ管理機能', () => {
 
     it('ホーム画面で週次フォーカスが表示されること', () => {
       // 日報を作成してよかったことを追加
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('週次フォーカス表示テスト用日報');
 
@@ -974,10 +977,10 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('週次フォーカス表示テスト用よかったこと');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
       // フォロー項目一覧画面で週次フォーカスを追加
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
 
       cy.get('.followup-card').first().find('.icon-button__wrapper button[aria-label="フォーカスに追加"]').click();
@@ -994,7 +997,7 @@ describe('フォローアップ管理機能', () => {
 
     it('週次フォーカスを削除できること', () => {
       // 日報を作成してよかったことを追加
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('週次フォーカス削除テスト用日報');
 
@@ -1003,10 +1006,10 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('週次フォーカス削除テスト用よかったこと');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
       // フォロー項目一覧画面で週次フォーカスを追加
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
 
       cy.get('.followup-card').first().find('.icon-button__wrapper button[aria-label="フォーカスに追加"]').click();
@@ -1025,7 +1028,7 @@ describe('フォローアップ管理機能', () => {
 
     it('既にフォーカスに設定されている項目は「フォーカスに追加」ボタンが非表示になること', () => {
       // 日報を作成してよかったことを追加
-      cy.visit('http://localhost:4200/daily-reports/new');
+      cy.visit('http://localhost:4200/#/daily-reports/new');
       cy.get('textarea#events').should('be.visible');
       cy.get('textarea#events').type('週次フォーカス重複テスト用日報');
 
@@ -1034,10 +1037,10 @@ describe('フォローアップ管理機能', () => {
       cy.contains('.form-group', 'よかったこと').find('.form-card').first().find('textarea').first().type('週次フォーカス重複テスト用よかったこと');
 
       cy.get('button[type="submit"]').click();
-      cy.url().should('eq', 'http://localhost:4200/daily-reports', { timeout: 15000 });
+      cy.url().should('eq', 'http://localhost:4200/#/daily-reports', { timeout: 15000 });
 
       // フォロー項目一覧画面で週次フォーカスを追加
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });
 
       cy.get('.followup-card').first().find('.icon-button__wrapper button[aria-label="フォーカスに追加"]').click();
@@ -1055,15 +1058,15 @@ describe('フォローアップ管理機能', () => {
     it('最大5件制限でエラーが表示されること', () => {
       // ヘルパー関数: 日報を作成してフォロー項目を追加
       function createDailyReportWithGoodPoint(index: number) {
-        cy.visit('http://localhost:4200/daily-reports/new');
+        cy.visit('http://localhost:4200/#/daily-reports/new');
         cy.get('textarea#events').should('be.visible', { timeout: 5000 });
-        
+
         // 日付を設定（各日報で異なる日付を使用）
         const testDate = new Date();
         testDate.setDate(testDate.getDate() + index + 100); // 100日後以降（重複回避）
         const dateString = testDate.toISOString().split('T')[0];
         cy.get('input#date').clear().type(dateString);
-        
+
         cy.get('textarea#events').type(`週次フォーカス制限テスト用日報${index}`);
 
         // よかったことを追加
@@ -1079,20 +1082,20 @@ describe('フォローアップ管理機能', () => {
 
       // ヘルパー関数: フォロー項目一覧で特定のカードをフォーカスに追加
       function addToWeeklyFocus(cardText: string) {
-        cy.visit('http://localhost:4200/followups');
+        cy.visit('http://localhost:4200/#/followups');
         cy.get('.followup-list-page__filter').should('be.visible', { timeout: 5000 });
-        
+
         // フィルタを「すべて」に変更
         cy.get('.followup-list-page__filter').first().select('すべて');
         cy.get('.followup-card').should('be.visible', { timeout: 5000 });
-        
+
         // カードを探す
         cy.get('.followup-card').filter(`:contains("${cardText}")`).first().should('be.visible', { timeout: 5000 });
 
         // 「フォーカスに追加」ボタンをクリック
         cy.get('.followup-card').filter(`:contains("${cardText}")`).first().find('.icon-button__wrapper button[aria-label="フォーカスに追加"]').should('be.visible', { timeout: 5000 });
         cy.get('.followup-card').filter(`:contains("${cardText}")`).first().find('.icon-button__wrapper button[aria-label="フォーカスに追加"]').click();
-        
+
         // 成功トーストを待機
         cy.get('.toast--success').should('be.visible', { timeout: 5000 });
       }
@@ -1107,9 +1110,9 @@ describe('フォローアップ管理機能', () => {
       createDailyReportWithGoodPoint(6);
 
       // フォロー項目一覧画面に遷移
-      cy.visit('http://localhost:4200/followups');
+      cy.visit('http://localhost:4200/#/followups');
       cy.get('.followup-list-page__filter').should('be.visible', { timeout: 5000 });
-      
+
       // フィルタを「すべて」に変更
       cy.get('.followup-list-page__filter').first().select('すべて');
       cy.get('.followup-card').should('be.visible', { timeout: 5000 });

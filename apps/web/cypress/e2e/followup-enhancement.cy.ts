@@ -12,7 +12,7 @@
  */
 
 describe('フォローアップ機能強化', () => {
-  const baseUrl = 'http://localhost:4200';
+  const baseUrl = 'http://localhost:4200/#';
   const testPassword = 'TestPassword123!';
 
   // テスト用ユーティリティ
@@ -37,7 +37,7 @@ describe('フォローアップ機能強化', () => {
       .first()
       .type(content);
     cy.get('button[type="submit"]').click();
-    cy.url().should('include', '/daily-reports', { timeout: 15000 });
+    cy.url().should('include', '/#/daily-reports', { timeout: 15000 });
   };
 
   const createDailyReportWithImprovement = (content: string) => {
@@ -51,7 +51,7 @@ describe('フォローアップ機能強化', () => {
       .first()
       .type(content);
     cy.get('button[type="submit"]').click();
-    cy.url().should('include', '/daily-reports', { timeout: 15000 });
+    cy.url().should('include', '/#/daily-reports', { timeout: 15000 });
   };
 
   const navigateToFollowupPageFromCard = (cardContent: string) => {
@@ -65,7 +65,7 @@ describe('フォローアップ機能強化', () => {
 
   const addEpisodeOrAction = (memo: string) => {
     const today = new Date().toISOString().split('T')[0];
-    
+
     // モーダルが開いている場合は閉じる
     cy.get('body').then(($body) => {
       const overlay = $body.find('.followup-page__overlay');
@@ -75,18 +75,18 @@ describe('フォローアップ機能強化', () => {
         cy.wait(500); // モーダルが閉じるのを待つ
       }
     });
-    
+
     // 空状態かどうかを確認して、適切なボタンをクリック
     // モーダルが開いていないことを確認してから判定
     cy.get('.followup-page__overlay').should('not.exist');
-    
+
     cy.get('.followup-page').then(($page) => {
       // モーダルが開いていない、かつ空状態が表示されている場合のみ空状態と判定
       const hasOverlay = $page.find('.followup-page__overlay').length > 0;
       const hasEmptyState = $page.find('.empty-state').length > 0;
       const isEmptyStateVisible = hasEmptyState && $page.find('.empty-state').is(':visible');
       const isEmpty = !hasOverlay && isEmptyStateVisible;
-      
+
       return isEmpty;
     }).then((isEmpty) => {
       if (isEmpty) {
@@ -99,7 +99,7 @@ describe('フォローアップ機能強化', () => {
         cy.get('.followup-page__add-button').should('be.visible', { timeout: 5000 }).click();
       }
     });
-    
+
     // クリック後、モーダルが表示されるまで待機
     cy.get('.followup-page__overlay').should('be.visible', { timeout: 10000 });
     cy.get('.followup-page__modal').should('be.visible', { timeout: 10000 });
@@ -134,7 +134,7 @@ describe('フォローアップ機能強化', () => {
     it('フォロー項目カードからフォローアップページに遷移できる', () => {
       navigateToFollowupPageFromCard(goodPointContent);
 
-      cy.url().should('include', '/followups/goodPoint/');
+      cy.url().should('include', '/#/followups/goodPoint/');
       cy.get('.followup-page__title').should('be.visible');
     });
 
@@ -171,7 +171,7 @@ describe('フォローアップ機能強化', () => {
     it('改善点のフォローアップページでアクションを追加できる', () => {
       navigateToFollowupPageFromCard(improvementContent);
 
-      cy.url().should('include', '/followups/improvement/', { timeout: 10000 });
+      cy.url().should('include', '/#/followups/improvement/', { timeout: 10000 });
       addEpisodeOrAction('アクション1のメモ');
 
       cy.contains('.followup-page__item-memo', 'アクション1のメモ').should('be.visible', { timeout: 10000 });
@@ -258,7 +258,7 @@ describe('フォローアップ機能強化', () => {
         cy.get('a[aria-label="フォローアップ"]').should('be.visible').click();
       });
 
-      cy.url().should('include', '/followups/goodPoint/', { timeout: 10000 });
+      cy.url().should('include', '/#/followups/goodPoint/', { timeout: 10000 });
       cy.get('.followup-page').should('be.visible', { timeout: 10000 });
     });
 

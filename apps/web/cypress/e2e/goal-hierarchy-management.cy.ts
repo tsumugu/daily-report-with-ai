@@ -14,7 +14,7 @@
  */
 
 describe('目標階層管理機能', () => {
-  const baseUrl = 'http://localhost:4200';
+  const baseUrl = 'http://localhost:4200/#';
   const testPassword = 'TestPassword123!';
   let uniqueEmail: string;
 
@@ -53,7 +53,7 @@ describe('目標階層管理機能', () => {
       cy.contains('button', '目標を作成').click();
 
       // 目標作成画面に遷移したことを確認
-      cy.url().should('include', '/goals/new');
+      cy.url().should('include', '/#/goals/new');
       cy.contains('h1', '目標を作成').should('be.visible');
     });
 
@@ -63,7 +63,7 @@ describe('目標階層管理機能', () => {
       // フォーム入力
       cy.get('input#goal-name').should('be.visible').type('長期目標: スキル向上');
       cy.get('textarea#goal-description').type('技術スキルを向上させ、キャリアを発展させる');
-      
+
       // 開始日を設定（今日の日付）
       const today = new Date();
       const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -82,7 +82,7 @@ describe('目標階層管理機能', () => {
       cy.contains('button', '保存する').click();
 
       // 目標一覧画面に遷移したことを確認
-      cy.url().should('include', '/goals', { timeout: 15000 });
+      cy.url().should('include', '/#/goals', { timeout: 15000 });
     });
 
     it('必須項目が未入力の場合、エラーメッセージが表示されること', () => {
@@ -93,7 +93,7 @@ describe('目標階層管理機能', () => {
 
       // 目標名を入力
       cy.get('input#goal-name').type('テスト目標');
-      
+
       // 開始日を設定
       const today = new Date();
       const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -119,7 +119,7 @@ describe('目標階層管理機能', () => {
       // まず長期目標を作成
       cy.visit(`${baseUrl}/goals/new`);
       cy.get('input#goal-name').should('be.visible').type('長期目標: プロジェクト管理スキル向上');
-      
+
       const today = new Date();
       const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
       cy.get('input#goal-start-date').type(startDate);
@@ -130,7 +130,7 @@ describe('目標階層管理機能', () => {
       cy.get('input#goal-end-date').type(endDateStr);
       cy.get('select#goal-type').select('skill');
       cy.contains('button', '保存する').click();
-      cy.url().should('include', '/goals', { timeout: 15000 });
+      cy.url().should('include', '/#/goals', { timeout: 15000 });
 
       // 目標一覧画面で目標が表示されるまで待機
       cy.contains('長期目標: プロジェクト管理スキル向上').should('be.visible');
@@ -138,10 +138,10 @@ describe('目標階層管理機能', () => {
       // 中期目標を作成（上位目標として長期目標を選択）
       // 目標一覧画面から目標作成画面に遷移
       cy.contains('button', '目標を作成').click();
-      cy.url().should('include', '/goals/new');
-      
+      cy.url().should('include', '/#/goals/new');
+
       cy.get('input#goal-name').should('be.visible').type('中期目標: アジャイル手法の習得');
-      
+
       const midStartDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
       cy.get('input#goal-start-date').type(midStartDate);
 
@@ -159,7 +159,7 @@ describe('目標階層管理機能', () => {
 
       cy.get('select#goal-type').select('project');
       cy.contains('button', '保存する').click();
-      cy.url().should('include', '/goals', { timeout: 15000 });
+      cy.url().should('include', '/#/goals', { timeout: 15000 });
     });
 
     it('中期目標から短期目標を作成できること', () => {
@@ -167,7 +167,7 @@ describe('目標階層管理機能', () => {
       // その後、短期目標を作成
       cy.visit(`${baseUrl}/goals/new`);
       cy.get('input#goal-name').type('短期目標: スプリント計画の実践');
-      
+
       const today = new Date();
       const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
       cy.get('input#goal-start-date').type(startDate);
@@ -182,7 +182,7 @@ describe('目標階層管理機能', () => {
 
       cy.get('select#goal-type').select('habit');
       cy.contains('button', '保存する').click();
-      cy.url().should('include', '/goals', { timeout: 15000 });
+      cy.url().should('include', '/#/goals', { timeout: 15000 });
     });
   });
 
@@ -223,7 +223,7 @@ describe('目標階層管理機能', () => {
       // 短期目標を作成
       cy.visit(`${baseUrl}/goals/new`);
       cy.get('input#goal-name').type('短期目標: 週次フォーカステスト');
-      
+
       const today = new Date();
       const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
       cy.get('input#goal-start-date').type(startDate);
@@ -234,17 +234,17 @@ describe('目標階層管理機能', () => {
       cy.get('input#goal-end-date').type(endDateStr);
       cy.get('select#goal-type').select('habit');
       cy.contains('button', '保存する').click();
-      cy.url().should('include', '/goals/', { timeout: 15000 });
-      
+      cy.url().should('include', '/#/goals/', { timeout: 15000 });
+
       // 目標一覧画面に戻る
       cy.visit(`${baseUrl}/goals`);
       cy.get('.goal-list-page').should('be.visible', { timeout: 10000 });
-      
+
       // 目標一覧画面で目標が表示されるまで待機
       cy.contains('.hierarchy-card', '短期目標: 週次フォーカステスト').should('be.visible', { timeout: 10000 });
       // 目標カードをクリックして詳細画面に遷移
       cy.contains('.hierarchy-card', '短期目標: 週次フォーカステスト').click();
-      cy.url().should('include', '/goals/', { timeout: 15000 });
+      cy.url().should('include', '/#/goals/', { timeout: 15000 });
 
       // 目標詳細が読み込まれるまで待機
       cy.contains('h1', '目標詳細').should('be.visible');
@@ -265,7 +265,7 @@ describe('目標階層管理機能', () => {
       // まず目標を作成
       cy.visit(`${baseUrl}/goals/new`);
       cy.get('input#goal-name').type('編集テスト目標');
-      
+
       const today = new Date();
       const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
       cy.get('input#goal-start-date').type(startDate);
@@ -276,17 +276,17 @@ describe('目標階層管理機能', () => {
       cy.get('input#goal-end-date').type(endDateStr);
       cy.get('select#goal-type').select('skill');
       cy.contains('button', '保存する').click();
-      cy.url().should('include', '/goals/', { timeout: 15000 });
-      
+      cy.url().should('include', '/#/goals/', { timeout: 15000 });
+
       // 目標一覧画面に戻る
       cy.visit(`${baseUrl}/goals`);
       cy.get('.goal-list-page').should('be.visible', { timeout: 10000 });
-      
+
       // 目標一覧画面で目標が表示されるまで待機
       cy.contains('.hierarchy-card', '編集テスト目標').should('be.visible', { timeout: 10000 });
       // 目標カードをクリックして詳細画面に遷移
       cy.contains('.hierarchy-card', '編集テスト目標').click();
-      cy.url().should('include', '/goals/', { timeout: 15000 });
+      cy.url().should('include', '/#/goals/', { timeout: 15000 });
 
       // 目標詳細が読み込まれるまで待機
       cy.contains('h1', '目標詳細').should('be.visible');
@@ -296,9 +296,9 @@ describe('目標階層管理機能', () => {
       cy.get('.goal-detail-page__actions').within(() => {
         cy.contains('button', '編集').should('be.visible').click();
       });
-      
+
       // 編集画面に遷移したことを確認
-      cy.url().should('include', '/goals/', { timeout: 15000 });
+      cy.url().should('include', '/#/goals/', { timeout: 15000 });
       cy.url().should('include', '/edit', { timeout: 15000 });
 
       // フォームが編集モードで表示されることを確認
@@ -309,7 +309,7 @@ describe('目標階層管理機能', () => {
       // まず目標を作成
       cy.visit(`${baseUrl}/goals/new`);
       cy.get('input#goal-name').type('削除テスト目標');
-      
+
       const today = new Date();
       const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
       cy.get('input#goal-start-date').type(startDate);
@@ -320,17 +320,17 @@ describe('目標階層管理機能', () => {
       cy.get('input#goal-end-date').type(endDateStr);
       cy.get('select#goal-type').select('skill');
       cy.contains('button', '保存する').click();
-      cy.url().should('include', '/goals/', { timeout: 15000 });
-      
+      cy.url().should('include', '/#/goals/', { timeout: 15000 });
+
       // 目標一覧画面に戻る
       cy.visit(`${baseUrl}/goals`);
       cy.get('.goal-list-page').should('be.visible', { timeout: 10000 });
-      
+
       // 目標一覧画面で目標が表示されるまで待機
       cy.contains('.hierarchy-card', '削除テスト目標').should('be.visible', { timeout: 10000 });
       // 目標カードをクリックして詳細画面に遷移
       cy.contains('.hierarchy-card', '削除テスト目標').click();
-      cy.url().should('include', '/goals/', { timeout: 15000 });
+      cy.url().should('include', '/#/goals/', { timeout: 15000 });
 
       // 目標詳細が読み込まれるまで待機
       cy.contains('h1', '目標詳細').should('be.visible');
